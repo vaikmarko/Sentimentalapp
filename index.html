@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentimental | Where Every Story Matters</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #8B5CF6;
+            --primary-dark: #7C3AED;
+            --primary-light: #DDD6FE;
+            --text-dark: #1F2937;
+            --text-light: #6B7280;
+            --bg-light: #F9FAFB;
+            --white: #FFFFFF;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            color: var(--text-dark);
+            background-color: var(--bg-light);
+            line-height: 1.6;
+        }
+        
+        h1, h2, h3, h4, h5 {
+            font-family: 'Playfair Display', serif;
+            line-height: 1.2;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header */
+        header {
+            background-color: var(--white);
+            box-shadow: var(--shadow-sm);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 50;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        nav {
+            display: none;
+        }
+        
+        @media (min-width: 768px) {
+            nav {
+                display: flex;
+                gap: 32px;
+                align-items: center;
+            }
+        }
+        
+        nav a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        nav a:hover {
+            color: var(--primary);
+        }
+        
+        .mobile-menu-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        @media (min-width: 768px) {
+            .mobile-menu-btn {
+                display: none;
+            }
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 24px;
+            border-radius: 50px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background-color: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn-secondary:hover {
+            background-color: rgba(139, 92, 246, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        /* Hero Section */
+        .hero {
+            padding-top: 120px;
+            padding-bottom: 80px;
+        }
+        
+        .hero-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        @media (min-width: 768px) {
+            .hero-content {
+                flex-direction: row;
+                align-items: center;
+            }
+        }
+        
+        .hero-text {
+            margin-bottom: 40px;
+        }
+        
+        @media (min-width: 768px) {
+            .hero-text {
+                width: 50%;
+                margin-bottom: 0;
+                padding-right: 40px;
+            }
+            
+            .hero-image {
+                width: 50%;
+            }
+        }
+        
+        .hero h1 {
+            font-size: 36px;
+            margin-bottom: 24px;
+        }
+        
+        @media (min-width: 768px) {
+            .hero h1 {
+                font-size: 48px;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .hero h1 {
+                font-size: 56px;
+            }
+        }
+        
+        .hero h1 span {
+            display: block;
+        }
+        
+        .hero h1 .accent {
+            color: var(--primary);
+        }
+        
+        .hero p {
+            font-size: 18px;
+            color: var(--text-light);
+            margin-bottom: 32px;
+        }
+        
+        .hero-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        @media (min-width: 640px) {
+            .hero-buttons {
+                flex-direction: row;
+            }
+        }
+        
+        .hero-image img {
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+        }
+        
+        /* Problem Section */
+        .problem {
+            padding: 80px 0;
+            background-color: var(--bg-light);
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 24px;
+        }
+        
+        @media (min-width: 768px) {
+            .section-title {
+                font-size: 36px;
+            }
+        }
+        
+        .section-subtitle {
+            text-align: center;
+            font-size: 20px;
+            color: var(--text-light);
+            max-width: 800px;
+            margin: 0 auto 48px;
+        }
+        
+        .problem-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+        
+        @media (min-width: 768px) {
+            .problem-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .problem-card {
+            background-color: var(--white);
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+        
+        .problem-icon {
+            color: var(--primary);
+            margin-bottom: 16px;
+            width: 48px;
+            height: 48px;
+        }
+        
+        .problem-card h3 {
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+        
+        .problem-card p {
+            color: var(--text-light);
+        }
+        
+        .stats-card {
+            background-color: var(--white);
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .stats-card h3 {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+        
+        @media (min-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+        }
+        
+        .stat-number {
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 24px;
+            margin-right: 12px;
+        }
+        
+        .stat-text {
+            color: var(--text-light);
+        }
+        
+        .problem-conclusion {
+            text-align: center;
+            font-size: 20px;
+            color: var(--text-dark);
+            font-style: italic;
+            max-width: 800px;
+            margin: 40px auto 0;
+        }
+        
+        /* Solution Section */
+        .solution {
+            padding: 80px 0;
+        }
+        
+        .solution-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        @media (min-width: 768px) {
+            .solution-content {
+                flex-direction: row;
+            }
+        }
+        
+        .solution-image {
+            margin-bottom: 40px;
+        }
+        
+        @media (min-width: 768px) {
+            .solution-image {
+                width: 50%;
+                margin-bottom: 0;
+            }
+            
+            .solution-text {
+                width: 50%;
+                padding-left: 48px;
+            }
+        }
+        
+        .solution-image img {
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .solution-text h2 {
+            font-size: 32px;
+            margin-bottom: 24px;
+        }
+        
+        .solution-text > p {
+            font-size: 18px;
+            color: var(--text-light);
+            margin-bottom: 32px;
+        }
+        
+        .solution-features {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .feature-item {
+            display: flex;
+        }
+        
+        .feature-icon {
+            flex-shrink: 0;
+            width: 48px;
+            margin-right: 16px;
+        }
+        
+        .feature-icon-inner {
+            background-color: var(--primary-light);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .feature-icon-inner svg {
+            width: 24px;
+            height: 24px;
+            color: var(--primary);
+        }
+        
+        .feature-info h3 {
+            font-size: 18px;
+            margin-bottom: 4px;
+        }
+        
+        .feature-info p {
+            color: var(--text-light);
+        }
+        
+        .solution-quote {
+            font-size: 20px;
+            color: var(--primary);
+            font-style: italic;
+        }
+        
+        /* How It Works */
+        .how-it-works {
+            padding: 80px 0;
+            background-color: var(--bg-light);
+        }
+        
+        .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+        
+        @media (min-width: 768px) {
+            .steps {
+                flex-direction: row;
+            }
+        }
+        
+        .step {
+            text-align: center;
+            padding: 24px;
+        }
+        
+        @media (min-width: 768px) {
+            .step {
+                width: 33.333%;
+            }
+        }
+        
+        .step-number {
+            background-color: var(--white);
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+        
+        .step h3 {
+            font-size: 24px;
+            margin-bottom: 16px;
+        }
+        
+        .step-label {
+            color: var(--primary);
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        .step p {
+            color: var(--text-light);
+        }
+        
+        .how-it-works-footer {
+            text-align: center;
+            margin-top: 48px;
+            font-size: 20px;
+            color: var(--text-light);
+            font-style: italic;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* Features */
+        .features {
+            padding: 80px 0;
+        }
+        
+        .features-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 32px;
+        }
+        
+        @media (min-width: 768px) {
+            .features-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .features-grid {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+        
+        .feature-card {
+            background-color: var(--white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .feature-card-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .feature-card-content {
+            padding: 24px;
+        }
+        
+        .feature-card h3 {
+            font-size: 22px;
+            margin-bottom: 12px;
+        }
+        
+        .feature-card p {
+            color: var(--text-light);
+        }
+        
+        /* Team */
+        .team {
+            padding: 80px 0;
+            background-color: var(--bg-light);
+        }
+        
+        .team-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 32px;
+            margin-bottom: 60px;
+        }
+        
+        @media (min-width: 768px) {
+            .team-grid {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+        
+        .team-card {
+            background-color: var(--white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        
+        .team-image {
+            width: 100%;
+            height: 260px;
+            object-fit: cover;
+        }
+        
+        .team-info {
+            padding: 24px;
+        }
+        
+        .team-info h3 {
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+        
+        .team-title {
+            color: var(--primary);
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+        
+        .team-bio {
+            color: var(--text-light);
+        }
+        
+        .team-link {
+            text-align: center;
+        }
+        
+        .team-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .team-link a:hover {
+            color: var(--primary-dark);
+        }
+        
+        /* CTA Section */
+        .cta {
+            padding: 80px 0;
+            background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #D946EF 100%);
+            color: var(--white);
+            text-align: center;
+        }
+        
+        .cta h2 {
+            font-size: 32px;
+            margin-bottom: 24px;
+        }
+        
+        .cta p {
+            font-size: 18px;
+            max-width: 800px;
+            margin: 0 auto 32px;
+            opacity: 0.9;
+        }
+        
+        .cta-btn {
+            background-color: var(--white);
+            color: var(--primary);
+            padding: 12px 32px;
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .cta-btn:hover {
+            background-color: rgba(255, 255, 255, 0.9);
+            transform: translateY(-2px);
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--white);
+            padding: 40px 0;
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .footer-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 16px;
+        }
+        
+        .footer-contact {
+            margin-bottom: 24px;
+        }
+        
+        .footer-contact p {
+            color: var(--text-light);
+            margin-bottom: 4px;
+        }
+        
+        .footer-links {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .footer-links a {
+            color: var(--text-light);
+            text-decoration: none;
+        }
+        
+        .footer-links a:hover {
+            color: var(--primary);
+        }
+        
+        .footer-copy {
+            color: var(--text-light);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">Sentimental</div>
+                <nav>
+                    <a href="#how-it-works">How It Works</a>
+                    <a href="#features">Features</a>
+                    <a href="#vision">Vision</a>
+                    <a href="#team">Team</a>
+                    <a href="#waitlist" class="btn btn-primary">Join Waitlist</a>
+                </nav>
+                <button class="mobile-menu-btn">☰</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1>
+                        <span>Transform Your Life</span>
+                        <span class="accent">Into Your Masterpiece</span>
+                    </h1>
+                    <p>Your life is extraordinary. Experience it that way.</p>
+                    <p>Sentimental creates your personal story universe—professionally crafted from your experiences as they happen. See your narrative unfold in beautiful chapters, cinematic videos, and immersive audio, all generated automatically as you live.</p>
+                    <div class="hero-buttons">
+                        <a href="#demo" class="btn btn-secondary">Watch The Demo</a>
+                        <a href="#waitlist" class="btn btn-primary">Join Waitlist</a>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <img src="https://via.placeholder.com/600x500" alt="Sentimental story universe visualization">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem Section -->
+    <section class="problem" id="problem">
+        <div class="container">
+            <h2 class="section-title">The Profound Identity Crisis of the Digital Age</h2>
+            <p class="section-subtitle">Our lives have never been more documented yet less understood.</p>
+            
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <div class="problem-icon">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 11H5M19 11C20.1046 11 21 11.8954 21 13V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V13C3 11.8954 3.89543 11 5 11M19 11V9C19 7.89543 18.1046 7 17 7M5 11V9C5 7.89543 5.89543 7 7 7M7 7V5C7 3.89543 7.89543 3 9 3H15C16.1046 3 17 3.89543 17 5V7M7 7H17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3>Memory Dissolution</h3>
+                    <p>Precious memories disappear into endless feeds and forgotten folders, losing their context and emotional significance.</p>
+                </div>
+                
+                <div class="problem-card">
+                    <div class="problem-icon">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4 7V17C4 19.2091 7.58172 21 12 21C16.4183 21 20 19.2091 20 17V7M4 7C4 9.20914 7.58172 11 12 11C16.4183 11 20 9.20914 20 7M4 7C4 4.79086 7.58172 3 12 3C16.4183 3 20 4.79086 20 7M20 12C20 14.2091 16.4183 16 12 16C7.58172 16 4 14.2091 4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3>Narrative Fragmentation</h3>
+                    <p>Our identities scatter across dozens of platforms, creating disjointed versions of ourselves without coherent meaning.</p>
+                </div>
+                
+                <div class="problem-card">
+                    <div class="problem-icon">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 19V13C9 11.8954 8.10457 11 7 11H5C3.89543 11 3 11.8954 3 13V19C3 20.1046 3.89543 21 5 21H7C8.10457 21 9 20.1046 9 19ZM9 19V9C9 7.89543 9.89543 7 11 7H13C14.1046 7 15 7.89543 15 9V19M9 19C9 20.1046 9.89543 21 11 21H13C14.1046 21 15 20.1046 15 19M15 19V5C15 3.89543 15.8954 3 17 3H19C20.1046 3 21 3.89543 21 5V19C21 20.1046 20.1046 21 19 21H17C15.8954 21 15 20.1046 15 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3>Pattern Blindness</h3>
+                    <p>We fail to see our own behavioral patterns and recurring themes because they're distributed across disconnected digital silos.</p>
+                </div>
+                
+                <div class="problem-card">
+                    <div class="problem-icon">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 8V12M12 16H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3>Legacy Vulnerability</h3>
+                    <p>Our most valuable stories risk being lost forever, leaving future generations with scattered pixels instead of meaningful narratives.</p>
+                </div>
+            </div>
+            
+            <div class="stats-card">
+                <h3>Research Shows:</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number">89%</div>
+                        <div class="stat-text">report feeling disconnected from their own digital content</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">78%</div>
+                        <div class="stat-text">cannot easily access significant memories from 5+ years ago</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">92%</div>
+                        <div class="stat-text">have no cohesive narrative of their personal journey</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">86%</div>
+                        <div class="stat-text">worry about how their story will be preserved for loved ones</div>
+                    </div>
+                </div>
+            </div>
+            
+            <p class="problem-conclusion">Digital fragmentation isn't just a technology problem—it's a human identity crisis that affects how we understand ourselves and relate to our own experiences.</p>
+        </div>
+    </section>
+
+    <!-- Solution Section -->
+    <section class="solution">
+        <div class="container">
+            <div class="solution-content">
+                <div class="solution-image">
+                    <img src="https://via.placeholder.com/600x500" alt="Your complete story universe">
+                </div>
+                <div class="solution-text">
+                    <h2>Your Complete Personal Story Universe</h2>
+                    <p>Sentimental transforms your fragmented digital existence into a cohesive, beautiful narrative.</p>
+                    
+                    <div class="solution-features">
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <div class="feature-icon-inner">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M5 19C3.89543 19 3 18.1046 3 17V7C3 5.89543 3.89543 5 5 5H9L11 7H15C16.1046 7 17 7.89543 17 9V10M5 19H19C20.1046 19 21 18.1046 21 17V12C21 10.8954 20.1046 10 19 10H9C7.89543 10 7 10.8954 7 12V17C7 18.1046 6.10457 19 5 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="feature-info">
+                                <h3>Unified Story</h3>
+                                <p>Integrates all your digital footprints into one cohesive narrative</p>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <div class="feature-icon-inner">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M7 4V20M17 4V20M3 8H7M17 8H21M3 12H21M3 16H7M17 16H21M4 20H20C20.5523 20 21 19.5523 21 19V5C21 4.44772 20.5523 4 20 4H4C3.44772 4 3 4.44772 3 5V19C3 19.5523 3.44772 20 4 20Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="feature-info">
+                                <h3>Multiple Formats</h3>
+                                <p>Experience your story as written chapters, videos, audio, and visual timelines</p>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <div class="feature-icon-inner">
+                                    <svg viewBox="0 0 24 24"
+<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 8V12L15 15M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="feature-info">
+                                <h3>Real-Time Creation</h3>
+                                <p>Content professionally crafted as your life happens, not after</p>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <div class="feature-icon-inner">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M14 10L12 11M12 11L10 10M12 11V13.5M20 7L18 8M18 8L16 7M18 8V10.5M14 4L12 3L10 4M4 7L2 8L4 9M20 17L18 16L16 17M4 17L2 16L4 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="feature-info">
+                                <h3>Pattern Recognition</h3>
+                                <p>Discover connections and themes across your journey</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p class="solution-quote">Your life becomes extraordinary content without effort.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="container">
+            <h2 class="section-title">From Life to Story in Three Steps</h2>
+            
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Connect</h3>
+                    <p class="step-label">Integrate your digital existence</p>
+                    <p>Connect your accounts, import your photos, link your locations. Sentimental brings everything together.</p>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Experience</h3>
+                    <p class="step-label">Witness your story unfold</p>
+                    <p>See your life organized into meaningful chapters with professional-quality narratives, videos, and audio stories—all created automatically.</p>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Author</h3>
+                    <p class="step-label">Shape your narrative</p>
+                    <p>Provide reflections, identify what matters most, and guide your story's direction—becoming the author of your own life.</p>
+                </div>
+            </div>
+            
+            <p class="how-it-works-footer">No technical skills required. Your life becomes content as you live it.</p>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="features-header">
+                <h2 class="section-title">The Next Great Medium</h2>
+                <p class="section-subtitle">Experience your story in multiple formats, each professionally crafted as you live your life.</p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <img src="https://via.placeholder.com/400x200" alt="Written chapters" class="feature-card-image">
+                    <div class="feature-card-content">
+                        <h3>Your Life in Chapters</h3>
+                        <p>Beautifully written narratives that capture your journey with the quality of professional biography.</p>
+                    </div>
+                </div>
+                
+                <div class="feature-card">
+                    <img src="https://via.placeholder.com/400x200" alt="Video stories" class="feature-card-image">
+                    <div class="feature-card-content">
+                        <h3>Cinematic Life Stories</h3>
+                        <p>Automatically generated video narratives that transform your moments into emotional visual stories.</p>
+                    </div>
+                </div>
+                
+                <div class="feature-card">
+                    <img src="https://via.placeholder.com/400x200" alt="Audio experience" class="feature-card-image">
+                    <div class="feature-card-content">
+                        <h3>Audio Experience</h3>
+                        <p>Podcast-quality audio narratives that let you hear your journey unfold with music and professional narration.</p>
+                    </div>
+                </div>
+                
+                <div class="feature-card">
+                    <img src="https://via.placeholder.com/400x200" alt="Visual mapping" class="feature-card-image">
+                    <div class="feature-card-content">
+                        <h3>Visual Mapping</h3>
+                        <p>Interactive timelines that reveal connections across your life and help you see patterns and growth.</p>
+                    </div>
+                </div>
+                
+                <div class="feature-card">
+                    <img src="https://via.placeholder.com/400x200" alt="Selective sharing" class="feature-card-image">
+                    <div class="feature-card-content">
+                        <h3>Meaningful Sharing</h3>
+                        <p>Share selected chapters with loved ones in whatever format works best for the moment and audience.</p>
+                    </div>
+                </div>
+                
+                <div class="feature-card">
+                    <img src="https://via.placeholder.com/400x200" alt="Legacy creation" class="feature-card-image">
+                    <div class="feature-card-content">
+                        <h3>Legacy Creation</h3>
+                        <p>Build a lasting narrative that preserves your story for future generations in multiple formats.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Vision Section -->
+    <section id="vision" class="solution" style="background-color:var(--bg-light)">
+        <div class="container">
+            <div class="solution-content">
+                <div class="solution-text">
+                    <h2>Beyond Social Media, Beyond Content</h2>
+                    <p>Sentimental isn't just another app or platform—it's an entirely new medium that transforms how you experience your own life.</p>
+                    
+                    <div class="solution-features">
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <div class="feature-icon-inner">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="feature-info">
+                                <h3>Coherent narrative</h3>
+                                <p>Instead of fragmented moments, experience your life as a complete story</p>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <div class="feature-icon-inner">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M5 13L9 17L19 7M13 19L19 19C20.1046 19 21 18.1046 21 17V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V17C3 18.1046 3.89543 19 5 19H13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="feature-info">
+                                <h3>Personal value</h3>
+                                <p>Focus on meaningful content for yourself rather than performing for others</p>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <div class="feature-icon-inner">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M8 7V3M16 7V3M7 11H17M5 21H19C20.1046 21 21 20.1046 21 19V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V19C3 20.1046 3.89543 21 5 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="feature-info">
+                                <h3>Long-term perspective</h3>
+                                <p>See the bigger picture of your life beyond the ephemeral moment</p>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <div class="feature-icon-inner">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M15 12C15 13.6569 13.6569 15 12 15C10.3431 15 9 13.6569 9 12C9 10.3431 10.3431 9 12 9C13.6569 9 15 10.3431 15 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M12.0004 5V3M12.0004 21V19M4.22339 7.75732L2.80908 6.34301M21.1921 17.6568L19.7778 16.2425M4.22339 16.2425L2.80908 17.6568M21.1921 6.34301L19.7778 7.75732M18.364 12H20.364M3.63672 12H5.63672" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="feature-info">
+                                <h3>Authentic integration</h3>
+                                <p>Unite your public and private experiences into a single cohesive story</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p class="solution-quote">Join us in creating the next evolution of human storytelling.</p>
+                </div>
+                <div class="solution-image">
+                    <img src="https://via.placeholder.com/600x500" alt="Beyond social media visualization">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section id="team" class="team">
+        <div class="container">
+            <h2 class="section-title">The Visionaries</h2>
+            
+            <div class="team-grid">
+                <div class="team-card">
+                    <img src="https://via.placeholder.com/400x300" alt="Marko Vaik" class="team-image">
+                    <div class="team-info">
+                        <h3>Marko Vaik</h3>
+                        <p class="team-title">Founder & CEO</p>
+                        <p class="team-bio">
+                            Serial entrepreneur with extensive experience in digital platforms and narrative systems. Built Estonia's largest mental health network and recognized expert in personal data integration.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="team-card">
+                    <img src="https://via.placeholder.com/400x300" alt="Professor Merike Sisask" class="team-image">
+                    <div class="team-info">
+                        <h3>Professor Merike Sisask</h3>
+                        <p class="team-title">Co-Founder & Chief Scientific Officer</p>
+                        <p class="team-bio">
+                            Professor of social health care at Tallinn University and co-founder of the Centre of Excellence for Well-Being Sciences (EstWell). Editor-in-chief of the Estonian Human Development Report on Mental Health and Well-being.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="team-card">
+                    <img src="https://via.placeholder.com/400x300" alt="Lars-Erik Hion" class="team-image">
+                    <div class="team-info">
+                        <h3>Lars-Erik Hion</h3>
+                        <p class="team-title">Co-Founder & CTO</p>
+                        <p class="team-bio">
+                            Over 20 years of experience designing scalable digital systems for global organizations. Pioneer in AI narrative generation and data integration architecture for companies like SEB, Swedbank, and Telia.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="team-link">
+                <a href="#about">Learn more about our team and advisors →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta" id="waitlist">
+        <div class="container">
+            <h2>Be Part of the Story Revolution</h2>
+            <p>Sentimental is currently in private beta with selected users. Join our waitlist to be among the first to experience your life as an extraordinary story.</p>
+            <a href="#join" class="btn cta-btn">Join the Waitlist</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">Sentimental</div>
+                <div class="footer-contact">
+                    <p>hello@sentimentalapp.com</p>
+                    <p>Tallinn, Estonia</p>
+                </div>
+                <div class="footer-links">
+                    <a href="#privacy">Privacy Policy</a>
+                    <a href="#terms">Terms of Service</a>
+                </div>
+                <p class="footer-copy">© 2025 Sentimental OÜ. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
