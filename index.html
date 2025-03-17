@@ -517,32 +517,89 @@
         </div>
     </section>
 
-    <!-- Waitlist Section -->
-    <section id="waitlist" class="py-20 px-6 gradient-bg text-white">
+<!-- Waitlist Section -->
+<section id="waitlist" class="py-20 px-6 gradient-bg text-white">
+    <div class="container mx-auto">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-4xl font-bold mb-6">Join the Movement</h2>
+            <p class="text-xl mb-10 max-w-2xl mx-auto">
+                Together, we're creating a platform that transforms how people document, understand, and share their life stories in meaningful ways.
+            </p>
+            <p class="text-xl mb-10 max-w-2xl mx-auto">
+                We're building the future of personal storytelling. Be among the first to experience Sentimental.
+            </p>
+            
+            <div class="bg-white bg-opacity-10 backdrop-filter backdrop-blur-md p-8 rounded-xl max-w-xl mx-auto">
+                <form action="https://formsubmit.co/join@sentimentalapp.com" method="POST">
+                    <!-- Form configuration -->
+                    <input type="hidden" name="_subject" value="New Sentimental Waitlist Signup!">
+                    <input type="hidden" name="_captcha" value="false">
+                    <input type="hidden" name="_next" value="https://sentimentalapp.com/thanks.html">
+                    
+                    <div class="mb-4">
+                        <input type="email" name="email" placeholder="Your email address" class="w-full px-4 py-3 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-600" required>
+                    </div>
+                    <button type="submit" class="w-full bg-white text-purple-600 font-bold py-3 rounded-lg hover:bg-gray-100 transition">
+                        Join Waitlist
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+    <!-- Thank You Section -->
+    <section class="py-20 px-6 flex-grow flex items-center">
         <div class="container mx-auto">
-            <div class="max-w-4xl mx-auto text-center">
-                <h2 class="text-4xl font-bold mb-6">Join the Movement</h2>
-                <p class="text-xl mb-10 max-w-2xl mx-auto">
-                    Together, we're creating a platform that transforms how people document, understand, and share their life stories in meaningful ways.
+            <div class="max-w-2xl mx-auto text-center">
+                <div class="w-24 h-24 gradient-bg rounded-full flex items-center justify-center mx-auto mb-8">
+                    <i class="fas fa-check text-white text-4xl"></i>
+                </div>
+                <h1 class="text-5xl font-bold mb-6">Thank You!</h1>
+                <p class="text-xl text-gray-600 mb-8">
+                    You've successfully joined the Sentimental waitlist. We're excited to have you on this journey with us!
                 </p>
-                <p class="text-xl mb-10 max-w-2xl mx-auto">
-                    We're building the future of personal storytelling. Be among the first to experience Sentimental.
+                <p class="text-lg text-gray-600 mb-12">
+                    We'll keep you updated on our progress and let you know when it's your turn to experience Sentimental.
                 </p>
-                
-                <div class="bg-white bg-opacity-10 backdrop-filter backdrop-blur-md p-8 rounded-xl max-w-xl mx-auto">
-                    <form>
-                        <div class="mb-4">
-                            <input type="email" placeholder="Your email address" class="w-full px-4 py-3 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-600">
-                        </div>
-                        <button type="submit" class="w-full bg-white text-purple-600 font-bold py-3 rounded-lg hover:bg-gray-100 transition">
-                            Join Waitlist
-                        </button>
-                    </form>
+                <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <a href="/" class="btn-primary">
+                        Return to Homepage
+                    </a>
+                    <a href="https://twitter.com/intent/tweet?text=I%20just%20joined%20the%20waitlist%20for%20Sentimental%20-%20a%20new%20way%20to%20document%20and%20share%20life%20stories!%20%23SentimentalStories" target="_blank" class="bg-white border border-purple-600 text-purple-600 px-6 py-3 rounded-full font-medium hover:bg-purple-50 transition flex items-center justify-center">
+                        <i class="fab fa-x-twitter mr-2"></i> Share on X
+                    </a>
                 </div>
             </div>
         </div>
     </section>
 
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 px-6">
+        <div class="container mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-8 md:mb-0">
+                    <a href="/" class="text-2xl font-bold">Sentimental</a>
+                    <p class="mt-2 text-gray-400">Your Life, Your Story.</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#" class="hover:text-purple-400 transition"><i class="fab fa-x-twitter text-xl"></i></a>
+                    <a href="#" class="hover:text-purple-400 transition"><i class="fab fa-instagram text-xl"></i></a>
+                    <a href="#" class="hover:text-purple-400 transition"><i class="fab fa-linkedin text-xl"></i></a>
+                </div>
+            </div>
+            <hr class="border-gray-800 my-8">
+            <div class="text-center text-gray-400">
+                <p>&copy; 2025 Sentimental. All rights reserved.</p>
+                <div class="mt-4 space-x-4">
+                    <a href="#" class="hover:text-white">Privacy Policy</a>
+                    <a href="#" class="hover:text-white">Terms of Service</a>
+                    <a href="#" class="hover:text-white">Contact Us</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
     <!-- Footer -->
     <footer class="bg-gray-900 text-white py-12 px-6">
         <div class="container mx-auto">
