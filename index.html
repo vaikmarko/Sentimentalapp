@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sentimental - Your Life, Your Story</title>
+    <title>Sentimental - Your Story, Captured Live</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -34,14 +34,6 @@
             background-color: #7529D8;
             box-shadow: 0 10px 15px rgba(134, 57, 232, 0.2);
         }
-        
-        .layer-card {
-            transition: all 0.3s ease;
-        }
-        
-        .layer-card:hover {
-            transform: translateY(-5px);
-        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -50,9 +42,10 @@
         <div class="container mx-auto flex justify-between items-center">
             <a href="#" class="text-3xl font-bold text-purple-600">Sentimental</a>
             <div class="hidden md:flex space-x-8 items-center">
-                <a href="#how-it-works" class="hover:text-purple-600 transition">How It Works</a>
-                <a href="#different-stories" class="hover:text-purple-600 transition">Different Stories</a>
-                <a href="#examples" class="hover:text-purple-600 transition">Real Examples</a>
+                <a href="#capture" class="hover:text-purple-600 transition">Capture</a>
+                <a href="#stories" class="hover:text-purple-600 transition">Stories</a>
+                <a href="#formats" class="hover:text-purple-600 transition">Formats</a>
+                <a href="#examples" class="hover:text-purple-600 transition">Examples</a>
                 <a href="#waitlist" class="btn-primary">Join Waitlist</a>
             </div>
             <button class="md:hidden">
@@ -62,12 +55,191 @@
     </nav>
 
     <!-- Hero Section -->
-    <section class="pt-24 pb-20 px-6 bg-white">
+    <section class="pt-20 pb-16 px-6 bg-white">
         <div class="container mx-auto">
             <div class="max-w-4xl mx-auto text-center">
-                <h2 class="text-4xl font-bold mb-6">Join the Movement</h2>
+                <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+                    Your Story, Captured Live
+                </h1>
+                <p class="text-xl text-gray-600 mb-10 leading-relaxed max-w-3xl mx-auto">
+                    Sentimental transforms your life moments into meaningful stories you can share as books, podcasts, social posts, and more—tailored for different audiences.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <a href="#waitlist" class="btn-primary">
+                        Join the Waitlist
+                    </a>
+                    <a href="#capture" class="bg-white border border-purple-600 text-purple-600 px-6 py-3 rounded-full font-medium hover:bg-purple-50 transition">
+                        See How It Works
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Capture Section -->
+    <section id="capture" class="py-16 px-6 bg-gray-50">
+        <div class="container mx-auto">
+            <div class="max-w-5xl mx-auto">
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl font-bold mb-4">Capture Real Moments, Not Just Memories</h2>
+                    <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                        Document your experiences as they unfold—with all the emotions, thoughts, and context that make them meaningful.
+                    </p>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-md p-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        <div>
+                            <div class="mb-6">
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Entrepreneur -->
+                    <div class="bg-gray-50 rounded-xl shadow-md p-8">
+                        <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-lightbulb text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3 text-center">The Entrepreneur</h3>
+                        <p class="text-gray-600 mb-4">
+                            Documents the startup rollercoaster from idea to execution.
+                        </p>
+                        <div class="space-y-3">
+                            <div class="bg-white p-3 rounded-lg shadow-sm">
+                                <div class="flex items-center mb-2">
+                                    <i class="fab fa-linkedin-in text-green-600 mr-2"></i>
+                                    <span class="font-bold">LinkedIn Articles</span>
+                                </div>
+                                <p class="text-sm text-gray-600">
+                                    About key business lessons and insights
+                                </p>
+                            </div>
+                            <div class="bg-white p-3 rounded-lg shadow-sm">
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-microphone text-green-600 mr-2"></i>
+                                    <span class="font-bold">Podcast Series</span>
+                                </div>
+                                <p class="text-sm text-gray-600">
+                                    About the founder's emotional journey
+                                </p>
+                            </div>
+                            <div class="bg-white p-3 rounded-lg shadow-sm">
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-book text-green-600 mr-2"></i>
+                                    <span class="font-bold">Guide for Children</span>
+                                </div>
+                                <p class="text-sm text-gray-600">
+                                    About perseverance and building something from nothing
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Parent -->
+                    <div class="bg-gray-50 rounded-xl shadow-md p-8">
+                        <div class="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-home text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3 text-center">The Parent</h3>
+                        <p class="text-gray-600 mb-4">
+                            Chronicles the everyday moments of family life and growth.
+                        </p>
+                        <div class="space-y-3">
+                            <div class="bg-white p-3 rounded-lg shadow-sm">
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-book text-yellow-600 mr-2"></i>
+                                    <span class="font-bold">Family History Book</span>
+                                </div>
+                                <p class="text-sm text-gray-600">
+                                    With photos, stories, and family traditions
+                                </p>
+                            </div>
+                            <div class="bg-white p-3 rounded-lg shadow-sm">
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-heart text-yellow-600 mr-2"></i>
+                                    <span class="font-bold">Private Reflections</span>
+                                </div>
+                                <p class="text-sm text-gray-600">
+                                    On parenting challenges for personal growth
+                                </p>
+                            </div>
+                            <div class="bg-white p-3 rounded-lg shadow-sm">
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-gift text-yellow-600 mr-2"></i>
+                                    <span class="font-bold">Memory Collections</span>
+                                </div>
+                                <p class="text-sm text-gray-600">
+                                    For children to receive at milestone ages
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-12 bg-purple-50 p-8 rounded-xl shadow-md">
+                    <h3 class="text-2xl font-bold mb-6 text-center">Control Who Sees What</h3>
+                    <p class="text-center text-gray-600 mb-8">
+                        Sentimental gives you complete control over your story:
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="flex items-start">
+                            <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                                <i class="fas fa-user-shield"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold mb-1">Choose Visibility</h4>
+                                <p class="text-gray-600 text-sm">
+                                    Decide which moments become public, private, or for specific people
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                                <i class="fas fa-layer-group"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold mb-1">Multi-Dimensional Sharing</h4>
+                                <p class="text-gray-600 text-sm">
+                                    Different aspects of the same experience can be shared differently
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold mb-1">Schedule Future Releases</h4>
+                                <p class="text-gray-600 text-sm">
+                                    Set time-based releases of private content for future access
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                                <i class="fas fa-edit"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold mb-1">Always Editable</h4>
+                                <p class="text-gray-600 text-sm">
+                                    Change privacy settings or content at any time
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Waitlist Section -->
+    <section id="waitlist" class="py-16 px-6 gradient-bg text-white">
+        <div class="container mx-auto">
+            <div class="max-w-4xl mx-auto text-center">
+                <h2 class="text-4xl font-bold mb-6">Join the Story Revolution</h2>
                 <p class="text-xl mb-10 max-w-2xl mx-auto">
-                    We're building the future of personal storytelling. Be among the first to experience Sentimental.
+                    Be among the first to experience Sentimental and create your living legacy.
                 </p>
                 
                 <div class="bg-white bg-opacity-10 backdrop-filter backdrop-blur-md p-8 rounded-xl max-w-xl mx-auto">
@@ -80,6 +252,10 @@
                         </button>
                     </form>
                 </div>
+                
+                <p class="mt-10 italic text-sm max-w-lg mx-auto">
+                    "The stories we tell define us. Sentimental ensures your story is told as it unfolds, not just remembered in fragments."
+                </p>
             </div>
         </div>
     </section>
@@ -90,7 +266,7 @@
             <div class="flex flex-col md:flex-row justify-between items-center">
                 <div class="mb-8 md:mb-0">
                     <a href="#" class="text-2xl font-bold">Sentimental</a>
-                    <p class="mt-2 text-gray-400">Your Life, Your Story.</p>
+                    <p class="mt-2 text-gray-400">Your Story, Captured Live</p>
                 </div>
                 <div class="flex space-x-6">
                     <a href="#" class="hover:text-purple-400 transition"><i class="fab fa-twitter text-xl"></i></a>
@@ -110,105 +286,115 @@
         </div>
     </footer>
 </body>
-</html>1 class="text-5xl md:text-6xl font-bold mb-8 leading-tight">
-                    Your Life, Your Story.
-                </h1>
-                <p class="text-xl text-gray-600 mb-10 leading-relaxed max-w-3xl mx-auto">
-                    Sentimental helps you document your life story as it happens, then uses AI to transform your moments into beautiful books, podcasts, and social content you can share with different audiences.
-                </p>
-                <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-                    <a href="#waitlist" class="btn-primary">
-                        Join the Waitlist
-                    </a>
-                    <a href="#how-it-works" class="bg-white border border-purple-600 text-purple-600 px-6 py-3 rounded-full font-medium hover:bg-purple-50 transition">
-                        See How It Works
-                    </a>
+</html><div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mb-4">
+                                    <i class="fas fa-heart-pulse text-xl"></i>
+                                </div>
+                                <h3 class="text-xl font-bold mb-2">Emotional Context</h3>
+                                <p class="text-gray-600">
+                                    <span class="italic">"How did winning that client make you feel?"</span><br> 
+                                    Simple prompts capture the emotions that photos miss and journals often forget.
+                                </p>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mb-4">
+                                    <i class="fas fa-brain text-xl"></i>
+                                </div>
+                                <h3 class="text-xl font-bold mb-2">Thought Process</h3>
+                                <p class="text-gray-600">
+                                    Record the decisions, doubts, and breakthroughs that shaped key moments in your life and career.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="mb-6">
+                                <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mb-4">
+                                    <i class="fas fa-link text-xl"></i>
+                                </div>
+                                <h3 class="text-xl font-bold mb-2">Connections</h3>
+                                <p class="text-gray-600">
+                                    Link related experiences across time to reveal the complete story of your journey.
+                                </p>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mb-4">
+                                    <i class="fas fa-feather text-xl"></i>
+                                </div>
+                                <h3 class="text-xl font-bold mb-2">Minimal Effort</h3>
+                                <p class="text-gray-600">
+                                    Voice notes, quick taps, and smart suggestions make documentation frictionless and natural.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- How It Works -->
-    <section id="how-it-works" class="py-20 px-6 bg-gray-50">
+    <!-- AI Stories Section -->
+    <section class="py-16 px-6 bg-white">
         <div class="container mx-auto">
             <div class="max-w-5xl mx-auto">
-                <div class="text-center mb-16">
-                    <h2 class="text-4xl font-bold mb-6">How It Works</h2>
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl font-bold mb-4">AI Transforms Moments into Narratives</h2>
                     <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                        Sentimental transforms how you document and share your life's journey.
+                        Your scattered moments become compelling narratives without any writing skills required.
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-                    <!-- Step 1 -->
-                    <div class="bg-white rounded-xl shadow-md p-8 border-t-4 border-purple-600">
-                        <div class="flex items-center mb-6">
-                            <div class="w-14 h-14 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
-                                <span class="text-2xl font-bold">1</span>
-                            </div>
-                            <h3 class="text-2xl font-bold">Capture Moments Easily</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div class="bg-purple-50 rounded-xl p-8">
+                        <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mb-4">
+                            <i class="fas fa-lightbulb text-xl"></i>
                         </div>
-                        <p class="text-gray-600 mb-6">
-                            Quick voice notes, photos, and simple prompts help you document life's meaningful moments without disrupting the experience.
+                        <h3 class="text-xl font-bold mb-3">Theme Detection</h3>
+                        <p class="text-gray-600 mb-4">
+                            AI identifies meaningful patterns and story arcs across your experiences, finding connections you might miss.
                         </p>
-                        <div class="bg-purple-50 p-4 rounded-lg">
-                            <p class="italic text-gray-600 text-sm">
-                                "Looks like you just finished a major project. How are you feeling about this accomplishment?"
-                            </p>
+                        <div class="bg-white p-4 rounded-lg text-sm italic text-gray-500">
+                            "We noticed you've documented several moments about leadership challenges. Would you like to create a narrative around your growth as a leader?"
                         </div>
                     </div>
                     
-                    <!-- Step 2 -->
-                    <div class="bg-white rounded-xl shadow-md p-8 border-t-4 border-blue-600">
-                        <div class="flex items-center mb-6">
-                            <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
-                                <span class="text-2xl font-bold">2</span>
-                            </div>
-                            <h3 class="text-2xl font-bold">AI Creates Cohesive Stories</h3>
+                    <div class="bg-purple-50 rounded-xl p-8">
+                        <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mb-4">
+                            <i class="fas fa-book text-xl"></i>
                         </div>
-                        <p class="text-gray-600 mb-6">
-                            Your scattered moments become compelling narratives, organized by themes and emotional arcs without any writing skills needed.
+                        <h3 class="text-xl font-bold mb-3">Narrative Structuring</h3>
+                        <p class="text-gray-600 mb-4">
+                            Transforms random moments into cohesive stories with beginning, middle, and end that flow naturally.
                         </p>
-                        <div class="bg-blue-50 p-4 rounded-lg">
-                            <p class="italic text-gray-600 text-sm">
-                                "We've noticed a theme of personal growth in your recent entries. Would you like us to create a narrative around your transformation?"
-                            </p>
+                        <div class="bg-white p-4 rounded-lg text-sm italic text-gray-500">
+                            "Your journey to complete the marathon has a powerful arc. We've organized it into chapters following your training breakthrough, injury setback, and eventual triumph."
                         </div>
                     </div>
                     
-                    <!-- Step 3 -->
-                    <div class="bg-white rounded-xl shadow-md p-8 border-t-4 border-green-600">
-                        <div class="flex items-center mb-6">
-                            <div class="w-14 h-14 bg-green-100 text-green-600 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
-                                <span class="text-2xl font-bold">3</span>
-                            </div>
-                            <h3 class="text-2xl font-bold">Different Stories For Different Audiences</h3>
+                    <div class="bg-purple-50 rounded-xl p-8">
+                        <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mb-4">
+                            <i class="fas fa-pen-fancy text-xl"></i>
                         </div>
-                        <p class="text-gray-600 mb-6">
-                            Create separate versions for personal reflection, family legacy, or public sharing—all from the same captured moments.
+                        <h3 class="text-xl font-bold mb-3">Professional Quality</h3>
+                        <p class="text-gray-600 mb-4">
+                            Stories written with the impact and flow of professional writing, while maintaining your authentic voice.
                         </p>
-                        <div class="bg-green-50 p-4 rounded-lg">
-                            <p class="italic text-gray-600 text-sm">
-                                "Your career journey can be shared as a motivational story for your network or as personal reflections for your journal."
-                            </p>
+                        <div class="bg-white p-4 rounded-lg text-sm italic text-gray-500">
+                            "Your travel experiences have been crafted into a narrative with the engaging style of a travel memoir while preserving your unique perspective and observations."
                         </div>
                     </div>
                     
-                    <!-- Step 4 -->
-                    <div class="bg-white rounded-xl shadow-md p-8 border-t-4 border-yellow-600">
-                        <div class="flex items-center mb-6">
-                            <div class="w-14 h-14 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
-                                <span class="text-2xl font-bold">4</span>
-                            </div>
-                            <h3 class="text-2xl font-bold">Multiple Formats, One Story</h3>
+                    <div class="bg-purple-50 rounded-xl p-8">
+                        <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mb-4">
+                            <i class="fas fa-chart-line text-xl"></i>
                         </div>
-                        <p class="text-gray-600 mb-6">
-                            Turn your experiences into books, audiobooks, social posts, or mini-documentaries that preserve your life's meaningful chapters.
+                        <h3 class="text-xl font-bold mb-3">Continuous Learning</h3>
+                        <p class="text-gray-600 mb-4">
+                            The more you use Sentimental, the better it understands your voice and story preferences.
                         </p>
-                        <div class="bg-yellow-50 p-4 rounded-lg">
-                            <p class="italic text-gray-600 text-sm">
-                                "Your travel experiences would make a beautiful photo book or a series of engaging podcast episodes."
-                            </p>
+                        <div class="bg-white p-4 rounded-lg text-sm italic text-gray-500">
+                            "Based on your feedback, we've adjusted your storytelling style to include more humor and personal reflection in your narratives."
                         </div>
                     </div>
                 </div>
@@ -216,28 +402,30 @@
         </div>
     </section>
 
-    <!-- Different Stories Section -->
-    <section id="different-stories" class="py-20 px-6 gradient-bg text-white">
+    <!-- Audience Layers -->
+    <section id="stories" class="py-16 px-6 gradient-bg text-white">
         <div class="container mx-auto">
             <div class="max-w-5xl mx-auto">
-                <div class="text-center mb-16">
-                    <h2 class="text-4xl font-bold mb-6">Different Stories For Different Audiences</h2>
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl font-bold mb-4">Different Stories for Different Audiences</h2>
                     <p class="text-xl max-w-3xl mx-auto">
-                        One life. Multiple narratives. Share what matters with who matters.
+                        Create multiple versions of your story from the same captured moments.
                     </p>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <!-- Therapeutic Layer -->
-                    <div class="bg-white bg-opacity-10 backdrop-filter backdrop-blur-md rounded-xl p-8 layer-card">
-                        <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <i class="fas fa-heart text-2xl"></i>
+                    <div class="bg-white bg-opacity-10 backdrop-blur-md rounded-xl p-8">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-heart text-xl"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold">Therapeutic Layer</h3>
                         </div>
-                        <h3 class="text-2xl font-bold mb-4 text-center">Therapeutic Layer</h3>
-                        <p class="text-center mb-6">
+                        <p class="mb-3">
                             Private reflections tailored for personal growth and therapy sessions.
                         </p>
-                        <ul class="space-y-2 mb-6">
+                        <ul class="space-y-2 mb-4">
                             <li class="flex items-start">
                                 <i class="fas fa-check mt-1 mr-2"></i>
                                 <span>Process emotions and identify patterns with your therapist</span>
@@ -252,20 +440,22 @@
                             </li>
                         </ul>
                         <div class="bg-white bg-opacity-10 p-4 rounded-lg italic text-sm">
-                            "I've noticed these thought patterns connect to events from your childhood. Let's explore that together."
+                            "I've noticed a pattern in how you respond to professional criticism. Here's how this connects to your childhood experiences..."
                         </div>
                     </div>
                     
                     <!-- Legacy Layer -->
-                    <div class="bg-white bg-opacity-10 backdrop-filter backdrop-blur-md rounded-xl p-8 layer-card">
-                        <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <i class="fas fa-seedling text-2xl"></i>
+                    <div class="bg-white bg-opacity-10 backdrop-blur-md rounded-xl p-8">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-seedling text-xl"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold">Legacy Layer</h3>
                         </div>
-                        <h3 class="text-2xl font-bold mb-4 text-center">Legacy Layer</h3>
-                        <p class="text-center mb-6">
+                        <p class="mb-3">
                             Meaningful narratives for loved ones and future generations.
                         </p>
-                        <ul class="space-y-2 mb-6">
+                        <ul class="space-y-2 mb-4">
                             <li class="flex items-start">
                                 <i class="fas fa-check mt-1 mr-2"></i>
                                 <span>Share life lessons and personal history with your children</span>
@@ -280,48 +470,52 @@
                             </li>
                         </ul>
                         <div class="bg-white bg-opacity-10 p-4 rounded-lg italic text-sm">
-                            "This is how I built our family business, the challenges we faced, and what I learned along the way..."
+                            "This is how I started our family business, the challenges we faced, and what I learned about perseverance along the way..."
                         </div>
                     </div>
                     
                     <!-- Social Layer -->
-                    <div class="bg-white bg-opacity-10 backdrop-filter backdrop-blur-md rounded-xl p-8 layer-card">
-                        <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <i class="fas fa-share-alt text-2xl"></i>
+                    <div class="bg-white bg-opacity-10 backdrop-blur-md rounded-xl p-8">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-share-alt text-xl"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold">Social Layer</h3>
                         </div>
-                        <h3 class="text-2xl font-bold mb-4 text-center">Social Layer</h3>
-                        <p class="text-center mb-6">
-                            Polished content optimized for your followers and professional network.
+                        <p class="mb-3">
+                            Polished content optimized for broader audiences.
                         </p>
-                        <ul class="space-y-2 mb-6">
+                        <ul class="space-y-2 mb-4">
                             <li class="flex items-start">
                                 <i class="fas fa-check mt-1 mr-2"></i>
-                                <span>Career insights and thought leadership for LinkedIn</span>
+                                <span>Career insights for professional networks</span>
                             </li>
                             <li class="flex items-start">
                                 <i class="fas fa-check mt-1 mr-2"></i>
-                                <span>Inspirational moments tailored for your followers</span>
+                                <span>Inspirational moments for followers</span>
                             </li>
                             <li class="flex items-start">
                                 <i class="fas fa-check mt-1 mr-2"></i>
-                                <span>Blog posts and articles from your expertise</span>
+                                <span>Thought leadership pieces from your expertise</span>
                             </li>
                         </ul>
                         <div class="bg-white bg-opacity-10 p-4 rounded-lg italic text-sm">
-                            "Here are three leadership lessons I learned during our recent product launch..."
+                            "Three leadership lessons I learned during our recent product launch that changed how I approach team management..."
                         </div>
                     </div>
                     
                     <!-- Memory Layer -->
-                    <div class="bg-white bg-opacity-10 backdrop-filter backdrop-blur-md rounded-xl p-8 layer-card">
-                        <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <i class="fas fa-brain text-2xl"></i>
+                    <div class="bg-white bg-opacity-10 backdrop-blur-md rounded-xl p-8">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-brain text-xl"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold">Memory Layer</h3>
                         </div>
-                        <h3 class="text-2xl font-bold mb-4 text-center">Memory Layer</h3>
-                        <p class="text-center mb-6">
+                        <p class="mb-3">
                             The complete archive for your future self.
                         </p>
-                        <ul class="space-y-2 mb-6">
+                        <ul class="space-y-2 mb-4">
                             <li class="flex items-start">
                                 <i class="fas fa-check mt-1 mr-2"></i>
                                 <span>Every detail preserved with full context</span>
@@ -336,7 +530,7 @@
                             </li>
                         </ul>
                         <div class="bg-white bg-opacity-10 p-4 rounded-lg italic text-sm">
-                            "Here's everything about that summer of 2025, including all the details you'll cherish years from now..."
+                            "Here's everything about that summer of 2025, including the conversations, emotions, and small details you might otherwise forget..."
                         </div>
                     </div>
                 </div>
@@ -344,227 +538,139 @@
         </div>
     </section>
 
-    <!-- Real Life Examples -->
-    <section id="examples" class="py-20 px-6 bg-white">
+    <!-- Story Formats -->
+    <section id="formats" class="py-16 px-6 bg-gray-50">
         <div class="container mx-auto">
             <div class="max-w-5xl mx-auto">
-                <div class="text-center mb-16">
-                    <h2 class="text-4xl font-bold mb-6">Inspiring Real-Life Examples</h2>
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl font-bold mb-4">Stories That Transcend Formats</h2>
                     <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                        See how people just like you are using Sentimental to capture and share their unique journeys.
+                        Your life experiences transform into various formats tailored to different purposes.
                     </p>
                 </div>
 
-                <div class="space-y-12">
-                    <!-- Example 1: Athlete -->
-                    <div class="bg-gray-50 rounded-xl shadow-md overflow-hidden">
-                        <div class="md:flex">
-                            <div class="md:w-1/3 bg-purple-600 text-white p-8 flex items-center justify-center">
-                                <div class="text-center">
-                                    <div class="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <i class="fas fa-running text-3xl"></i>
-                                    </div>
-                                    <h3 class="text-2xl font-bold">The Marathon Runner</h3>
-                                    <p class="mt-2 text-purple-100">From couch to finish line</p>
-                                </div>
+                <div class="bg-white rounded-xl shadow-md p-8">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-book-open text-2xl"></i>
                             </div>
-                            <div class="md:w-2/3 p-8">
-                                <p class="text-gray-600 mb-4">
-                                    After years of saying "someday," Sarah decided to train for her first marathon at age 45. She captured her journey from day one through crossing the finish line.
-                                </p>
-                                <h4 class="font-bold text-xl mb-4">Her Sentimental Story Became:</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div class="bg-purple-50 p-4 rounded-lg">
-                                        <div class="font-bold text-purple-600 mb-2">Inspirational Memoir</div>
-                                        <p class="text-sm text-gray-600">
-                                            A book proving it's never too late to transform your life
-                                        </p>
-                                    </div>
-                                    <div class="bg-purple-50 p-4 rounded-lg">
-                                        <div class="font-bold text-purple-600 mb-2">Training Insights</div>
-                                        <p class="text-sm text-gray-600">
-                                            Social content that inspired other beginner runners
-                                        </p>
-                                    </div>
-                                    <div class="bg-purple-50 p-4 rounded-lg">
-                                        <div class="font-bold text-purple-600 mb-2">Personal Reflections</div>
-                                        <p class="text-sm text-gray-600">
-                                            Private journal tracking her mental transformation
-                                        </p>
-                                    </div>
-                                </div>
+                            <h3 class="text-xl font-bold mb-3">Books & Memoirs</h3>
+                            <p class="text-gray-600">
+                                Your championship season, entrepreneurial journey, or family history as a beautiful memoir.
+                            </p>
+                        </div>
+                        
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-headphones text-2xl"></i>
                             </div>
+                            <h3 class="text-xl font-bold mb-3">Audio Stories</h3>
+                            <p class="text-gray-600">
+                                Your travel adventure or career transition as an immersive podcast series.
+                            </p>
+                        </div>
+                        
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-film text-2xl"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-3">Video Stories</h3>
+                            <p class="text-gray-600">
+                                Your year of personal growth as a mini-documentary with visuals and narration.
+                            </p>
                         </div>
                     </div>
                     
-                    <!-- Example 2: New Parent -->
-                    <div class="bg-gray-50 rounded-xl shadow-md overflow-hidden">
-                        <div class="md:flex">
-                            <div class="md:w-1/3 bg-blue-600 text-white p-8 flex items-center justify-center">
-                                <div class="text-center">
-                                    <div class="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <i class="fas fa-baby text-3xl"></i>
-                                    </div>
-                                    <h3 class="text-2xl font-bold">The New Parents</h3>
-                                    <p class="mt-2 text-blue-100">First-time parenting journey</p>
-                                </div>
+                    <hr class="my-8 border-gray-200">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fab fa-linkedin-in text-2xl"></i>
                             </div>
-                            <div class="md:w-2/3 p-8">
-                                <p class="text-gray-600 mb-4">
-                                    Miguel and Ava documented their journey from pregnancy to their daughter's first birthday, capturing moments they knew would fade from memory.
-                                </p>
-                                <h4 class="font-bold text-xl mb-4">Their Sentimental Story Became:</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div class="bg-blue-50 p-4 rounded-lg">
-                                        <div class="font-bold text-blue-600 mb-2">Family Time Capsule</div>
-                                        <p class="text-sm text-gray-600">
-                                            A beautiful book for their daughter's 18th birthday
-                                        </p>
-                                    </div>
-                                    <div class="bg-blue-50 p-4 rounded-lg">
-                                        <div class="font-bold text-blue-600 mb-2">Parenting Blog</div>
-                                        <p class="text-sm text-gray-600">
-                                            Honest reflections that helped other new parents
-                                        </p>
-                                    </div>
-                                    <div class="bg-blue-50 p-4 rounded-lg">
-                                        <div class="font-bold text-blue-600 mb-2">Video Documentary</div>
-                                        <p class="text-sm text-gray-600">
-                                            A cinematic year-in-review for overseas grandparents
-                                        </p>
-                                    </div>
-                                </div>
+                            <h3 class="text-xl font-bold mb-3">Professional Insights</h3>
+                            <p class="text-gray-600">
+                                Your breakthrough insight as a thoughtful LinkedIn article for your professional network.
+                            </p>
+                        </div>
+                        
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-rss text-2xl"></i>
                             </div>
+                            <h3 class="text-xl font-bold mb-3">Blog Series</h3>
+                            <p class="text-gray-600">
+                                Your expertise journey as educational content for followers and community.
+                            </p>
+                        </div>
+                        
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fab fa-twitter text-2xl"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-3">Social Moments</h3>
+                            <p class="text-gray-600">
+                                Your inspirational experiences distilled into impactful social media posts.
+                            </p>
                         </div>
                     </div>
                     
-                    <!-- Example 3: Career Change -->
-                    <div class="bg-gray-50 rounded-xl shadow-md overflow-hidden">
-                        <div class="md:flex">
-                            <div class="md:w-1/3 bg-green-600 text-white p-8 flex items-center justify-center">
-                                <div class="text-center">
-                                    <div class="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <i class="fas fa-stethoscope text-3xl"></i>
-                                    </div>
-                                    <h3 class="text-2xl font-bold">The Career Changer</h3>
-                                    <p class="mt-2 text-green-100">From medicine to tech startup</p>
-                                </div>
-                            </div>
-                            <div class="md:w-2/3 p-8">
-                                <p class="text-gray-600 mb-4">
-                                    After 15 years as a doctor, Elena made a dramatic pivot to tech entrepreneurship, building an AI platform for patient care. She documented her journey from medical practice to startup success.
-                                </p>
-                                <h4 class="font-bold text-xl mb-4">Her Sentimental Story Became:</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div class="bg-green-50 p-4 rounded-lg">
-                                        <div class="font-bold text-green-600 mb-2">LinkedIn Series</div>
-                                        <p class="text-sm text-gray-600">
-                                            "Healthcare to Tech" articles that inspired other medical professionals
-                                        </p>
-                                    </div>
-                                    <div class="bg-green-50 p-4 rounded-lg">
-                                        <div class="font-bold text-green-600 mb-2">TED Talk Material</div>
-                                        <p class="text-sm text-gray-600">
-                                            A powerful presentation on bridging medicine with technology
-                                        </p>
-                                    </div>
-                                    <div class="bg-green-50 p-4 rounded-lg">
-                                        <div class="font-bold text-green-600 mb-2">Memoir</div>
-                                        <p class="text-sm text-gray-600">
-                                            A book about reinvention and bringing humanity to technology
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="mt-10 bg-purple-50 p-6 rounded-lg">
+                        <h4 class="text-xl font-bold mb-3 text-center">The Story Matters, Not Just the Format</h4>
+                        <p class="text-gray-600 text-center">
+                            Your experiences deserve to be preserved and shared in ways that resonate with different audiences. Sentimental ensures the emotional truth and impact of your story remains consistent across all formats.
+                        </p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Personal Storytelling Section -->
-    <section class="py-20 px-6 bg-gray-50">
-        <div class="container mx-auto">
-            <div class="max-w-4xl mx-auto text-center">
-                <h2 class="text-4xl font-bold mb-8">Your Life Story: The Most Human Thing in a Technological Future</h2>
-                <p class="text-xl text-gray-600 mb-10 leading-relaxed">
-                    In a world increasingly defined by algorithms, filters, and virtual experiences, <span class="font-bold text-purple-600">your authentic life story is the most deeply human treasure you possess.</span>
-                </p>
-                <div class="bg-white p-8 rounded-xl shadow-md">
-                    <p class="text-2xl font-bold text-purple-600 mb-4">This is Sentimental.</p>
-                    <p class="text-xl italic">Your life, beautifully told.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Team Section -->
-    <section class="py-20 px-6 bg-white">
+    <!-- Real-life Examples -->
+    <section id="examples" class="py-16 px-6 bg-white">
         <div class="container mx-auto">
             <div class="max-w-5xl mx-auto">
-                <div class="text-center mb-16">
-                    <h2 class="text-4xl font-bold mb-6">The Team Behind Sentimental</h2>
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl font-bold mb-4">Real-Life Examples</h2>
                     <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                        Combining expertise in mental wellbeing, technology, and storytelling.
+                        See how different people use Sentimental to capture their unique journeys.
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-                    <!-- Founder 1 -->
-                    <div class="bg-gray-50 rounded-xl shadow-md overflow-hidden">
-                        <div class="h-48 bg-purple-600 flex items-center justify-center">
-                            <div class="w-32 h-32 bg-white rounded-full flex items-center justify-center text-purple-600 text-4xl font-bold">
-                                MV
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Athlete -->
+                    <div class="bg-gray-50 rounded-xl shadow-md p-8">
+                        <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-trophy text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3 text-center">The Professional Athlete</h3>
+                        <p class="text-gray-600 mb-4">
+                            Captures the emotional journey through training, setbacks, and victories.
+                        </p>
+                        <div class="space-y-3">
+                            <div class="bg-white p-3 rounded-lg shadow-sm">
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-headphones text-blue-600 mr-2"></i>
+                                    <span class="font-bold">Motivational Audiobook</span>
+                                </div>
+                                <p class="text-sm text-gray-600">
+                                    About mental toughness and overcoming obstacles
+                                </p>
                             </div>
-                        </div>
-                        <div class="p-6">
-                            <h3 class="text-xl font-bold mb-2">Marko Vaik</h3>
-                            <p class="text-purple-600 font-semibold mb-4">Founder & CEO</p>
-                            <p class="text-gray-600">
-                                Co-founded Estonia's largest mental health platform, Serenity Platform. Marko's vision for user-centered wellbeing technology drives Sentimental's mission to transform personal storytelling.
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <!-- Founder 2 -->
-                    <div class="bg-gray-50 rounded-xl shadow-md overflow-hidden">
-                        <div class="h-48 bg-blue-600 flex items-center justify-center">
-                            <div class="w-32 h-32 bg-white rounded-full flex items-center justify-center text-blue-600 text-4xl font-bold">
-                                MS
+                            <div class="bg-white p-3 rounded-lg shadow-sm">
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-share-alt text-blue-600 mr-2"></i>
+                                    <span class="font-bold">Fan Content</span>
+                                </div>
+                                <p class="text-sm text-gray-600">
+                                    Training insights and behind-the-scenes moments
+                                </p>
                             </div>
-                        </div>
-                        <div class="p-6">
-                            <h3 class="text-xl font-bold mb-2">Merike Sisask</h3>
-                            <p class="text-blue-600 font-semibold mb-4">Co-Founder & Chief Scientific Officer</p>
-                            <p class="text-gray-600">
-                                Social health professor and author of 100+ scientific publications. Merike bridges the gap between personal storytelling and mental wellbeing, giving Sentimental its scientific foundation.
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <!-- Founder 3 -->
-                    <div class="bg-gray-50 rounded-xl shadow-md overflow-hidden">
-                        <div class="h-48 bg-green-600 flex items-center justify-center">
-                            <div class="w-32 h-32 bg-white rounded-full flex items-center justify-center text-green-600 text-4xl font-bold">
-                                LH
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <h3 class="text-xl font-bold mb-2">Lars-Erik Hion</h3>
-                            <p class="text-green-600 font-semibold mb-4">Co-Founder & CTO</p>
-                            <p class="text-gray-600">
-                                Digital innovation veteran who's built scalable solutions for SEB, Swedbank, and Telia. Co-founder of Tailwind and founder of Rethink, Lars-Erik creates powerful technology that feels effortlessly simple.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Waitlist Section -->
-    <section id="waitlist" class="py-20 px-6 gradient-bg text-white">
-        <div class="container mx-auto">
-            <div class="max-w-4xl mx-auto text-center">
-                <h
+                            <div class="bg-white p-3 rounded-lg shadow-sm">
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-book text-blue-600 mr-2"></i>
+                                    <span class="font-bold">Legacy Book</span>
+                                </div>
+                                <p class="text-sm text-gray-600">
+                                    For future athletes in their family
