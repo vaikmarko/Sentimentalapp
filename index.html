@@ -3,285 +3,434 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sentimental - Your Life Story, Captured As You Live It</title>
+    <title>Sentimental | Your Life's Narrative Studio</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        .hero-gradient {
-            background: linear-gradient(135deg, #8A2BE2 0%, #FF69B4 100%);
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Sans+Pro:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Source Sans Pro', sans-serif;
         }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #5D3FD3 0%, #FF6E7F 100%);
+        }
+        
+        .custom-shadow {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
         .feature-card {
-            transition: transform 0.3s ease;
+            transition: all 0.3s ease;
         }
+        
         .feature-card:hover {
-            transform: translateY(-10px);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
+        }
+        
+        .text-gradient {
+            background: linear-gradient(90deg, #5D3FD3, #FF6E7F);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .pill {
+            border-radius: 9999px;
+            padding: 0.25rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .animated-gradient {
+            background: linear-gradient(-45deg, #5D3FD3, #8E5EF7, #FF6E7F, #FF9D6C);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
     </style>
 </head>
-<body class="font-sans text-gray-800">
+<body class="antialiased bg-gray-50 text-gray-900">
     <!-- Navigation -->
-    <nav class="bg-white shadow-md py-4">
-        <div class="container mx-auto px-6 flex justify-between items-center">
-            <a href="#" class="text-2xl font-bold text-purple-600">Sentimental</a>
-            <div class="space-x-6">
-                <a href="#how-it-works" class="hover:text-purple-600">How It Works</a>
-                <a href="#features" class="hover:text-purple-600">Features</a>
-                <a href="#vision" class="hover:text-purple-600">Vision</a>
-                <a href="#waitlist" class="bg-purple-600 text-white px-4 py-2 rounded-full hover:bg-purple-700">Join Waitlist</a>
+    <nav class="bg-white py-4 px-6 fixed w-full z-50 shadow-sm">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="#" class="text-3xl font-bold">
+                <span class="text-gradient">Sentimental</span>
+            </a>
+            <div class="hidden md:flex space-x-8 items-center">
+                <a href="#concept" class="hover:text-purple-600 transition">Concept</a>
+                <a href="#experience" class="hover:text-purple-600 transition">Experience</a>
+                <a href="#for-whom" class="hover:text-purple-600 transition">For Whom</a>
+                <a href="#why-now" class="hover:text-purple-600 transition">Why Now</a>
+                <a href="#waitlist" class="gradient-bg text-white px-6 py-2 rounded-full hover:shadow-lg transition">Join Waitlist</a>
             </div>
+            <button class="md:hidden">
+                <i class="fas fa-bars text-2xl"></i>
+            </button>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <section class="hero-gradient text-white py-20">
-        <div class="container mx-auto px-6 text-center">
-            <h1 class="text-5xl font-bold mb-6">Your Life Story, Captured As You Live It</h1>
-            <p class="text-xl mb-10 max-w-3xl mx-auto">
-                Transform your everyday moments into a meaningful narrative, preserving the emotions and context that make them special.
-            </p>
-            <a href="#waitlist" class="bg-white text-purple-600 px-8 py-3 rounded-full font-bold text-lg hover:bg-gray-100 hover:shadow-lg transition duration-300">
-                Join the Waitlist
-            </a>
-        </div>
-    </section>
-
-    <!-- Why Sentimental -->
-    <section class="py-16 bg-gray-50">
-        <div class="container mx-auto px-6">
-            <h2 class="text-3xl font-bold text-center mb-10">Why Sentimental?</h2>
-            <p class="text-xl text-center max-w-3xl mx-auto">
-                In a world where memories fade and context gets lost, Sentimental helps you document your life journey in real-time - capturing not just what happened, but how it felt and why it mattered.
-            </p>
-        </div>
-    </section>
-
-    <!-- How It Works -->
-    <section id="how-it-works" class="py-16">
-        <div class="container mx-auto px-6">
-            <h2 class="text-3xl font-bold text-center mb-16">How It Works</h2>
-            
-            <!-- Feature 1 -->
-            <div class="flex flex-col md:flex-row items-center mb-20">
-                <div class="md:w-1/2 mb-10 md:mb-0 md:pr-10">
-                    <span class="bg-purple-100 text-purple-600 px-4 py-1 rounded-full text-sm font-semibold">PILLAR 1</span>
-                    <h3 class="text-2xl font-bold mt-4 mb-6">Effortless Memory Capture</h3>
-                    <h4 class="text-xl font-semibold mb-4">Document life as it unfolds</h4>
-                    <ul class="space-y-3">
-                        <li class="flex items-start">
-                            <i class="fas fa-check-circle text-purple-600 mt-1 mr-2"></i>
-                            <span>Add photos, links, notes, and poems with emotional context</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="fas fa-check-circle text-purple-600 mt-1 mr-2"></i>
-                            <span>Receive thoughtful prompts to articulate your feelings in the moment</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="fas fa-check-circle text-purple-600 mt-1 mr-2"></i>
-                            <span>Tag important people, places, and milestones</span>
-                        </li>
-                    </ul>
-                    <div class="mt-6 bg-gray-100 p-4 rounded-lg italic">
-                        "Sentimental helps me preserve the small moments that would otherwise be forgotten, complete with all the emotions I felt at the time." - Early User
-                    </div>
-                </div>
-                <div class="md:w-1/2">
-                    <div class="rounded-lg shadow-xl bg-white p-1">
-                        <img src="/api/placeholder/600/400" alt="Effortless Memory Capture" class="rounded-lg">
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Feature 2 -->
-            <div class="flex flex-col md:flex-row-reverse items-center mb-20">
-                <div class="md:w-1/2 mb-10 md:mb-0 md:pl-10">
-                    <span class="bg-purple-100 text-purple-600 px-4 py-1 rounded-full text-sm font-semibold">PILLAR 2</span>
-                    <h3 class="text-2xl font-bold mt-4 mb-6">Personalized Storytelling</h3>
-                    <h4 class="text-xl font-semibold mb-4">One life, multiple narratives</h4>
-                    <ul class="space-y-3">
-                        <li class="flex items-start">
-                            <i class="fas fa-check-circle text-purple-600 mt-1 mr-2"></i>
-                            <span>Create different versions of your story for different audiences</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="fas fa-check-circle text-purple-600 mt-1 mr-2"></i>
-                            <span>Keep deeply personal reflections private while sharing curated moments publicly</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="fas fa-check-circle text-purple-600 mt-1 mr-2"></i>
-                            <span>AI assistance organizes random moments into cohesive storylines</span>
-                        </li>
-                    </ul>
-                    <div class="mt-6 bg-gray-100 p-4 rounded-lg italic">
-                        "I love being able to share the fun parts of my journey with friends while keeping my deeper reflections private for personal growth." - Early User
-                    </div>
-                </div>
-                <div class="md:w-1/2">
-                    <div class="rounded-lg shadow-xl bg-white p-1">
-                        <img src="/api/placeholder/600/400" alt="Personalized Storytelling" class="rounded-lg">
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Feature 3 -->
-            <div class="flex flex-col md:flex-row items-center">
-                <div class="md:w-1/2 mb-10 md:mb-0 md:pr-10">
-                    <span class="bg-purple-100 text-purple-600 px-4 py-1 rounded-full text-sm font-semibold">PILLAR 3</span>
-                    <h3 class="text-2xl font-bold mt-4 mb-6">Transformative Output</h3>
-                    <h4 class="text-xl font-semibold mb-4">Turn digital memories into lasting legacies</h4>
-                    <ul class="space-y-3">
-                        <li class="flex items-start">
-                            <i class="fas fa-check-circle text-purple-600 mt-1 mr-2"></i>
-                            <span>Convert your collected moments into beautifully formatted books</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="fas fa-check-circle text-purple-600 mt-1 mr-2"></i>
-                            <span>Create immersive audiobooks narrated in your own voice</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="fas fa-check-circle text-purple-600 mt-1 mr-2"></i>
-                            <span>Generate mini-documentaries and podcast episodes from your experiences</span>
-                        </li>
-                    </ul>
-                    <div class="mt-6 bg-gray-100 p-4 rounded-lg italic">
-                        "Creating a physical book from my digital memories gave me something tangible to share with my family - a gift that tells my story in my own words." - Early User
-                    </div>
-                </div>
-                <div class="md:w-1/2">
-                    <div class="rounded-lg shadow-xl bg-white p-1">
-                        <img src="/api/placeholder/600/400" alt="Transformative Output" class="rounded-lg">
-                    </div>
+    <section class="pt-32 pb-20 px-6">
+        <div class="container mx-auto">
+            <div class="max-w-4xl mx-auto text-center">
+                <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+                    Transform Moments into Memoirs, While Living Them
+                </h1>
+                <p class="text-xl md:text-2xl text-gray-600 mb-10 leading-relaxed">
+                    Your life's narrative studio. Capture experiences with emotional context, create multiple perspectives, and transform moments into meaningful stories — as they happen.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <a href="#waitlist" class="gradient-bg text-white px-8 py-4 rounded-full font-bold text-lg hover:shadow-xl transition duration-300 transform hover:-translate-y-1">
+                        Join the Waitlist
+                    </a>
+                    <a href="#concept" class="bg-white border border-purple-600 text-purple-600 px-8 py-4 rounded-full font-bold text-lg hover:shadow-lg transition duration-300">
+                        Learn More
+                    </a>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- The Sentimental Difference -->
-    <section id="features" class="py-16 bg-purple-50">
-        <div class="container mx-auto px-6">
-            <h2 class="text-3xl font-bold text-center mb-6">The Sentimental Difference</h2>
-            <p class="text-xl text-center mb-16 max-w-3xl mx-auto font-semibold">
-                More than a journal. More than social media. More than a photo album.
-            </p>
-            <p class="text-center mb-12 max-w-3xl mx-auto">
-                Sentimental combines the best elements of journaling, social sharing, and memory preservation into a seamless experience that grows with you over time.
-            </p>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                <!-- Feature Card 1 -->
-                <div class="feature-card bg-white rounded-lg shadow-lg p-6">
-                    <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-6 mx-auto">
-                        <i class="fas fa-clock text-2xl text-purple-600"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-center mb-4">Real-time Documentation</h3>
-                    <p class="text-center">
-                        Capture authentic emotions before they fade, preserving the true essence of your experiences.
+    <!-- Concept Animation Section -->
+    <section id="concept" class="py-20 px-6 bg-white">
+        <div class="container mx-auto">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-16">
+                    <span class="pill bg-purple-100 text-purple-700 mb-4">OUR CONCEPT</span>
+                    <h2 class="text-4xl font-bold mb-6">Life's Narrative Studio</h2>
+                    <p class="text-xl text-gray-600">
+                        Sentimental isn't just another journal app or social platform — it's a <strong>narrative studio for your life</strong>. We combine intelligent moment capture, emotional intelligence, and creative production to transform your experiences into meaningful stories — as they happen.
                     </p>
                 </div>
                 
-                <!-- Feature Card 2 -->
-                <div class="feature-card bg-white rounded-lg shadow-lg p-6">
-                    <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-6 mx-auto">
-                        <i class="fas fa-lock text-2xl text-purple-600"></i>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div class="bg-gray-100 p-8 rounded-2xl">
+                        <h3 class="text-2xl font-bold mb-4">The Problem</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-start">
+                                <div class="bg-red-100 text-red-600 rounded-full w-6 h-6 flex items-center justify-center mt-1 mr-3">
+                                    <i class="fas fa-times text-sm"></i>
+                                </div>
+                                <div>
+                                    <strong class="block">Memory Decay</strong>
+                                    <span class="text-gray-600">By the time you document your life, crucial details and emotions have faded</span>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <div class="bg-red-100 text-red-600 rounded-full w-6 h-6 flex items-center justify-center mt-1 mr-3">
+                                    <i class="fas fa-times text-sm"></i>
+                                </div>
+                                <div>
+                                    <strong class="block">Creator Barrier</strong>
+                                    <span class="text-gray-600">Most people don't have the skills to craft compelling narratives from isolated memories</span>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <div class="bg-red-100 text-red-600 rounded-full w-6 h-6 flex items-center justify-center mt-1 mr-3">
+                                    <i class="fas fa-times text-sm"></i>
+                                </div>
+                                <div>
+                                    <strong class="block">Context Loss</strong>
+                                    <span class="text-gray-600">Photos, journals, and social posts exist in separate silos, losing the connections between them</span>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <div class="bg-red-100 text-red-600 rounded-full w-6 h-6 flex items-center justify-center mt-1 mr-3">
+                                    <i class="fas fa-times text-sm"></i>
+                                </div>
+                                <div>
+                                    <strong class="block">Time Commitment</strong>
+                                    <span class="text-gray-600">Traditional journaling and memoir writing demand time most people simply don't have</span>
+                                </div>
+                            </li>
+                        </ul>
                     </div>
-                    <h3 class="text-xl font-bold text-center mb-4">Flexible Privacy Controls</h3>
-                    <p class="text-center">
-                        Decide what to share and with whom, maintaining control over your personal narrative.
+                    
+                    <div class="bg-purple-50 p-8 rounded-2xl">
+                        <h3 class="text-2xl font-bold mb-4">Our Solution</h3>
+                        <p class="mb-6">Sentimental creates a friction-free flow:</p>
+                        <div class="relative">
+                            <div class="absolute left-4 top-0 bottom-0 w-1 bg-purple-200 rounded-full"></div>
+                            <div class="space-y-6 relative">
+                                <div class="pl-10 relative">
+                                    <div class="absolute left-0 w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center">
+                                        <i class="fas fa-heart-pulse"></i>
+                                    </div>
+                                    <h4 class="font-bold text-lg">Living</h4>
+                                    <p class="text-gray-600">Experience life's meaningful moments</p>
+                                </div>
+                                <div class="pl-10 relative">
+                                    <div class="absolute left-0 w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center">
+                                        <i class="fas fa-camera"></i>
+                                    </div>
+                                    <h4 class="font-bold text-lg">Capturing</h4>
+                                    <p class="text-gray-600">Document moments with emotional context</p>
+                                </div>
+                                <div class="pl-10 relative">
+                                    <div class="absolute left-0 w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center">
+                                        <i class="fas fa-brain"></i>
+                                    </div>
+                                    <h4 class="font-bold text-lg">Contextualizing</h4>
+                                    <p class="text-gray-600">AI helps organize and add meaning</p>
+                                </div>
+                                <div class="pl-10 relative">
+                                    <div class="absolute left-0 w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center">
+                                        <i class="fas fa-wand-magic-sparkles"></i>
+                                    </div>
+                                    <h4 class="font-bold text-lg">Creating</h4>
+                                    <p class="text-gray-600">Transform moments into memoirs</p>
+                                </div>
+                                <div class="pl-10 relative">
+                                    <div class="absolute left-0 w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center">
+                                        <i class="fas fa-share-nodes"></i>
+                                    </div>
+                                    <h4 class="font-bold text-lg">Sharing</h4>
+                                    <p class="text-gray-600">Different stories for different audiences</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Experience Section -->
+    <section id="experience" class="py-20 px-6 gradient-bg text-white">
+        <div class="container mx-auto">
+            <div class="text-center mb-16">
+                <span class="pill bg-white bg-opacity-20 mb-4">THE EXPERIENCE</span>
+                <h2 class="text-4xl font-bold mb-6">The Sentimental Experience</h2>
+                <p class="text-xl max-w-3xl mx-auto">
+                    A seamless journey from living moments to creating meaningful narratives
+                </p>
+            </div>
+            
+            <!-- Experience Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                <!-- Card 1 -->
+                <div class="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-2xl p-8 custom-shadow feature-card">
+                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mb-6">
+                        <i class="fas fa-lightbulb text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Intelligent Capture</h3>
+                    <h4 class="text-lg font-semibold mb-4 text-purple-200">Your personal narrative assistant</h4>
+                    <p class="mb-6">
+                        Sentimental observes your digital life — integrating with your photos, social feeds, location data, and music — to recognize meaningful moments.
+                    </p>
+                    <div class="bg-white bg-opacity-5 p-4 rounded-lg mb-6">
+                        <p class="italic text-sm">
+                            "This appears to be a significant milestone. What emotions are you experiencing right now?"
+                        </p>
+                    </div>
+                    <h5 class="font-bold mb-2">Unlike traditional journaling:</h5>
+                    <ul class="space-y-2">
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-400 mr-2 mt-1"></i>
+                            <span>No blank page anxiety — just respond to contextual prompts</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-400 mr-2 mt-1"></i>
+                            <span>Capture moments in any format (voice, text, photos with emotion tags)</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-400 mr-2 mt-1"></i>
+                            <span>Document life as it happens, not in retrospect</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Card 2 -->
+                <div class="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-2xl p-8 custom-shadow feature-card">
+                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mb-6">
+                        <i class="fas fa-heart text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Emotional Intelligence</h3>
+                    <h4 class="text-lg font-semibold mb-4 text-purple-200">Multiple perspectives of your authentic self</h4>
+                    <p class="mb-6">
+                        Your life story exists on a spectrum from deeply private to publicly shareable.
+                    </p>
+                    <div class="space-y-3 mb-6">
+                        <div class="bg-white bg-opacity-5 p-3 rounded-lg">
+                            <span class="font-bold block">Therapeutic Layer</span>
+                            <span class="text-sm">Process experiences with mental health prompts</span>
+                        </div>
+                        <div class="bg-white bg-opacity-5 p-3 rounded-lg">
+                            <span class="font-bold block">Personal Layer</span>
+                            <span class="text-sm">Document authentic thoughts for your future self</span>
+                        </div>
+                        <div class="bg-white bg-opacity-5 p-3 rounded-lg">
+                            <span class="font-bold block">Legacy Layer</span>
+                            <span class="text-sm">Craft how experiences will be shared with loved ones</span>
+                        </div>
+                        <div class="bg-white bg-opacity-5 p-3 rounded-lg">
+                            <span class="font-bold block">Public Layer</span>
+                            <span class="text-sm">Create polished narratives for broader sharing</span>
+                        </div>
+                    </div>
+                    <h5 class="font-bold mb-2">Unlike social media:</h5>
+                    <ul class="space-y-2">
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-400 mr-2 mt-1"></i>
+                            <span>Multi-dimensional sharing instead of a single performative self</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-400 mr-2 mt-1"></i>
+                            <span>Emotional depth beyond "highlight reels"</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Card 3 -->
+                <div class="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-2xl p-8 custom-shadow feature-card">
+                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mb-6">
+                        <i class="fas fa-book text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Creative Production</h3>
+                    <h4 class="text-lg font-semibold mb-4 text-purple-200">From moments to masterpieces</h4>
+                    <p class="mb-6">
+                        Sentimental doesn't just store your memories — it transforms them into meaningful creations.
+                    </p>
+                    <div class="grid grid-cols-2 gap-3 mb-6">
+                        <div class="bg-white bg-opacity-5 p-3 rounded-lg text-center">
+                            <i class="fas fa-book-open mb-2"></i>
+                            <span class="text-sm block">Narrative Books</span>
+                        </div>
+                        <div class="bg-white bg-opacity-5 p-3 rounded-lg text-center">
+                            <i class="fas fa-headphones mb-2"></i>
+                            <span class="text-sm block">Emotional Audiobooks</span>
+                        </div>
+                        <div class="bg-white bg-opacity-5 p-3 rounded-lg text-center">
+                            <i class="fas fa-film mb-2"></i>
+                            <span class="text-sm block">Mini-Documentaries</span>
+                        </div>
+                        <div class="bg-white bg-opacity-5 p-3 rounded-lg text-center">
+                            <i class="fas fa-microphone mb-2"></i>
+                            <span class="text-sm block">Memory Podcasts</span>
+                        </div>
+                    </div>
+                    <h5 class="font-bold mb-2">Unlike digital archives:</h5>
+                    <ul class="space-y-2">
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-400 mr-2 mt-1"></i>
+                            <span>Transforms raw moments into cohesive narratives</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-400 mr-2 mt-1"></i>
+                            <span>Creates tangible artifacts from digital experiences</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-400 mr-2 mt-1"></i>
+                            <span>Preserves emotional context alongside factual content</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- For Whom Section -->
+    <section id="for-whom" class="py-20 px-6 bg-white">
+        <div class="container mx-auto">
+            <div class="text-center mb-16">
+                <span class="pill bg-purple-100 text-purple-700 mb-4">FOR WHOM</span>
+                <h2 class="text-4xl font-bold mb-6">Who Is Sentimental For?</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Sentimental serves diverse needs while maintaining a core focus on meaningful documentation of life's journey.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-5xl mx-auto">
+                <!-- User Type 1 -->
+                <div class="bg-gray-50 rounded-2xl p-8 custom-shadow feature-card">
+                    <div class="w-16 h-16 gradient-bg text-white rounded-full flex items-center justify-center mb-6">
+                        <i class="fas fa-seedling text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Personal Growth Seekers</h3>
+                    <p class="text-gray-600 mb-6">
+                        People who want to understand themselves better through documenting and reflecting on their journey.
+                    </p>
+                    <div class="bg-purple-50 p-4 rounded-lg italic text-sm text-gray-700">
+                        "Sentimental helps me connect the dots between experiences and see patterns in my life I never noticed before."
+                    </div>
+                </div>
+                
+                <!-- User Type 2 -->
+                <div class="bg-gray-50 rounded-2xl p-8 custom-shadow feature-card">
+                    <div class="w-16 h-16 gradient-bg text-white rounded-full flex items-center justify-center mb-6">
+                        <i class="fas fa-hourglass-half text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Legacy Creators</h3>
+                    <p class="text-gray-600 mb-6">
+                        Those who want to preserve their authentic stories for children, grandchildren and future generations.
+                    </p>
+                    <div class="bg-purple-50 p-4 rounded-lg italic text-sm text-gray-700">
+                        "I'm creating the memoir I wish my grandparents had left for me — complete with all the context and emotion of their life experiences."
+                    </div>
+                </div>
+                
+                <!-- User Type 3 -->
+                <div class="bg-gray-50 rounded-2xl p-8 custom-shadow feature-card">
+                    <div class="w-16 h-16 gradient-bg text-white rounded-full flex items-center justify-center mb-6">
+                        <i class="fas fa-route text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Life Transition Navigators</h3>
+                    <p class="text-gray-600 mb-6">
+                        People experiencing major life changes who want to document transformative periods.
+                    </p>
+                    <div class="bg-purple-50 p-4 rounded-lg italic text-sm text-gray-700">
+                        "During my career change, Sentimental helped me process the emotional journey and create a narrative that made sense of this major transition."
+                    </div>
+                </div>
+                
+                <!-- User Type 4 -->
+                <div class="bg-gray-50 rounded-2xl p-8 custom-shadow feature-card">
+                    <div class="w-16 h-16 gradient-bg text-white rounded-full flex items-center justify-center mb-6">
+                        <i class="fas fa-memory text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Memory Preservationists</h3>
+                    <p class="text-gray-600 mb-6">
+                        Those with loved ones facing memory challenges who want to preserve their stories before they're lost.
+                    </p>
+                    <div class="bg-purple-50 p-4 rounded-lg italic text-sm text-gray-700">
+                        "Working with my father to document his life story while he still remembers the details has been an incredible gift for our entire family."
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Now Section -->
+    <section id="why-now" class="py-20 px-6 bg-gray-900 text-white">
+        <div class="container mx-auto">
+            <div class="text-center mb-16">
+                <span class="pill bg-white bg-opacity-20 mb-4">WHY NOW</span>
+                <h2 class="text-4xl font-bold mb-6">Why Sentimental, Why Now?</h2>
+                <p class="text-xl max-w-3xl mx-auto">
+                    Three converging factors make Sentimental possible today
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <div class="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-2xl p-8">
+                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mb-6">
+                        <i class="fas fa-robot text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">AI Narrative Intelligence</h3>
+                    <p>
+                        Advanced language models can now understand narrative structures and emotional contexts, helping transform scattered moments into cohesive stories.
                     </p>
                 </div>
                 
-                <!-- Feature Card 3 -->
-                <div class="feature-card bg-white rounded-lg shadow-lg p-6">
-                    <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-6 mx-auto">
-                        <i class="fas fa-brain text-2xl text-purple-600"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-center mb-4">AI-powered Organization</h3>
-                    <p class="text-center">
-                        Transform scattered moments into meaningful narratives with intelligent assistance.
-                    </p>
-                </div>
-                
-                <!-- Feature Card 4 -->
-                <div class="feature-card bg-white rounded-lg shadow-lg p-6">
-                    <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-6 mx-auto">
-                        <i class="fas fa-book text-2xl text-purple-600"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-center mb-4">Multiple Output Formats</h3>
-                    <p class="text-center">
-                        Create lasting legacies from digital memories in the form of books, audiobooks, and more.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Vision -->
-    <section id="vision" class="py-16">
-        <div class="container mx-auto px-6 max-w-3xl text-center">
-            <h2 class="text-3xl font-bold mb-8">Our Vision</h2>
-            <p class="text-xl mb-8">
-                We believe everyone has a story worth preserving - not just celebrities or writers. Sentimental democratizes memoir creation by making it accessible, effortless, and meaningful for anyone who wants to document their journey through life.
-            </p>
-            <p class="italic text-purple-600 text-lg font-semibold">
-                Preserve today's moments with tomorrow's technology
-            </p>
-        </div>
-    </section>
-
-    <!-- Waitlist Section -->
-    <section id="waitlist" class="py-16 bg-purple-600 text-white">
-        <div class="container mx-auto px-6 text-center">
-            <h2 class="text-3xl font-bold mb-8">Join the Waitlist</h2>
-            <p class="text-xl mb-10 max-w-2xl mx-auto">
-                Be among the first to document your journey with Sentimental.
-            </p>
-            <form class="max-w-md mx-auto">
-                <div class="flex flex-col md:flex-row gap-4">
-                    <input type="email" placeholder="Your email address" class="px-4 py-3 rounded-full text-gray-800 flex-grow">
-                    <button type="submit" class="bg-white text-purple-600 font-bold px-6 py-3 rounded-full hover:bg-gray-100">
-                        Join Waitlist
-                    </button>
-                </div>
-            </form>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-12">
-        <div class="container mx-auto px-6">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-6 md:mb-0">
-                    <h2 class="text-2xl font-bold">Sentimental</h2>
-                    <p class="mt-2">Your Life Story, Captured As You Live It</p>
-                </div>
-                <div class="flex space-x-6">
-                    <a href="#" class="hover:text-purple-400"><i class="fab fa-twitter text-xl"></i></a>
-                    <a href="#" class="hover:text-purple-400"><i class="fab fa-instagram text-xl"></i></a>
-                    <a href="#" class="hover:text-purple-400"><i class="fab fa-linkedin text-xl"></i></a>
-                    <a href="#" class="hover:text-purple-400"><i class="fab fa-facebook text-xl"></i></a>
-                </div>
-            </div>
-            <hr class="border-gray-700 my-8">
-            <div class="text-center text-gray-400">
-                <p>&copy; 2025 Sentimental. All rights reserved.</p>
-                <div class="mt-4 space-x-4">
-                    <a href="#" class="hover:text-white">Privacy Policy</a>
-                    <a href="#" class="hover:text-white">Terms of Service</a>
-                    <a href="#" class="hover:text-white">Contact Us</a>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <script>
-        // Simple smooth scrolling for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
-            });
-        });
-    </script>
-</body>
-</html>
+                <div class="bg
