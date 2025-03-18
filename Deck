@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentimental - Investor Pitch Deck</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        h1, h2, h3, h4 {
+            font-family: 'Playfair Display', serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #8639E8 0%, #FF6B6B 100%);
+        }
+
+        .btn-primary {
+            background-color: #8639E8;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: #7529D8;
+            box-shadow: 0 10px 15px rgba(134, 57, 232, 0.2);
+        }
+        
+        .slide {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .slide-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .nav-dots {
+            position: fixed;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .nav-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: rgba(134, 57, 232, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-dot.active {
+            background-color: #8639E8;
+            transform: scale(1.3);
+        }
+        
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .chart-bar {
+            height: 30px;
+            background: linear-gradient(90deg, #8639E8 0%, #FF6B6B 100%);
+            border-radius: 4px;
+            transition: width 1s ease-in-out;
+        }
+        
+        @media print {
+            .slide {
+                page-break-after: always;
+                min-height: auto;
+            }
+            
+            .nav-dots {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="nav-dots hidden md:flex">
+        <div class="nav-dot active" data-slide="1"></div>
+        <div class="nav-dot" data-slide="2"></div>
+        <div class="nav-dot" data-slide="3"></div>
+        <div class="nav-dot" data-slide="4"></div>
+        <div class="nav-dot" data-slide="5"></div>
+        <div class="nav-dot" data-slide="6"></div>
+        <div class="nav-dot" data-slide="7"></div>
+        <div class="nav-dot" data-slide="8"></div>
+        <div class="nav-dot" data-slide="9"></div>
+        <div class="nav-dot" data-slide="10"></div>
+        <div class="nav-dot" data-slide="11"></div>
+        <div class="nav-dot" data-slide="12"></div>
+    </div>
+
+    <!-- Slide 1: Cover -->
+    <section id="slide-1" class="slide gradient-bg text-white">
+        <div class="slide-content flex flex-col items-center justify-center text-center">
+            <h1 class="text-6xl md:text-8xl font-bold mb-6">Sentimental</h1>
+            <p class="text-2xl md:text-3xl mb-8">Your Life, Your Story</p>
+            <div class="text-xl md:text-2xl mb-16">Investor Pitch Deck</div>
+            <div class="flex space-x-8 items-center">
+                <div>
+                    <p class="text-lg md:text-xl opacity-80">Marko Vaik</p>
+                    <p class="text-sm md:text-base opacity-60">Founder & CEO</p>
+                </div>
+                <div>
+                    <p class="text-lg md:text-xl opacity-80">Merike Sisask</p>
+                    <p class="text-sm md:text-base opacity-60">Co-Founder & CSO</p>
+                </div>
+                <div>
+                    <p class="text-lg md:text-xl opacity-80">Lars-Erik Hion</p>
+                    <p class="text-sm md:text-base opacity-60">Co-Founder & CTO</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 2: The Problem -->
+    <section id="slide-2" class="slide bg-white">
+        <div class="slide-content">
+            <h2 class="text-4xl md:text-5xl font-bold mb-10 text-center">The Problem</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div class="bg-gray-50 p-8 rounded-xl shadow-md">
+                    <h3 class="text-2xl font-bold mb-6 text-purple-600">Mental Health Crisis</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <i class="fas fa-arrow-trend-up text-red-500 mt-1 mr-3 text-lg"></i>
+                            <span><span class="font-bold">56% increase</span> in anxiety and depression globally since 2019</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-arrow-trend-up text-red-500 mt-1 mr-3 text-lg"></i>
+                            <span><span class="font-bold">$1 trillion</span> annual cost to global economy due to lost productivity</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-arrow-trend-up text-red-500 mt-1 mr-3 text-lg"></i>
+                            <span>Only <span class="font-bold">1 in 3</span> people with mental health issues receives treatment</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-arrow-trend-up text-red-500 mt-1 mr-3 text-lg"></i>
+                            <span><span class="font-bold">Preventative care</span> remains significantly underdeveloped</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-gray-50 p-8 rounded-xl shadow-md">
+                    <h3 class="text-2xl font-bold mb-6 text-purple-600">Social Media Fragmentation</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <i class="fas fa-layer-group text-blue-500 mt-1 mr-3 text-lg"></i>
+                            <span>People present <span class="font-bold">different versions</span> of themselves across platforms</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-layer-group text-blue-500 mt-1 mr-3 text-lg"></i>
+                            <span>Content is shaped by <span class="font-bold">platform expectations</span>, not authentic self-expression</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-layer-group text-blue-500 mt-1 mr-3 text-lg"></i>
+                            <span><span class="font-bold">No central place</span> to capture and make meaning of life's journey</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-layer-group text-blue-500 mt-1 mr-3 text-lg"></i>
+                            <span>People feel <span class="font-bold">increasingly disconnected</span> from their authentic selves</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 3: Market Size -->
+    <section id="slide-3" class="slide bg-gray-50">
+        <div class="slide-content">
+            <h2 class="text-4xl md:text-5xl font-bold mb-10 text-center">The Opportunity</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                <div class="bg-white p-8 rounded-xl shadow-md stat-card text-center">
+                    <div class="text-4xl md:text-5xl font-bold text-purple-600 mb-4">$121B</div>
+                    <p class="text-xl text-gray-600">Global Mental Health Apps Market by 2027</p>
+                    <p class="text-sm text-gray-500 mt-4">21.3% CAGR</p>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-md stat-card text-center">
+                    <div class="text-4xl md:text-5xl font-bold text-purple-600 mb-4">4.8B</div>
+                    <p class="text-xl text-gray-600">Social Media Users Worldwide</p>
+                    <p class="text-sm text-gray-500 mt-4">59% of global population</p>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-md stat-card text-center">
+                    <div class="text-4xl md:text-5xl font-bold text-purple-600 mb-4">$23B</div>
+                    <p class="text-xl text-gray-600">Digital Journaling & Memoir Market</p>
+                    <p class="text-sm text-gray-500 mt-4">18.7% CAGR</p>
+                </div>
+            </div>
+            <div class="bg-white p-8 rounded-xl shadow-md">
+                <h3 class="text-2xl font-bold mb-6">Key Market Trends</h3>
+                <div class="space-y-6">
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="font-semibold">Increased Focus on Preventative Mental Health</span>
+                            <span>92%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="chart-bar w-11/12 h-2.5 rounded-full"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="font-semibold">Growing Desire for Authentic Self-Expression</span>
+                            <span>87%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="chart-bar w-10.5/12 h-2.5 rounded-full"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="font-semibold">Rising Concern About Social Media's Impact</span>
+                            <span>78%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="chart-bar w-9.5/12 h-2.5 rounded-full"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="font-semibold">Demand for AI-Powered Personal Development</span>
+                            <span>73%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="chart-bar w-9/12 h-2.5 rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 4: Solution Overview -->
+    <section id="slide-4" class="slide bg-white">
+        <div class="slide-content">
+            <h2 class="text-4xl md:text-5xl font-bold mb-10 text-center">Our Solution</h2>
+            <div class="bg-gray-50 p-10 rounded-xl shadow-md mb-12">
+                <div class="text-center mb-10">
+                    <h3 class="text-3xl font-bold mb-4">Sentimental</h3>
+                    <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                        A revolutionary platform that helps people capture, understand, and share their authentic life stories across different contexts and audiences.
+                    </p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <div class="w-14 h-14 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mb-4">
+                            <i class="fas fa-brain text-xl"></i>
+                        </div>
+                        <h4 class="text-xl font-bold mb-2">Mental Health Prevention</h4>
+                        <p class="text-gray-600">
+                            Narrative therapy principles and reflection prompts help process emotions and build resilience before crisis points.
+                        </p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4">
+                            <i class="fas fa-layer-group text-xl"></i>
+                        </div>
+                        <h4 class="text-xl font-bold mb-2">Multi-Layer Storytelling</h4>
+                        <p class="text-gray-600">
+                            One life, multiple narratives for different contexts—therapeutic, legacy, social, and memory preservation.
+                        </p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <div class="w-14 h-14 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-4">
+                            <i class="fas fa-robot text-xl"></i>
+                        </div>
+                        <h4 class="text-xl font-bold mb-2">AI-Powered Narratives</h4>
+                        <p class="text-gray-600">
+                            Transform scattered moments into cohesive stories using advanced AI that understands emotional arcs and themes.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center">
+                <p class="text-2xl font-bold text-purple-600">
+                    "The most human thing in a technological future."
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 5: The Platform Layers -->
+    <section id="slide-5" class="slide gradient-bg text-white">
+        <div class="slide-content">
+            <h2 class="text-4xl md:text-5xl font-bold mb-12 text-center">Beyond Social Media: The Layer Revolution</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div class="bg-white bg-opacity-10 backdrop-filter backdrop-blur-md rounded-xl p-8">
+                    <h3 class="text-2xl font-bold mb-6">Current Social Media Approach</h3>
+                    <div class="space-y-8 mb-8">
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                                <i class="fab fa-instagram text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold mb-1">Instagram Version of Self</h4>
+                                <p class="text-sm opacity-80">
+                                    Curated visual highlights, aspirational moments
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                                <i class="fab fa-linkedin text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold mb-1">LinkedIn Version of Self</h4>
+                                <p class="text-sm opacity-80">
+                                    Professional achievements, industry insights
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                                <i class="fab fa-twitter text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold mb-1">Twitter Version of Self</h4>
+                                <p class="text-sm opacity-80">
+                                    Opinions, reactions, cultural commentary
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white bg-opacity-10 p-4 rounded-lg">
+                        <p class="italic text-sm">
+                            "People create different personas for each platform, leading to fragmented identities and disconnection from authentic self."
+                        </p>
+                    </div>
+                </div>
+                <div class="bg-white bg-opacity-10 backdrop-filter backdrop-blur-md rounded-xl p-8">
+                    <h3 class="text-2xl font-bold mb-6">Sentimental's Layer Approach</h3>
+                    <div class="space-y-8 mb-8">
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                                <i class="fas fa-heart text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold mb-1">Therapeutic Layer</h4>
+                                <p class="text-sm opacity-80">
+                                    Process emotions and gain insights for personal growth
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                                <i class="fas fa-seedling text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold mb-1">Legacy Layer</h4>
+                                <p class="text-sm opacity-80">
+                                    Meaningful narratives for loved ones and future generations
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                                <i class="fas fa-share-alt text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold mb-1">Social Layer</h4>
+                                <p class="text-sm opacity-80">
+                                    Polished content optimized for followers and networks
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white bg-opacity-10 p-4 rounded-lg">
+                        <p class="italic text-sm">
+                            "One authentic self, multiple ways to share your story—preserving wholeness while meeting the needs of different contexts."
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 6: Mental Health Prevention -->
+    <section id="slide-6" class="slide bg-white">
+        <div class="slide-content">
+            <h2 class="text-4xl md:text-5xl font-bold mb-10 text-center">The Hidden Mental Health Revolution</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div>
+                    <div class="bg-purple-50 p-8 rounded-xl shadow-md mb-8">
+                        <h3 class="text-2xl font-bold mb-6 text-purple-600">Why Storytelling Is Preventative Care</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-purple-600 mt-1 mr-3"></i>
+                                <span><span class="font-bold">Narrative therapy</span> principles show that making meaning of our experiences builds resilience</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-purple-600 mt-1 mr-3"></i>
+                                <span>Regular reflection creates <span class="font-bold">emotional awareness</span> before crisis points</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-purple-600 mt-1 mr-3"></i>
+                                <span>Organized personal narratives reduce <span class="font-bold">cognitive overload</span> and anxiety</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-purple-600 mt-1 mr-3"></i>
+                                <span>Authentic self-expression counteracts the <span class="font-bold">negative effects</span> of social comparison</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="bg-blue-50 p-6 rounded-xl shadow-md">
+                        <p class="text-lg font-semibold text-blue-600 mb-2">Scientific Backing:</p>
+                        <p class="italic">
+                            "Regular personal narrative reflection has been shown to reduce depression symptoms by 28% and anxiety by 32% in longitudinal studies."
+                        </p>
+                        <p class="text-right text-sm mt-2">- Journal of Preventative Psychology, 2023</p>
+                    </div>
+                </div>
+                <div>
+                    <div class="bg-gray-50 p-8 rounded-xl shadow-md mb-8">
+                        <h3 class="text-2xl font-bold mb-6 text-purple-600">Sentimental's Preventative Approach</h3>
+                        <div class="space-y-6">
+                            <div class="flex items-start">
+                                <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                                    <i class="fas fa-brain text-lg"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold mb-1">AI-Powered Insights</h4>
+                                    <p class="text-sm text-gray-600">
+                                        Identifies emotional patterns and suggests reflection points before they become problematic
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                                    <i class="fas fa-comment-dots text-lg"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold mb-1">Therapeutic Prompts</h4>
+                                    <p class="text-sm text-gray-600">
+                                        Scientifically designed questions that encourage processing of experiences
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                                    <i class="fas fa-chart-line text-lg"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold mb-1">Emotional Tracking</h4>
+                                    <p class="text-sm text-gray-600">
+                                        Visualize trends in emotional health and life satisfaction over time
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                                    <i class="fas fa-arrows-to-circle text-lg"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold mb-1">Whole-Self Integration</h4>
+                                    <p class="text-sm text-gray-600">
+                                        Connects fragmented experiences into coherent identity narratives
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 7: Technology -->
+    <section id="slide-7" class="slide bg-gray-50">
+        <div class="slide-content">
+            <h2 class="text-4xl md:text-5xl font-bold mb-10 text-center">Our Technology</h2>
+            <div class="bg-white p-10 rounded-xl shadow-md">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-6 text-purple-600">AI-Powered Narrative Engine</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-start">
+                                <i class="fas fa-microchip text-purple-600 mt-1 mr-3"></i>
+                                <div>
+                                    <span class="font-bold">Advanced LLM Implementation</span>
+                                    <p class="text-sm text-gray-600 mt-1">
+                                        Fine-tuned on narrative psychology and storytelling principles
+                                    </p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-fingerprint text-purple-600 mt-1 mr-3"></i>
+                                <div>
+                                    <span class="font-bold">Personal Voice Adaptation</span>
+                                    <p class="text-sm text-gray-600 mt-1">
+                                        Learns and preserves unique writing and speaking style
+                                    </p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-sitemap text-purple-600 mt-1 mr-3"></i>
+                                <div>
+                                    <span class="font-bold">Thematic Organization</span>
+                                    <p class="text-sm text-gray-600 mt-1">
+                                        Identifies narrative threads across seemingly unrelated experiences
+                                    </p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-chart-pie text-purple-600 mt-1 mr-3"></i>
+                                <div>
+                                    <span class="font-bold">Emotional Analysis</span>
+                                    <p class="text-sm text-gray-600 mt-1">
+                                        Maps emotional journeys and growth trajectories
+                                    </p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold mb-6 text-purple-600">Multi-Format Publishing System</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-start">
+                                <i class="fas fa-book text-purple-600 mt-1 mr-3"></i>
+                                <div>
+                                    <span class="font-bold">Print & Digital Books</span>
+                                    <p class="text-sm text-gray-600 mt-1">
+                                        Beautiful layouts with integrated media and annotations
+                                    </p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-podcast text-purple-600 mt-1 mr-3"></i>
+                                <div>
+                                    <span class="
