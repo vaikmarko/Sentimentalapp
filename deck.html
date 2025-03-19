@@ -503,69 +503,175 @@
         <div class="slide">
             <h2>The Four Layers of Your Life Story</h2>
             
-            <svg width="100%" height="400" viewBox="0 0 800 400">
-                <!-- Background Rectangle -->
-                <rect width="800" height="400" fill="#f8f9fa" rx="10" ry="10"></rect>
-                
-                <!-- Layered Circles -->
-                <g transform="translate(400, 200)">
-                    <!-- Layer 4 - Memory Layer (Bottom) -->
-                    <circle cx="0" cy="0" r="180" fill="rgba(134, 57, 232, 0.1)" stroke="#8639E8" stroke-width="2"></circle>
-                    <text x="0" y="170" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#8639E8">MEMORY LAYER</text>
+            <div style="display: flex; justify-content: center; position: relative; height: 450px; margin-bottom: 1em;">
+                <svg width="100%" height="450" viewBox="0 0 1000 450">
+                    <defs>
+                        <radialGradient id="therapeutic-gradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+                            <stop offset="0%" style="stop-color:#8639E8;stop-opacity:0.9" />
+                            <stop offset="100%" style="stop-color:#8639E8;stop-opacity:0.6" />
+                        </radialGradient>
+                        
+                        <radialGradient id="legacy-gradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+                            <stop offset="0%" style="stop-color:#A142D0;stop-opacity:0.1" />
+                            <stop offset="100%" style="stop-color:#A142D0;stop-opacity:0.4" />
+                        </radialGradient>
+                        
+                        <radialGradient id="social-gradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+                            <stop offset="0%" style="stop-color:#BC4BB9;stop-opacity:0.1" />
+                            <stop offset="100%" style="stop-color:#BC4BB9;stop-opacity:0.3" />
+                        </radialGradient>
+                        
+                        <radialGradient id="memory-gradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+                            <stop offset="0%" style="stop-color:#FF6B6B;stop-opacity:0.1" />
+                            <stop offset="100%" style="stop-color:#FF6B6B;stop-opacity:0.2" />
+                        </radialGradient>
+                        
+                        <filter id="layer-glow" x="-50%" y="-50%" width="200%" height="200%">
+                            <feGaussianBlur stdDeviation="5" result="blur" />
+                            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                        </filter>
+                        
+                        <filter id="drop-shadow-layer" x="-10%" y="-10%" width="120%" height="120%">
+                            <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#00000022" />
+                        </filter>
+                    </defs>
+                    
+                    <!-- Person Silhouette in Center -->
+                    <g transform="translate(500, 200)">
+                        <circle cx="0" cy="0" r="70" fill="white" stroke="#8639E8" stroke-width="3" filter="url(#drop-shadow-layer)" />
+                        <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#8639E8" font-size="60">&#xf007;</text>
+                        <text x="0" y="100" text-anchor="middle" font-family="Playfair Display, serif" fill="#333" font-size="20" font-weight="bold">Your Life Story</text>
+                    </g>
+                    
+                    <!-- Layer 4 - Memory Layer (Outermost) -->
+                    <g transform="translate(500, 200)">
+                        <circle cx="0" cy="0" r="220" fill="url(#memory-gradient)" stroke="#FF6B6B" stroke-width="3" stroke-dasharray="5,5" filter="url(#layer-glow)" />
+                        
+                        <!-- Memory Layer Label -->
+                        <g transform="translate(0, -220)">
+                            <rect x="-75" y="-20" width="150" height="40" rx="20" ry="20" fill="white" stroke="#FF6B6B" stroke-width="2" />
+                            <text x="0" y="5" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#FF6B6B" font-size="14">MEMORY LAYER</text>
+                        </g>
+                        
+                        <!-- Memory Icon -->
+                        <g transform="translate(180, 0)">
+                            <circle cx="0" cy="0" r="30" fill="white" stroke="#FF6B6B" stroke-width="2" />
+                            <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#FF6B6B" font-size="24">&#xf1da;</text>
+                        </g>
+                        
+                        <!-- Memory Feature -->
+                        <g transform="translate(140, 80)">
+                            <rect x="-70" y="-15" width="140" height="30" rx="15" ry="15" fill="white" stroke="#FF6B6B" stroke-width="1" />
+                            <text x="0" y="5" text-anchor="middle" font-family="Inter, sans-serif" fill="#FF6B6B" font-size="12">Complete Archive</text>
+                        </g>
+                    </g>
                     
                     <!-- Layer 3 - Social Layer -->
-                    <circle cx="0" cy="0" r="140" fill="rgba(134, 57, 232, 0.2)" stroke="#8639E8" stroke-width="2"></circle>
-                    <text x="0" y="130" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#8639E8">SOCIAL LAYER</text>
+                    <g transform="translate(500, 200)">
+                        <circle cx="0" cy="0" r="170" fill="url(#social-gradient)" stroke="#BC4BB9" stroke-width="3" filter="url(#layer-glow)" />
+                        
+                        <!-- Social Layer Label -->
+                        <g transform="translate(0, -170)">
+                            <rect x="-75" y="-20" width="150" height="40" rx="20" ry="20" fill="white" stroke="#BC4BB9" stroke-width="2" />
+                            <text x="0" y="5" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#BC4BB9" font-size="14">SOCIAL LAYER</text>
+                        </g>
+                        
+                        <!-- Social Icon -->
+                        <g transform="translate(0, 140)">
+                            <circle cx="0" cy="0" r="30" fill="white" stroke="#BC4BB9" stroke-width="2" />
+                            <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#BC4BB9" font-size="24">&#xf1e0;</text>
+                        </g>
+                        
+                        <!-- Social Feature -->
+                        <g transform="translate(-100, 100)">
+                            <rect x="-70" y="-15" width="140" height="30" rx="15" ry="15" fill="white" stroke="#BC4BB9" stroke-width="1" />
+                            <text x="0" y="5" text-anchor="middle" font-family="Inter, sans-serif" fill="#BC4BB9" font-size="12">Public Sharing</text>
+                        </g>
+                    </g>
                     
                     <!-- Layer 2 - Legacy Layer -->
-                    <circle cx="0" cy="0" r="100" fill="rgba(134, 57, 232, 0.3)" stroke="#8639E8" stroke-width="2"></circle>
-                    <text x="0" y="90" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#8639E8">LEGACY LAYER</text>
+                    <g transform="translate(500, 200)">
+                        <circle cx="0" cy="0" r="120" fill="url(#legacy-gradient)" stroke="#A142D0" stroke-width="3" filter="url(#layer-glow)" />
+                        
+                        <!-- Legacy Layer Label -->
+                        <g transform="translate(0, -120)">
+                            <rect x="-75" y="-20" width="150" height="40" rx="20" ry="20" fill="white" stroke="#A142D0" stroke-width="2" />
+                            <text x="0" y="5" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#A142D0" font-size="14">LEGACY LAYER</text>
+                        </g>
+                        
+                        <!-- Legacy Icon -->
+                        <g transform="translate(-90, 0)">
+                            <circle cx="0" cy="0" r="30" fill="white" stroke="#A142D0" stroke-width="2" />
+                            <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#A142D0" font-size="24">&#xf06c;</text>
+                        </g>
+                        
+                        <!-- Legacy Feature -->
+                        <g transform="translate(60, -80)">
+                            <rect x="-70" y="-15" width="140" height="30" rx="15" ry="15" fill="white" stroke="#A142D0" stroke-width="1" />
+                            <text x="0" y="5" text-anchor="middle" font-family="Inter, sans-serif" fill="#A142D0" font-size="12">Family Histories</text>
+                        </g>
+                    </g>
                     
-                    <!-- Layer 1 - Therapeutic Layer (Top) -->
-                    <circle cx="0" cy="0" r="60" fill="rgba(134, 57, 232, 0.4)" stroke="#8639E8" stroke-width="2"></circle>
-                    <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#FFFFFF">THERAPEUTIC LAYER</text>
+                    <!-- Layer 1 - Therapeutic Layer (Innermost) -->
+                    <g transform="translate(500, 200)">
+                        <circle cx="0" cy="0" r="80" fill="url(#therapeutic-gradient)" stroke="#8639E8" stroke-width="3" filter="url(#layer-glow)" />
+                        
+                        <!-- Therapeutic Layer Label on Person -->
+                        <g transform="translate(0, -80)">
+                            <rect x="-75" y="-20" width="150" height="40" rx="20" ry="20" fill="white" stroke="#8639E8" stroke-width="2" />
+                            <text x="0" y="5" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#8639E8" font-size="14">THERAPEUTIC LAYER</text>
+                        </g>
+                        
+                        <!-- Therapeutic Feature -->
+                        <g transform="translate(-55, 40)">
+                            <rect x="-55" y="-15" width="110" height="30" rx="15" ry="15" fill="white" stroke="#8639E8" stroke-width="1" />
+                            <text x="0" y="5" text-anchor="middle" font-family="Inter, sans-serif" fill="#8639E8" font-size="12">Personal Growth</text>
+                        </g>
+                    </g>
                     
-                    <!-- Icons -->
-                    <text x="0" y="-20" text-anchor="middle" font-family="Inter, sans-serif" font-size="24">❤️</text>
-                    <text x="-115" y="0" text-anchor="middle" font-family="Inter, sans-serif" font-size="24">🌱</text>
-                    <text x="0" y="110" text-anchor="middle" font-family="Inter, sans-serif" font-size="24">🔄</text>
-                    <text x="150" y="0" text-anchor="middle" font-family="Inter, sans-serif" font-size="24">🧠</text>
-                </g>
-            </svg>
+                    <!-- Connection Lines -->
+                    <line x1="180" y1="450" x2="320" y2="370" stroke="#8639E8" stroke-width="2" stroke-dasharray="5,5" />
+                    <line x1="380" y1="450" x2="410" y2="370" stroke="#A142D0" stroke-width="2" stroke-dasharray="5,5" />
+                    <line x1="580" y1="450" x2="560" y2="370" stroke="#BC4BB9" stroke-width="2" stroke-dasharray="5,5" />
+                    <line x1="780" y1="450" x2="680" y2="370" stroke="#FF6B6B" stroke-width="2" stroke-dasharray="5,5" />
+                </svg>
+            </div>
             
-            <div class="four-layers-grid">
-                <div class="layer-box">
-                    <div class="layer-icon">
-                        <i class="fas fa-heart"></i>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 15px; margin-top: 0;">
+                <div style="background: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 1.5em; border-top: 3px solid #8639E8; display: flex; flex-direction: column; align-items: center; text-align: center; transition: transform 0.3s ease;">
+                    <div style="width: 50px; height: 50px; background: #F0E6FD; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-bottom: 1em;">
+                        <i class="fas fa-heart" style="color: #8639E8; font-size: 22px;"></i>
                     </div>
-                    <h3>Therapeutic Layer</h3>
-                    <p>Private reflections for personal growth and therapy sessions</p>
+                    <h3 style="color: #8639E8; margin-bottom: 0.5em;">Therapeutic Layer</h3>
+                    <p style="font-size: 0.9em; color: #666;">Private reflections for personal growth and therapy sessions</p>
                 </div>
                 
-                <div class="layer-box">
-                    <div class="layer-icon">
-                        <i class="fas fa-seedling"></i>
+                <div style="background: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 1.5em; border-top: 3px solid #A142D0; display: flex; flex-direction: column; align-items: center; text-align: center; transition: transform 0.3s ease;">
+                    <div style="width: 50px; height: 50px; background: #F0E6FD; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-bottom: 1em;">
+                        <i class="fas fa-seedling" style="color: #A142D0; font-size: 22px;"></i>
                     </div>
-                    <h3>Legacy Layer</h3>
-                    <p>Meaningful narratives for loved ones and future generations</p>
+                    <h3 style="color: #A142D0; margin-bottom: 0.5em;">Legacy Layer</h3>
+                    <p style="font-size: 0.9em; color: #666;">Meaningful narratives for loved ones and future generations</p>
                 </div>
                 
-                <div class="layer-box">
-                    <div class="layer-icon">
-                        <i class="fas fa-share-alt"></i>
+                <div style="background: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 1.5em; border-top: 3px solid #BC4BB9; display: flex; flex-direction: column; align-items: center; text-align: center; transition: transform 0.3s ease;">
+                    <div style="width: 50px; height: 50px; background: #F0E6FD; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-bottom: 1em;">
+                        <i class="fas fa-share-alt" style="color: #BC4BB9; font-size: 22px;"></i>
                     </div>
-                    <h3>Social Layer</h3>
-                    <p>Polished content for followers and professional networks</p>
+                    <h3 style="color: #BC4BB9; margin-bottom: 0.5em;">Social Layer</h3>
+                    <p style="font-size: 0.9em; color: #666;">Polished content for followers and professional networks</p>
                 </div>
                 
-                <div class="layer-box">
-                    <div class="layer-icon">
-                        <i class="fas fa-brain"></i>
+                <div style="background: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 1.5em; border-top: 3px solid #FF6B6B; display: flex; flex-direction: column; align-items: center; text-align: center; transition: transform 0.3s ease;">
+                    <div style="width: 50px; height: 50px; background: #F0E6FD; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-bottom: 1em;">
+                        <i class="fas fa-history" style="color: #FF6B6B; font-size: 22px;"></i>
                     </div>
-                    <h3>Memory Layer</h3>
-                    <p>The complete archive for your future self</p>
+                    <h3 style="color: #FF6B6B; margin-bottom: 0.5em;">Memory Layer</h3>
+                    <p style="font-size: 0.9em; color: #666;">The complete archive for your future self</p>
                 </div>
             </div>
+            
+            <p class="text-center" style="margin-top: 1.5em; font-style: italic; color: #8639E8;">One life. Multiple narratives. Share what matters with who matters.</p>
         </div>
         
         <!-- Slide: Competitive Landscape -->
@@ -676,125 +782,142 @@
         <div class="slide">
             <h2>User Experience: Sarah's Marathon Journey</h2>
             
-            <svg width="100%" height="300" viewBox="0 0 800 300">
-                <!-- Background -->
-                <rect width="800" height="300" fill="#f8f9fa" rx="10" ry="10"></rect>
-                
-                <!-- Flow Arrows -->
-                <path d="M250,150 L550,150" stroke="#8639E8" stroke-width="3" fill="none"></path>
-                <polygon points="550,150 540,145 540,155" fill="#8639E8"></polygon>
-                
-                <!-- Input Box -->
-                <g transform="translate(150, 150)">
-                    <rect x="-120" y="-100" width="240" height="200" fill="white" stroke="#8639E8" stroke-width="2" rx="10" ry="10"></rect>
-                    <text x="0" y="-70" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#8639E8" font-size="18">INPUT</text>
+            <div style="margin: 2em 0;">
+                <svg width="100%" height="400" viewBox="0 0 900 400">
+                    <defs>
+                        <linearGradient id="user-flow-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#8639E8;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#FF6B6B;stop-opacity:1" />
+                        </linearGradient>
+                        <filter id="drop-shadow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#00000022" />
+                        </filter>
+                    </defs>
                     
-                    <!-- Input Icons -->
-                    <g transform="translate(-80, -30)">
-                        <circle cx="0" cy="0" r="20" fill="#F0E6FD"></circle>
-                        <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="20">🎤</text>
-                        <text x="0" y="30" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Voice Notes</text>
+                    <!-- Sarah Running Silhouette -->
+                    <g transform="translate(450, 50)">
+                        <ellipse cx="0" cy="0" rx="35" ry="35" fill="#F0E6FD" />
+                        <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#8639E8" font-size="28">&#xf70c;</text>
+                        <text x="0" y="50" text-anchor="middle" font-family="Playfair Display, serif" fill="#333" font-size="16" font-weight="bold">Sarah's Marathon Journey</text>
                     </g>
                     
-                    <g transform="translate(0, -30)">
-                        <circle cx="0" cy="0" r="20" fill="#F0E6FD"></circle>
-                        <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="20">📷</text>
-                        <text x="0" y="30" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Photos</text>
+                    <!-- Main Flow Path -->
+                    <path d="M100,200 C150,120 320,240 450,200 C580,160 750,280 800,200" stroke="url(#user-flow-gradient)" stroke-width="6" fill="none" stroke-linecap="round" filter="url(#drop-shadow)" />
+                    
+                    <!-- First Stage: Input -->
+                    <g transform="translate(100, 200)">
+                        <!-- Stage Circle -->
+                        <circle cx="0" cy="0" r="65" fill="white" stroke="#8639E8" stroke-width="3" filter="url(#drop-shadow)" />
+                        <circle cx="0" cy="-25" r="25" fill="#F0E6FD" />
+                        <text x="0" y="-25" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#8639E8" font-size="18">&#xf0c0;</text>
+                        <text x="0" y="15" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#8639E8" font-size="14">CAPTURE</text>
+                        
+                        <!-- Input Examples -->
+                        <g transform="translate(-45, 120)">
+                            <rect x="-40" y="-40" width="80" height="80" rx="10" ry="10" fill="white" stroke="#8639E8" stroke-width="2" />
+                            <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#8639E8" font-size="22">&#xf130;</text>
+                            <text x="0" y="50" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Voice Notes</text>
+                        </g>
+                        
+                        <g transform="translate(45, 120)">
+                            <rect x="-40" y="-40" width="80" height="80" rx="10" ry="10" fill="white" stroke="#8639E8" stroke-width="2" />
+                            <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#8639E8" font-size="22">&#xf03e;</text>
+                            <text x="0" y="50" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Training Photos</text>
+                        </g>
+                        
+                        <g transform="translate(0, 200)">
+                            <rect x="-40" y="-40" width="80" height="80" rx="10" ry="10" fill="white" stroke="#8639E8" stroke-width="2" />
+                            <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#8639E8" font-size="22">&#xf201;</text>
+                            <text x="0" y="50" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Fitness Data</text>
+                        </g>
                     </g>
                     
-                    <g transform="translate(80, -30)">
-                        <circle cx="0" cy="0" r="20" fill="#F0E6FD"></circle>
-                        <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="20">📊</text>
-                        <text x="0" y="30" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Stats</text>
+                    <!-- Second Stage: AI Processing -->
+                    <g transform="translate(450, 200)">
+                        <!-- Stage Circle -->
+                        <circle cx="0" cy="0" r="65" fill="white" stroke="#BE4BB9" stroke-width="3" filter="url(#drop-shadow)" />
+                        <circle cx="0" cy="-25" r="25" fill="#F0E6FD" />
+                        <text x="0" y="-25" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#BE4BB9" font-size="18">&#xf085;</text>
+                        <text x="0" y="15" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#BE4BB9" font-size="14">PROCESS</text>
+                        
+                        <!-- AI Processing Animation -->
+                        <g transform="translate(0, 120)">
+                            <rect x="-100" y="-60" width="200" height="120" rx="10" ry="10" fill="white" stroke="#BE4BB9" stroke-width="2" />
+                            <text x="0" y="-30" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#BE4BB9" font-size="14">AI TRANSFORMATION</text>
+                            
+                            <!-- Animation Lines -->
+                            <line x1="-80" y1="-10" x2="80" y2="-10" stroke="#BE4BB9" stroke-width="3" stroke-dasharray="5,5" />
+                            <line x1="-75" y1="10" x2="75" y2="10" stroke="#BE4BB9" stroke-width="3" stroke-dasharray="5,5" />
+                            <line x1="-70" y1="30" x2="70" y2="30" stroke="#BE4BB9" stroke-width="3" stroke-dasharray="5,5" />
+                            
+                            <text x="0" y="65" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Creating emotional narrative arc</text>
+                        </g>
                     </g>
                     
-                    <g transform="translate(0, 50)">
-                        <circle cx="0" cy="0" r="20" fill="#F0E6FD"></circle>
-                        <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="20">💭</text>
-                        <text x="0" y="30" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Reflections</text>
+                    <!-- Third Stage: Output -->
+                    <g transform="translate(800, 200)">
+                        <!-- Stage Circle -->
+                        <circle cx="0" cy="0" r="65" fill="white" stroke="#FF6B6B" stroke-width="3" filter="url(#drop-shadow)" />
+                        <circle cx="0" cy="-25" r="25" fill="#F0E6FD" />
+                        <text x="0" y="-25" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#FF6B6B" font-size="18">&#xf0ee;</text>
+                        <text x="0" y="15" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#FF6B6B" font-size="14">SHARE</text>
+                        
+                        <!-- Output Formats -->
+                        <g transform="translate(-45, 120)">
+                            <rect x="-40" y="-40" width="80" height="80" rx="10" ry="10" fill="white" stroke="#FF6B6B" stroke-width="2" />
+                            <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#FF6B6B" font-size="22">&#xf02d;</text>
+                            <text x="0" y="50" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Memoir</text>
+                        </g>
+                        
+                        <g transform="translate(45, 120)">
+                            <rect x="-40" y="-40" width="80" height="80" rx="10" ry="10" fill="white" stroke="#FF6B6B" stroke-width="2" />
+                            <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#FF6B6B" font-size="22">&#xf1e0;</text>
+                            <text x="0" y="50" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Social Content</text>
+                        </g>
+                        
+                        <g transform="translate(0, 200)">
+                            <rect x="-40" y="-40" width="80" height="80" rx="10" ry="10" fill="white" stroke="#FF6B6B" stroke-width="2" />
+                            <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#FF6B6B" font-size="22">&#xf5b9;</text>
+                            <text x="0" y="50" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Private Journal</text>
+                        </g>
                     </g>
-                </g>
-                
-                <!-- AI Transformation Box -->
-                <g transform="translate(400, 150)">
-                    <rect x="-120" y="-100" width="240" height="200" fill="white" stroke="#8639E8" stroke-width="2" rx="10" ry="10"></rect>
-                    <text x="0" y="-70" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#8639E8" font-size="18">AI TRANSFORMATION</text>
-                    
-                    <!-- Brain Icon -->
-                    <g>
-                        <circle cx="0" cy="-15" r="40" fill="#F0E6FD"></circle>
-                        <text x="0" y="-15" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="40">🧠</text>
-                    </g>
-                    
-                    <!-- Processing Lines -->
-                    <line x1="-80" y1="50" x2="80" y2="50" stroke="#8639E8" stroke-width="2" stroke-dasharray="5,5"></line>
-                    <line x1="-80" y1="70" x2="60" y2="70" stroke="#8639E8" stroke-width="2" stroke-dasharray="5,5"></line>
-                    <line x1="-80" y1="90" x2="70" y2="90" stroke="#8639E8" stroke-width="2" stroke-dasharray="5,5"></line>
-                </g>
-                
-                <!-- Output Box -->
-                <g transform="translate(650, 150)">
-                    <rect x="-120" y="-100" width="240" height="200" fill="white" stroke="#8639E8" stroke-width="2" rx="10" ry="10"></rect>
-                    <text x="0" y="-70" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#8639E8" font-size="18">OUTPUT</text>
-                    
-                    <!-- Output Icons -->
-                    <g transform="translate(-70, -20)">
-                        <circle cx="0" cy="0" r="25" fill="#F0E6FD"></circle>
-                        <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="20">📕</text>
-                        <text x="0" y="40" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Memoir</text>
-                    </g>
-                    
-                    <g transform="translate(70, -20)">
-                        <circle cx="0" cy="0" r="25" fill="#F0E6FD"></circle>
-                        <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="20">📱</text>
-                        <text x="0" y="40" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Social</text>
-                    </g>
-                    
-                    <g transform="translate(0, 60)">
-                        <circle cx="0" cy="0" r="25" fill="#F0E6FD"></circle>
-                        <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="20">📔</text>
-                        <text x="0" y="40" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Journal</text>
-                    </g>
-                </g>
-            </svg>
+                </svg>
+            </div>
             
-            <div class="grid-container">
-                <div class="highlight-box">
-                    <h3>Input</h3>
+            <div class="grid-container" style="grid-template-columns: 1fr 1fr 1fr; margin-bottom: 2em;">
+                <div class="highlight-box" style="border-left-color: #8639E8; margin-bottom: 0;">
+                    <h3 style="color: #8639E8; text-align: center;"><i class="fas fa-microphone" style="margin-right: 8px;"></i>Capture</h3>
                     <ul>
-                        <li>Quick voice notes after runs</li>
-                        <li>Photos of training milestones</li>
-                        <li>Reflections at key moments</li>
-                        <li>Stats from fitness apps</li>
+                        <li>"Just finished a 10-mile run today. My knees were hurting but I pushed through."</li>
+                        <li>Photos of her first race bib and medal</li>
+                        <li>Heart rate and pace data from her watch</li>
+                        <li>Weekly reflection on mental barriers</li>
                     </ul>
                 </div>
                 
-                <div class="highlight-box">
-                    <h3>AI Transformation</h3>
+                <div class="highlight-box" style="border-left-color: #BE4BB9; margin-bottom: 0;">
+                    <h3 style="color: #BE4BB9; text-align: center;"><i class="fas fa-brain" style="margin-right: 8px;"></i>Process</h3>
                     <ul>
-                        <li>Emotional arc through training</li>
-                        <li>Physical challenges linked to mental growth</li>
-                        <li>Coherent narrative from scattered moments</li>
+                        <li>Identified mental resilience theme across entries</li>
+                        <li>Connected physical milestones to emotional growth</li>
+                        <li>Organized fragmented moments into compelling narrative arc</li>
+                        <li>Applied appropriate tone for each audience</li>
+                    </ul>
+                </div>
+                
+                <div class="highlight-box" style="border-left-color: #FF6B6B; margin-bottom: 0;">
+                    <h3 style="color: #FF6B6B; text-align: center;"><i class="fas fa-share-alt" style="margin-right: 8px;"></i>Share</h3>
+                    <ul>
+                        <li>Inspirational book: "From Couch to Marathon at 45"</li>
+                        <li>Social content series featuring training methods</li>
+                        <li>Private journal tracking confidence transformation</li>
+                        <li>All from the same input, tailored for each context</li>
                     </ul>
                 </div>
             </div>
             
-            <div class="highlight-box mt-2">
-                <h3>Output Formats</h3>
-                <div class="grid-container" style="margin: 0">
-                    <div>
-                        <strong>Inspirational Memoir</strong>
-                        <p>Book for other middle-aged beginners</p>
-                    </div>
-                    <div>
-                        <strong>Training Content</strong>
-                        <p>Social posts documenting methods</p>
-                    </div>
-                    <div>
-                        <strong>Personal Journal</strong>
-                        <p>Private tracking of mental transformation</p>
-                    </div>
-                </div>
+            <div class="text-center">
+                <p style="font-style: italic; color: #8639E8; font-size: 1.2em;">"Sarah's journey shows how scattered moments become meaningful, tailored narratives."</p>
             </div>
         </div>
         
@@ -847,88 +970,183 @@
             </ul>
         </div>
         
-        <!-- Slide: Go-To-Market -->
+        <!-- Slide: Go-To-Market Strategy -->
         <div class="slide">
             <h2>Go-To-Market Strategy</h2>
             
-            <div class="timeline-container">
-                <svg width="100%" height="200" viewBox="0 0 800 200">
-                    <!-- Background -->
-                    <rect width="800" height="200" fill="#f8f9fa" rx="10" ry="10"></rect>
+            <svg width="100%" height="350" viewBox="0 0 900 350">
+                <defs>
+                    <linearGradient id="road-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" style="stop-color:#8639E8;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#FF6B6B;stop-opacity:1" />
+                    </linearGradient>
+                    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feGaussianBlur stdDeviation="5" result="blur" />
+                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                    </filter>
+                    <filter id="card-shadow" x="-10%" y="-10%" width="120%" height="120%">
+                        <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#00000022" />
+                    </filter>
+                </defs>
+                
+                <!-- Road Background -->
+                <rect x="50" y="150" width="800" height="60" rx="30" ry="30" fill="url(#road-gradient)" />
+                
+                <!-- Dotted Center Line -->
+                <line x1="50" y1="180" x2="850" y2="180" stroke="white" stroke-width="4" stroke-dasharray="15,10" />
+                
+                <!-- Phase 1: Targeted Launch -->
+                <g transform="translate(175, 180)">
+                    <!-- Milestone Circle -->
+                    <circle cx="0" cy="0" r="40" fill="white" stroke="#8639E8" stroke-width="3" filter="url(#card-shadow)" />
+                    <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Playfair Display, serif" font-weight="bold" fill="#8639E8" font-size="30">1</text>
                     
-                    <!-- Timeline Line -->
-                    <defs>
-                        <linearGradient id="timeline-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" style="stop-color:#8639E8;stop-opacity:1" />
-                            <stop offset="100%" style="stop-color:#FF6B6B;stop-opacity:1" />
-                        </linearGradient>
-                    </defs>
+                    <!-- Phase Label -->
+                    <text x="0" y="70" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#333" font-size="16">Targeted Launch</text>
+                    <text x="0" y="90" text-anchor="middle" font-family="Inter, sans-serif" fill="#666" font-size="14">Months 1-6</text>
                     
-                    <line x1="100" y1="100" x2="700" y2="100" stroke="url(#timeline-gradient)" stroke-width="8" stroke-linecap="round"></line>
+                    <!-- Target Audience Card -->
+                    <g transform="translate(0, -120)">
+                        <rect x="-100" y="-60" width="200" height="120" rx="10" ry="10" fill="white" stroke="#8639E8" stroke-width="2" filter="url(#card-shadow)" />
+                        
+                        <!-- Card Content -->
+                        <text x="0" y="-35" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#8639E8" font-size="14">TARGET AUDIENCES</text>
+                        
+                        <g transform="translate(-75, 0)">
+                            <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#8639E8" font-size="16">&#xf77c;</text>
+                            <text x="60" y="0" text-anchor="start" font-family="Inter, sans-serif" fill="#333" font-size="12">New Parents</text>
+                        </g>
+                        
+                        <g transform="translate(-75, 25)">
+                            <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#8639E8" font-size="16">&#xf5b3;</text>
+                            <text x="60" y="0" text-anchor="start" font-family="Inter, sans-serif" fill="#333" font-size="12">Life Transitions</text>
+                        </g>
+                    </g>
+                </g>
+                
+                <!-- Phase 2: Expansion -->
+                <g transform="translate(450, 180)">
+                    <!-- Milestone Circle -->
+                    <circle cx="0" cy="0" r="40" fill="white" stroke="#BE4BB9" stroke-width="3" filter="url(#card-shadow)" />
+                    <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Playfair Display, serif" font-weight="bold" fill="#BE4BB9" font-size="30">2</text>
                     
-                    <!-- Month Markers -->
-                    <text x="100" y="140" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Month 1</text>
-                    <text x="400" y="140" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Month 12</text>
-                    <text x="700" y="140" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Month 24+</text>
+                    <!-- Phase Label -->
+                    <text x="0" y="70" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#333" font-size="16">Expansion</text>
+                    <text x="0" y="90" text-anchor="middle" font-family="Inter, sans-serif" fill="#666" font-size="14">Months 7-18</text>
                     
-                    <!-- Phase 1 Node -->
-                    <circle cx="100" cy="100" r="25" fill="white" stroke="#8639E8" stroke-width="3"></circle>
-                    <text x="100" y="105" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#8639E8" font-size="18">1</text>
-                    <text x="100" y="170" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#8639E8" font-size="14">Targeted Launch</text>
+                    <!-- Strategy Card -->
+                    <g transform="translate(0, -120)">
+                        <rect x="-100" y="-60" width="200" height="120" rx="10" ry="10" fill="white" stroke="#BE4BB9" stroke-width="2" filter="url(#card-shadow)" />
+                        
+                        <!-- Card Content -->
+                        <text x="0" y="-35" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#BE4BB9" font-size="14">KEY INITIATIVES</text>
+                        
+                        <g transform="translate(-75, 0)">
+                            <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#BE4BB9" font-size="16">&#xf0e8;</text>
+                            <text x="60" y="0" text-anchor="start" font-family="Inter, sans-serif" fill="#333" font-size="12">Therapist Network</text>
+                        </g>
+                        
+                        <g transform="translate(-75, 25)">
+                            <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#BE4BB9" font-size="16">&#xf1e0;</text>
+                            <text x="60" y="0" text-anchor="start" font-family="Inter, sans-serif" fill="#333" font-size="12">API Partnerships</text>
+                        </g>
+                    </g>
+                </g>
+                
+                <!-- Phase 3: Ecosystem -->
+                <g transform="translate(725, 180)">
+                    <!-- Milestone Circle -->
+                    <circle cx="0" cy="0" r="40" fill="white" stroke="#FF6B6B" stroke-width="3" filter="url(#card-shadow)" />
+                    <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Playfair Display, serif" font-weight="bold" fill="#FF6B6B" font-size="30">3</text>
                     
-                    <!-- Phase 2 Node -->
-                    <circle cx="400" cy="100" r="25" fill="white" stroke="#BE4BB9" stroke-width="3"></circle>
-                    <text x="400" y="105" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#BE4BB9" font-size="18">2</text>
-                    <text x="400" y="170" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#BE4BB9" font-size="14">Expansion</text>
+                    <!-- Phase Label -->
+                    <text x="0" y="70" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#333" font-size="16">Ecosystem</text>
+                    <text x="0" y="90" text-anchor="middle" font-family="Inter, sans-serif" fill="#666" font-size="14">Months 19+</text>
                     
-                    <!-- Phase 3 Node -->
-                    <circle cx="700" cy="100" r="25" fill="white" stroke="#FF6B6B" stroke-width="3"></circle>
-                    <text x="700" y="105" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#FF6B6B" font-size="18">3</text>
-                    <text x="700" y="170" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#FF6B6B" font-size="14">Ecosystem</text>
-                    
-                    <!-- Phase Details -->
-                    <text x="100" y="45" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">New Parents</text>
-                    <text x="100" y="65" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Life Transitions</text>
-                    
-                    <text x="400" y="45" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Therapist Network</text>
-                    <text x="400" y="65" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Family Plans</text>
-                    
-                    <text x="700" y="45" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Enterprise Solutions</text>
-                    <text x="700" y="65" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Global Expansion</text>
-                </svg>
-            </div>
+                    <!-- Expansion Card -->
+                    <g transform="translate(0, -120)">
+                        <rect x="-100" y="-60" width="200" height="120" rx="10" ry="10" fill="white" stroke="#FF6B6B" stroke-width="2" filter="url(#card-shadow)" />
+                        
+                        <!-- Card Content -->
+                        <text x="0" y="-35" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#FF6B6B" font-size="14">GLOBAL SCALE</text>
+                        
+                        <g transform="translate(-75, 0)">
+                            <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#FF6B6B" font-size="16">&#xf1ad;</text>
+                            <text x="60" y="0" text-anchor="start" font-family="Inter, sans-serif" fill="#333" font-size="12">Enterprise Solutions</text>
+                        </g>
+                        
+                        <g transform="translate(-75, 25)">
+                            <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#FF6B6B" font-size="16">&#xf0ac;</text>
+                            <text x="60" y="0" text-anchor="start" font-family="Inter, sans-serif" fill="#333" font-size="12">Global Markets</text>
+                        </g>
+                    </g>
+                </g>
+            </svg>
             
-            <div class="grid-container mt-2">
-                <div class="highlight-box">
-                    <h3>Phase 1: Targeted Launch</h3>
-                    <p>Months 1-6</p>
-                    <ul>
-                        <li>New parents documenting beginnings</li>
-                        <li>Mid-life individuals seeking meaning</li>
-                        <li>Life transition navigators</li>
-                        <li>Influencer partnerships in wellness</li>
+            <div class="grid-container" style="grid-template-columns: 1fr 1fr 1fr; margin-top: 0;">
+                <div style="background: white; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); padding: 1.5em; border-top: 4px solid #8639E8;">
+                    <h3 style="color: #8639E8; text-align: center; margin-bottom: 1em;">Phase 1: Targeted Launch</h3>
+                    <ul style="list-style-type: none; padding-left: 0;">
+                        <li style="margin-bottom: 0.5em; display: flex; align-items: center;">
+                            <i class="fas fa-baby" style="color: #8639E8; width: 24px; margin-right: 10px;"></i>
+                            <span>New parents documenting beginnings</span>
+                        </li>
+                        <li style="margin-bottom: 0.5em; display: flex; align-items: center;">
+                            <i class="fas fa-hiking" style="color: #8639E8; width: 24px; margin-right: 10px;"></i>
+                            <span>Mid-life individuals seeking meaning</span>
+                        </li>
+                        <li style="margin-bottom: 0.5em; display: flex; align-items: center;">
+                            <i class="fas fa-exchange-alt" style="color: #8639E8; width: 24px; margin-right: 10px;"></i>
+                            <span>Life transition navigators</span>
+                        </li>
+                        <li style="margin-bottom: 0.5em; display: flex; align-items: center;">
+                            <i class="fas fa-users" style="color: #8639E8; width: 24px; margin-right: 10px;"></i>
+                            <span>Wellness influencer partnerships</span>
+                        </li>
                     </ul>
                 </div>
                 
-                <div class="highlight-box">
-                    <h3>Phase 2: Expansion</h3>
-                    <p>Months 7-18</p>
-                    <ul>
-                        <li>Broader audience targeting</li>
-                        <li>Therapist network integration</li>
-                        <li>Family plan introduction</li>
-                        <li>Key API partnerships</li>
+                <div style="background: white; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); padding: 1.5em; border-top: 4px solid #BE4BB9;">
+                    <h3 style="color: #BE4BB9; text-align: center; margin-bottom: 1em;">Phase 2: Expansion</h3>
+                    <ul style="list-style-type: none; padding-left: 0;">
+                        <li style="margin-bottom: 0.5em; display: flex; align-items: center;">
+                            <i class="fas fa-bullseye" style="color: #BE4BB9; width: 24px; margin-right: 10px;"></i>
+                            <span>Broader audience targeting</span>
+                        </li>
+                        <li style="margin-bottom: 0.5em; display: flex; align-items: center;">
+                            <i class="fas fa-user-md" style="color: #BE4BB9; width: 24px; margin-right: 10px;"></i>
+                            <span>Therapist network integration</span>
+                        </li>
+                        <li style="margin-bottom: 0.5em; display: flex; align-items: center;">
+                            <i class="fas fa-home" style="color: #BE4BB9; width: 24px; margin-right: 10px;"></i>
+                            <span>Family plan introduction</span>
+                        </li>
+                        <li style="margin-bottom: 0.5em; display: flex; align-items: center;">
+                            <i class="fas fa-plug" style="color: #BE4BB9; width: 24px; margin-right: 10px;"></i>
+                            <span>Key API partnerships</span>
+                        </li>
                     </ul>
                 </div>
                 
-                <div class="highlight-box">
-                    <h3>Phase 3: Ecosystem</h3>
-                    <p>Months 19+</p>
-                    <ul>
-                        <li>Enterprise solutions</li>
-                        <li>Global expansion</li>
-                        <li>Physical experience add-ons</li>
-                        <li>Creator marketplace</li>
+                <div style="background: white; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); padding: 1.5em; border-top: 4px solid #FF6B6B;">
+                    <h3 style="color: #FF6B6B; text-align: center; margin-bottom: 1em;">Phase 3: Ecosystem</h3>
+                    <ul style="list-style-type: none; padding-left: 0;">
+                        <li style="margin-bottom: 0.5em; display: flex; align-items: center;">
+                            <i class="fas fa-building" style="color: #FF6B6B; width: 24px; margin-right: 10px;"></i>
+                            <span>Enterprise solutions</span>
+                        </li>
+                        <li style="margin-bottom: 0.5em; display: flex; align-items: center;">
+                            <i class="fas fa-globe" style="color: #FF6B6B; width: 24px; margin-right: 10px;"></i>
+                            <span>Global expansion</span>
+                        </li>
+                        <li style="margin-bottom: 0.5em; display: flex; align-items: center;">
+                            <i class="fas fa-box-open" style="color: #FF6B6B; width: 24px; margin-right: 10px;"></i>
+                            <span>Physical experience add-ons</span>
+                        </li>
+                        <li style="margin-bottom: 0.5em; display: flex; align-items: center;">
+                            <i class="fas fa-store" style="color: #FF6B6B; width: 24px; margin-right: 10px;"></i>
+                            <span>Creator marketplace</span>
+                        </li>
                     </ul>
                 </div>
             </div>
