@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sentimental - Investor Pitch Deck</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         :root {
             --primary: #8639E8;
@@ -165,154 +166,205 @@
             margin-top: 2em;
         }
         
-        .placeholder-img {
-            width: 100%;
-            height: 300px;
-            background-color: #f2f2f2;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #888;
-            font-weight: bold;
-            margin: 1.5em 0;
-            border-radius: 10px;
-            border: 1px dashed #ccc;
-        }
-        
-        .placeholder-layers {
-            width: 100%;
-            height: 400px;
-            background-color: #f2f2f2;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #888;
-            font-weight: bold;
-            margin: 1.5em 0;
-            border-radius: 10px;
-            border: 1px dashed #ccc;
-            position: relative;
-        }
-        
         .checkmark {
             color: var(--primary);
             font-weight: bold;
         }
         
-        .team-box {
-            background-color: var(--gray);
-            padding: 1.5em;
+        .team-card {
+            background-color: white;
             border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
             height: 100%;
-            display: flex;
-            flex-direction: column;
         }
         
-        .team-box h3 {
+        .team-header {
+            height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .team-purple {
+            background-color: var(--primary);
+        }
+        
+        .team-blue {
+            background-color: #4267B2;
+        }
+        
+        .team-green {
+            background-color: #34A853;
+        }
+        
+        .team-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background-color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        
+        .team-purple .team-avatar {
             color: var(--primary);
         }
         
-        .team-box .role {
-            color: var(--primary-dark);
+        .team-blue .team-avatar {
+            color: #4267B2;
+        }
+        
+        .team-green .team-avatar {
+            color: #34A853;
+        }
+        
+        .team-content {
+            padding: 1.5em;
+        }
+        
+        .team-content h3 {
+            margin-bottom: 0.2em;
+        }
+        
+        .team-role {
             font-weight: 600;
             margin-bottom: 1em;
         }
         
-        .team-photo {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background-color: var(--primary);
-            margin: 0 auto 1.5em auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-weight: bold;
-            font-size: 2em;
-        }
-        
-        .go-to-market {
-            position: relative;
-            margin: 2em 0;
-        }
-        
-        .phase-container {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 3em;
-            position: relative;
-        }
-        
-        .phase-container::before {
-            content: "";
-            position: absolute;
-            top: 20px;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background-color: var(--primary);
-            z-index: 0;
-        }
-        
-        .phase {
-            background-color: var(--gray);
-            padding: 1.5em;
-            border-radius: 10px;
-            width: 30%;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .phase h3 {
+        .team-purple + .team-content .team-role {
             color: var(--primary);
-            margin-bottom: 0.75em;
         }
         
-        .phase-number {
-            width: 40px;
-            height: 40px;
-            background-color: var(--primary);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            margin: -35px auto 10px auto;
+        .team-blue + .team-content .team-role {
+            color: #4267B2;
+        }
+        
+        .team-green + .team-content .team-role {
+            color: #34A853;
         }
         
         .user-flow {
             display: flex;
             flex-direction: column;
             align-items: center;
+            margin: 2em 0;
         }
         
         .four-layers-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 1em;
+            gap: 1.5em;
             margin-top: 2em;
         }
         
         .layer-box {
-            background-color: var(--gray);
+            background-color: white;
             padding: 1.5em;
             border-radius: 10px;
-            height: 170px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
             display: flex;
             flex-direction: column;
+            height: 100%;
+            align-items: center;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .layer-box:hover {
+            transform: translateY(-5px);
         }
         
         .layer-box h3 {
             color: var(--primary);
-            margin-bottom: 0.5em;
+            margin: 0.5em 0;
         }
         
         .layer-icon {
-            font-size: 2em;
-            color: var(--primary);
+            width: 60px;
+            height: 60px;
+            background-color: var(--gray);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             margin-bottom: 0.5em;
+        }
+        
+        .layer-icon i {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+        
+        /* Style for the Go-to-Market timeline */
+        .timeline-container {
+            position: relative;
+            margin: 2em 0;
+        }
+        
+        .timeline {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            margin-top: 50px;
+        }
+        
+        .timeline::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(to right, #8639E8, #FF6B6B);
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+        
+        .timeline-point {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 30%;
+        }
+        
+        .timeline-marker {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background-color: white;
+            border: 4px solid var(--primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+            box-shadow: 0 0 15px rgba(134, 57, 232, 0.3);
+        }
+        
+        .timeline-phase {
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            color: var(--primary);
+        }
+        
+        .timeline-time {
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            color: var(--text);
+        }
+        
+        .timeline-content {
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            width: 100%;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
         }
     </style>
 </head>
@@ -327,7 +379,7 @@
         
         <!-- Section Title: Part 1 -->
         <div class="section-title">
-            <h2>PART 1: THE VISION & OPPORTUNITY</h2>
+            <h2>PART 1: THE VISION AND OPPORTUNITY</h2>
         </div>
         
         <!-- Slide: The Last Frontier -->
@@ -427,7 +479,7 @@
         
         <!-- Section Title: Part 2 -->
         <div class="section-title">
-            <h2>PART 2: THE PRODUCT & DIFFERENTIATION</h2>
+            <h2>PART 2: THE PRODUCT AND DIFFERENTIATION</h2>
         </div>
         
         <!-- Slide: How Sentimental Works -->
@@ -451,31 +503,65 @@
         <div class="slide">
             <h2>The Four Layers of Your Life Story</h2>
             
-            <div class="placeholder-layers">
-                <div>Four Layers Diagram</div>
-            </div>
+            <svg width="100%" height="400" viewBox="0 0 800 400">
+                <!-- Background Rectangle -->
+                <rect width="800" height="400" fill="#f8f9fa" rx="10" ry="10"></rect>
+                
+                <!-- Layered Circles -->
+                <g transform="translate(400, 200)">
+                    <!-- Layer 4 - Memory Layer (Bottom) -->
+                    <circle cx="0" cy="0" r="180" fill="rgba(134, 57, 232, 0.1)" stroke="#8639E8" stroke-width="2"></circle>
+                    <text x="0" y="170" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#8639E8">MEMORY LAYER</text>
+                    
+                    <!-- Layer 3 - Social Layer -->
+                    <circle cx="0" cy="0" r="140" fill="rgba(134, 57, 232, 0.2)" stroke="#8639E8" stroke-width="2"></circle>
+                    <text x="0" y="130" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#8639E8">SOCIAL LAYER</text>
+                    
+                    <!-- Layer 2 - Legacy Layer -->
+                    <circle cx="0" cy="0" r="100" fill="rgba(134, 57, 232, 0.3)" stroke="#8639E8" stroke-width="2"></circle>
+                    <text x="0" y="90" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#8639E8">LEGACY LAYER</text>
+                    
+                    <!-- Layer 1 - Therapeutic Layer (Top) -->
+                    <circle cx="0" cy="0" r="60" fill="rgba(134, 57, 232, 0.4)" stroke="#8639E8" stroke-width="2"></circle>
+                    <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#FFFFFF">THERAPEUTIC LAYER</text>
+                    
+                    <!-- Icons -->
+                    <text x="0" y="-20" text-anchor="middle" font-family="Inter, sans-serif" font-size="24">❤️</text>
+                    <text x="-115" y="0" text-anchor="middle" font-family="Inter, sans-serif" font-size="24">🌱</text>
+                    <text x="0" y="110" text-anchor="middle" font-family="Inter, sans-serif" font-size="24">🔄</text>
+                    <text x="150" y="0" text-anchor="middle" font-family="Inter, sans-serif" font-size="24">🧠</text>
+                </g>
+            </svg>
             
             <div class="four-layers-grid">
                 <div class="layer-box">
-                    <div class="layer-icon">❤️</div>
+                    <div class="layer-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
                     <h3>Therapeutic Layer</h3>
                     <p>Private reflections for personal growth and therapy sessions</p>
                 </div>
                 
                 <div class="layer-box">
-                    <div class="layer-icon">🌱</div>
+                    <div class="layer-icon">
+                        <i class="fas fa-seedling"></i>
+                    </div>
                     <h3>Legacy Layer</h3>
                     <p>Meaningful narratives for loved ones and future generations</p>
                 </div>
                 
                 <div class="layer-box">
-                    <div class="layer-icon">🔄</div>
+                    <div class="layer-icon">
+                        <i class="fas fa-share-alt"></i>
+                    </div>
                     <h3>Social Layer</h3>
                     <p>Polished content for followers and professional networks</p>
                 </div>
                 
                 <div class="layer-box">
-                    <div class="layer-icon">🧠</div>
+                    <div class="layer-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
                     <h3>Memory Layer</h3>
                     <p>The complete archive for your future self</p>
                 </div>
@@ -590,11 +676,87 @@
         <div class="slide">
             <h2>User Experience: Sarah's Marathon Journey</h2>
             
-            <div class="user-flow">
-                <div class="placeholder-img">
-                    User Flow Diagram
-                </div>
-            </div>
+            <svg width="100%" height="300" viewBox="0 0 800 300">
+                <!-- Background -->
+                <rect width="800" height="300" fill="#f8f9fa" rx="10" ry="10"></rect>
+                
+                <!-- Flow Arrows -->
+                <path d="M250,150 L550,150" stroke="#8639E8" stroke-width="3" fill="none"></path>
+                <polygon points="550,150 540,145 540,155" fill="#8639E8"></polygon>
+                
+                <!-- Input Box -->
+                <g transform="translate(150, 150)">
+                    <rect x="-120" y="-100" width="240" height="200" fill="white" stroke="#8639E8" stroke-width="2" rx="10" ry="10"></rect>
+                    <text x="0" y="-70" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#8639E8" font-size="18">INPUT</text>
+                    
+                    <!-- Input Icons -->
+                    <g transform="translate(-80, -30)">
+                        <circle cx="0" cy="0" r="20" fill="#F0E6FD"></circle>
+                        <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="20">🎤</text>
+                        <text x="0" y="30" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Voice Notes</text>
+                    </g>
+                    
+                    <g transform="translate(0, -30)">
+                        <circle cx="0" cy="0" r="20" fill="#F0E6FD"></circle>
+                        <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="20">📷</text>
+                        <text x="0" y="30" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Photos</text>
+                    </g>
+                    
+                    <g transform="translate(80, -30)">
+                        <circle cx="0" cy="0" r="20" fill="#F0E6FD"></circle>
+                        <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="20">📊</text>
+                        <text x="0" y="30" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Stats</text>
+                    </g>
+                    
+                    <g transform="translate(0, 50)">
+                        <circle cx="0" cy="0" r="20" fill="#F0E6FD"></circle>
+                        <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="20">💭</text>
+                        <text x="0" y="30" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Reflections</text>
+                    </g>
+                </g>
+                
+                <!-- AI Transformation Box -->
+                <g transform="translate(400, 150)">
+                    <rect x="-120" y="-100" width="240" height="200" fill="white" stroke="#8639E8" stroke-width="2" rx="10" ry="10"></rect>
+                    <text x="0" y="-70" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#8639E8" font-size="18">AI TRANSFORMATION</text>
+                    
+                    <!-- Brain Icon -->
+                    <g>
+                        <circle cx="0" cy="-15" r="40" fill="#F0E6FD"></circle>
+                        <text x="0" y="-15" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="40">🧠</text>
+                    </g>
+                    
+                    <!-- Processing Lines -->
+                    <line x1="-80" y1="50" x2="80" y2="50" stroke="#8639E8" stroke-width="2" stroke-dasharray="5,5"></line>
+                    <line x1="-80" y1="70" x2="60" y2="70" stroke="#8639E8" stroke-width="2" stroke-dasharray="5,5"></line>
+                    <line x1="-80" y1="90" x2="70" y2="90" stroke="#8639E8" stroke-width="2" stroke-dasharray="5,5"></line>
+                </g>
+                
+                <!-- Output Box -->
+                <g transform="translate(650, 150)">
+                    <rect x="-120" y="-100" width="240" height="200" fill="white" stroke="#8639E8" stroke-width="2" rx="10" ry="10"></rect>
+                    <text x="0" y="-70" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#8639E8" font-size="18">OUTPUT</text>
+                    
+                    <!-- Output Icons -->
+                    <g transform="translate(-70, -20)">
+                        <circle cx="0" cy="0" r="25" fill="#F0E6FD"></circle>
+                        <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="20">📕</text>
+                        <text x="0" y="40" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Memoir</text>
+                    </g>
+                    
+                    <g transform="translate(70, -20)">
+                        <circle cx="0" cy="0" r="25" fill="#F0E6FD"></circle>
+                        <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="20">📱</text>
+                        <text x="0" y="40" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Social</text>
+                    </g>
+                    
+                    <g transform="translate(0, 60)">
+                        <circle cx="0" cy="0" r="25" fill="#F0E6FD"></circle>
+                        <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="20">📔</text>
+                        <text x="0" y="40" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Journal</text>
+                    </g>
+                </g>
+            </svg>
             
             <div class="grid-container">
                 <div class="highlight-box">
@@ -638,7 +800,7 @@
         
         <!-- Section Title: Part 3 -->
         <div class="section-title">
-            <h2>PART 3: BUSINESS MODEL & INVESTMENT</h2>
+            <h2>PART 3: BUSINESS MODEL AND INVESTMENT</h2>
         </div>
         
         <!-- Slide: Business Model -->
@@ -689,43 +851,84 @@
         <div class="slide">
             <h2>Go-To-Market Strategy</h2>
             
-            <div class="placeholder-img">
-                Go-to-Market Timeline Visual
+            <div class="timeline-container">
+                <svg width="100%" height="200" viewBox="0 0 800 200">
+                    <!-- Background -->
+                    <rect width="800" height="200" fill="#f8f9fa" rx="10" ry="10"></rect>
+                    
+                    <!-- Timeline Line -->
+                    <defs>
+                        <linearGradient id="timeline-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#8639E8;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#FF6B6B;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    
+                    <line x1="100" y1="100" x2="700" y2="100" stroke="url(#timeline-gradient)" stroke-width="8" stroke-linecap="round"></line>
+                    
+                    <!-- Month Markers -->
+                    <text x="100" y="140" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Month 1</text>
+                    <text x="400" y="140" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Month 12</text>
+                    <text x="700" y="140" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Month 24+</text>
+                    
+                    <!-- Phase 1 Node -->
+                    <circle cx="100" cy="100" r="25" fill="white" stroke="#8639E8" stroke-width="3"></circle>
+                    <text x="100" y="105" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#8639E8" font-size="18">1</text>
+                    <text x="100" y="170" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#8639E8" font-size="14">Targeted Launch</text>
+                    
+                    <!-- Phase 2 Node -->
+                    <circle cx="400" cy="100" r="25" fill="white" stroke="#BE4BB9" stroke-width="3"></circle>
+                    <text x="400" y="105" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#BE4BB9" font-size="18">2</text>
+                    <text x="400" y="170" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#BE4BB9" font-size="14">Expansion</text>
+                    
+                    <!-- Phase 3 Node -->
+                    <circle cx="700" cy="100" r="25" fill="white" stroke="#FF6B6B" stroke-width="3"></circle>
+                    <text x="700" y="105" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#FF6B6B" font-size="18">3</text>
+                    <text x="700" y="170" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#FF6B6B" font-size="14">Ecosystem</text>
+                    
+                    <!-- Phase Details -->
+                    <text x="100" y="45" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">New Parents</text>
+                    <text x="100" y="65" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Life Transitions</text>
+                    
+                    <text x="400" y="45" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Therapist Network</text>
+                    <text x="400" y="65" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Family Plans</text>
+                    
+                    <text x="700" y="45" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Enterprise Solutions</text>
+                    <text x="700" y="65" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Global Expansion</text>
+                </svg>
             </div>
             
-            <div class="phase-container">
-                <div class="phase">
-                    <div class="phase-number">1</div>
-                    <h3>Targeted Launch</h3>
+            <div class="grid-container mt-2">
+                <div class="highlight-box">
+                    <h3>Phase 1: Targeted Launch</h3>
                     <p>Months 1-6</p>
                     <ul>
-                        <li>New parents</li>
-                        <li>Mid-life seekers</li>
+                        <li>New parents documenting beginnings</li>
+                        <li>Mid-life individuals seeking meaning</li>
                         <li>Life transition navigators</li>
-                        <li>Influencer partnerships</li>
+                        <li>Influencer partnerships in wellness</li>
                     </ul>
                 </div>
                 
-                <div class="phase">
-                    <div class="phase-number">2</div>
-                    <h3>Expansion</h3>
+                <div class="highlight-box">
+                    <h3>Phase 2: Expansion</h3>
                     <p>Months 7-18</p>
                     <ul>
-                        <li>Broader audience</li>
-                        <li>Therapist integration</li>
-                        <li>Family plans</li>
-                        <li>API partnerships</li>
+                        <li>Broader audience targeting</li>
+                        <li>Therapist network integration</li>
+                        <li>Family plan introduction</li>
+                        <li>Key API partnerships</li>
                     </ul>
                 </div>
                 
-                <div class="phase">
-                    <div class="phase-number">3</div>
-                    <h3>Ecosystem</h3>
+                <div class="highlight-box">
+                    <h3>Phase 3: Ecosystem</h3>
                     <p>Months 19+</p>
                     <ul>
                         <li>Enterprise solutions</li>
                         <li>Global expansion</li>
-                        <li>Physical experiences</li>
+                        <li>Physical experience add-ons</li>
+                        <li>Creator marketplace</li>
                     </ul>
                 </div>
             </div>
@@ -736,25 +939,43 @@
             <h2>The Team</h2>
             
             <div class="grid-container">
-                <div class="team-box">
-                    <div class="team-photo">MV</div>
-                    <h3>Marko Vaik</h3>
-                    <p class="role">Founder & CEO</p>
-                    <p>Co-founded Estonia's largest mental health platform (Serenity Platform). Deep expertise in user-centered wellbeing technology.</p>
+                <div class="team-card">
+                    <div class="team-header team-purple">
+                        <div class="team-avatar">
+                            MV
+                        </div>
+                    </div>
+                    <div class="team-content">
+                        <h3>Marko Vaik</h3>
+                        <p class="team-role">Founder and CEO</p>
+                        <p>Co-founded Estonia's largest mental health platform (Serenity Platform). Deep expertise in user-centered wellbeing technology.</p>
+                    </div>
                 </div>
                 
-                <div class="team-box">
-                    <div class="team-photo">MS</div>
-                    <h3>Merike Sisask</h3>
-                    <p class="role">Co-Founder & CSO</p>
-                    <p>Social health professor, Centre of Excellence for Well-Being Sciences. Author of 100+ scientific publications on wellbeing.</p>
+                <div class="team-card">
+                    <div class="team-header team-blue">
+                        <div class="team-avatar">
+                            MS
+                        </div>
+                    </div>
+                    <div class="team-content">
+                        <h3>Merike Sisask</h3>
+                        <p class="team-role">Co-Founder and CSO</p>
+                        <p>Social health professor, Centre of Excellence for Well-Being Sciences. Author of 100+ scientific publications on wellbeing.</p>
+                    </div>
                 </div>
                 
-                <div class="team-box">
-                    <div class="team-photo">LH</div>
-                    <h3>Lars-Erik Hion</h3>
-                    <p class="role">Co-Founder & CTO</p>
-                    <p>Digital innovation veteran (SEB, Swedbank, Telia). Co-founder of Tailwind and founder of Rethink.</p>
+                <div class="team-card">
+                    <div class="team-header team-green">
+                        <div class="team-avatar">
+                            LH
+                        </div>
+                    </div>
+                    <div class="team-content">
+                        <h3>Lars-Erik Hion</h3>
+                        <p class="team-role">Co-Founder and CTO</p>
+                        <p>Digital innovation veteran (SEB, Swedbank, Telia). Co-founder of Tailwind and founder of Rethink.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -784,7 +1005,7 @@
                 </div>
                 
                 <div class="highlight-box">
-                    <h3>IP & Assets</h3>
+                    <h3>IP and Assets</h3>
                     <ul>
                         <li>2 patent applications filed</li>
                         <li>Proprietary AI narrative generation algorithms</li>
@@ -795,7 +1016,7 @@
         
         <!-- Slide: Funding Request -->
         <div class="slide">
-            <h2>Funding Request & Use of Capital</h2>
+            <h2>Funding Request and Use of Capital</h2>
             
             <div class="highlight-box text-center">
                 <h3>Seeking $1.5M in Seed Funding</h3>
@@ -805,11 +1026,11 @@
                 <div class="highlight-box">
                     <h3>Allocation</h3>
                     <ul>
-                        <li>40% - Engineering & Product Development</li>
-                        <li>25% - AI Training & Optimization</li>
-                        <li>20% - Initial Marketing & Customer Acquisition</li>
-                        <li>10% - Operations & Team Expansion</li>
-                        <li>5% - Legal & Administrative</li>
+                        <li>40% - Engineering and Product Development</li>
+                        <li>25% - AI Training and Optimization</li>
+                        <li>20% - Initial Marketing and Customer Acquisition</li>
+                        <li>10% - Operations and Team Expansion</li>
+                        <li>5% - Legal and Administrative</li>
                     </ul>
                 </div>
                 
@@ -906,7 +1127,7 @@
             <h2>Thank You</h2>
             
             <p class="mb-2"><strong>Contact:</strong><br>
-            Marko Vaik, Founder & CEO<br>
+            Marko Vaik, Founder and CEO<br>
             marko@sentimentalapp.com<br>
             +372 555 1234</p>
             
