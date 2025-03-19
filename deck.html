@@ -26,6 +26,7 @@
             font-family: 'Inter', sans-serif;
             color: var(--text);
             line-height: 1.6;
+            background-color: #f9f9f9;
         }
         
         h1, h2, h3, h4 {
@@ -39,12 +40,12 @@
         }
         
         h2 {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             color: var(--primary);
         }
         
         h3 {
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             color: var(--dark);
         }
         
@@ -53,7 +54,7 @@
         }
         
         ul {
-            margin-left: 2em;
+            margin-left: 1.5em;
             margin-bottom: 1em;
         }
         
@@ -64,11 +65,11 @@
         }
         
         .slide {
-            margin-bottom: 5em;
-            padding: 2em;
+            margin-bottom: 3em;
+            padding: 2.5em;
             border-radius: 10px;
             background: var(--light);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
         }
         
         .cover-slide {
@@ -86,21 +87,29 @@
         
         .section-title {
             text-align: center;
-            padding: 3em 2em;
-            background-color: var(--gray);
+            padding: 2em;
+            background-color: var(--dark);
+            color: white;
             margin-bottom: 2em;
+            border-radius: 10px;
+        }
+        
+        .section-title h2 {
+            color: white;
+            margin-bottom: 0;
         }
         
         .highlight-box {
             padding: 1.5em;
             background-color: var(--gray);
-            border-left: 5px solid var(--primary);
+            border-left: 3px solid var(--primary);
             margin: 1.5em 0;
+            border-radius: 5px;
         }
         
         blockquote {
             font-style: italic;
-            border-left: 5px solid var(--primary);
+            border-left: 3px solid var(--primary);
             padding-left: 1em;
             margin: 1.5em 0;
             color: var(--primary-dark);
@@ -110,11 +119,13 @@
             width: 100%;
             border-collapse: collapse;
             margin: 1.5em 0;
+            border-radius: 5px;
+            overflow: hidden;
         }
         
         th, td {
             padding: 0.75em;
-            border: 1px solid #ddd;
+            border: 1px solid #eee;
             text-align: left;
         }
         
@@ -124,19 +135,14 @@
         }
         
         tr:nth-child(even) {
-            background-color: var(--gray);
+            background-color: #f9f9f9;
         }
         
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 2em;
-        }
-        
-        @media (max-width: 768px) {
-            .grid-container {
-                grid-template-columns: 1fr;
-            }
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5em;
+            margin: 1.5em 0;
         }
         
         .text-center {
@@ -161,14 +167,31 @@
         
         .placeholder-img {
             width: 100%;
-            height: 400px;
-            background-color: #ddd;
+            height: 300px;
+            background-color: #f2f2f2;
             display: flex;
             justify-content: center;
             align-items: center;
             color: #888;
             font-weight: bold;
-            margin: 1em 0;
+            margin: 1.5em 0;
+            border-radius: 10px;
+            border: 1px dashed #ccc;
+        }
+        
+        .placeholder-layers {
+            width: 100%;
+            height: 400px;
+            background-color: #f2f2f2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #888;
+            font-weight: bold;
+            margin: 1.5em 0;
+            border-radius: 10px;
+            border: 1px dashed #ccc;
+            position: relative;
         }
         
         .checkmark {
@@ -176,10 +199,120 @@
             font-weight: bold;
         }
         
-        .divider {
-            height: 1px;
-            background-color: #ddd;
+        .team-box {
+            background-color: var(--gray);
+            padding: 1.5em;
+            border-radius: 10px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .team-box h3 {
+            color: var(--primary);
+        }
+        
+        .team-box .role {
+            color: var(--primary-dark);
+            font-weight: 600;
+            margin-bottom: 1em;
+        }
+        
+        .team-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            margin: 0 auto 1.5em auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            font-size: 2em;
+        }
+        
+        .go-to-market {
+            position: relative;
             margin: 2em 0;
+        }
+        
+        .phase-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3em;
+            position: relative;
+        }
+        
+        .phase-container::before {
+            content: "";
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: var(--primary);
+            z-index: 0;
+        }
+        
+        .phase {
+            background-color: var(--gray);
+            padding: 1.5em;
+            border-radius: 10px;
+            width: 30%;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .phase h3 {
+            color: var(--primary);
+            margin-bottom: 0.75em;
+        }
+        
+        .phase-number {
+            width: 40px;
+            height: 40px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            margin: -35px auto 10px auto;
+        }
+        
+        .user-flow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .four-layers-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1em;
+            margin-top: 2em;
+        }
+        
+        .layer-box {
+            background-color: var(--gray);
+            padding: 1.5em;
+            border-radius: 10px;
+            height: 170px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .layer-box h3 {
+            color: var(--primary);
+            margin-bottom: 0.5em;
+        }
+        
+        .layer-icon {
+            font-size: 2em;
+            color: var(--primary);
+            margin-bottom: 0.5em;
         }
     </style>
 </head>
@@ -318,27 +451,31 @@
         <div class="slide">
             <h2>The Four Layers of Your Life Story</h2>
             
-            <div class="placeholder-img">
-                Four Layers Diagram
+            <div class="placeholder-layers">
+                <div>Four Layers Diagram</div>
             </div>
             
-            <div class="grid-container">
-                <div>
+            <div class="four-layers-grid">
+                <div class="layer-box">
+                    <div class="layer-icon">❤️</div>
                     <h3>Therapeutic Layer</h3>
                     <p>Private reflections for personal growth and therapy sessions</p>
                 </div>
                 
-                <div>
+                <div class="layer-box">
+                    <div class="layer-icon">🌱</div>
                     <h3>Legacy Layer</h3>
                     <p>Meaningful narratives for loved ones and future generations</p>
                 </div>
                 
-                <div>
+                <div class="layer-box">
+                    <div class="layer-icon">🔄</div>
                     <h3>Social Layer</h3>
                     <p>Polished content for followers and professional networks</p>
                 </div>
                 
-                <div>
+                <div class="layer-box">
+                    <div class="layer-icon">🧠</div>
                     <h3>Memory Layer</h3>
                     <p>The complete archive for your future self</p>
                 </div>
@@ -414,36 +551,36 @@
             <h2>Our Technology Advantage</h2>
             
             <div class="grid-container">
-                <div>
+                <div class="highlight-box">
                     <h3>1. Contextual AI</h3>
                     <ul>
-                        <li>Understands the emotional significance of moments</li>
-                        <li>Creates natural narrative flow from fragmented inputs</li>
+                        <li>Understands emotional significance of moments</li>
+                        <li>Creates natural narrative flow from fragments</li>
                         <li>Learns your personal style and preferences</li>
                     </ul>
                 </div>
                 
-                <div>
+                <div class="highlight-box">
                     <h3>2. Multi-Context Translation</h3>
                     <ul>
-                        <li>Proprietary algorithms that adapt the same content for different audiences</li>
+                        <li>Adapts content for different audiences</li>
                         <li>Preserves authenticity while tailoring presentation</li>
                     </ul>
                 </div>
                 
-                <div>
+                <div class="highlight-box">
                     <h3>3. Format-Fluid Design</h3>
                     <ul>
                         <li>Single-input, multi-output architecture</li>
-                        <li>Seamless transitions between text, audio, and visual formats</li>
+                        <li>Seamless transitions between formats</li>
                     </ul>
                 </div>
                 
-                <div>
+                <div class="highlight-box">
                     <h3>4. Ethical Privacy Architecture</h3>
                     <ul>
-                        <li>Granular controls for sharing sensitivity levels</li>
-                        <li>Advanced encryption for therapeutic content</li>
+                        <li>Granular controls for sharing</li>
+                        <li>Advanced encryption for sensitive content</li>
                     </ul>
                 </div>
             </div>
@@ -453,25 +590,50 @@
         <div class="slide">
             <h2>User Experience: Sarah's Marathon Journey</h2>
             
-            <div class="placeholder-img">
-                User Flow
+            <div class="user-flow">
+                <div class="placeholder-img">
+                    User Flow Diagram
+                </div>
             </div>
             
-            <p><strong>Input:</strong> Quick voice notes after runs, photos, milestone reflections, stats from fitness apps</p>
+            <div class="grid-container">
+                <div class="highlight-box">
+                    <h3>Input</h3>
+                    <ul>
+                        <li>Quick voice notes after runs</li>
+                        <li>Photos of training milestones</li>
+                        <li>Reflections at key moments</li>
+                        <li>Stats from fitness apps</li>
+                    </ul>
+                </div>
+                
+                <div class="highlight-box">
+                    <h3>AI Transformation</h3>
+                    <ul>
+                        <li>Emotional arc through training</li>
+                        <li>Physical challenges linked to mental growth</li>
+                        <li>Coherent narrative from scattered moments</li>
+                    </ul>
+                </div>
+            </div>
             
-            <h3 class="mt-1">AI Transformation:</h3>
-            <ul>
-                <li>Identified emotional arc through training process</li>
-                <li>Connected physical challenges to mental growth</li>
-                <li>Created a coherent narrative from scattered moments</li>
-            </ul>
-            
-            <h3 class="mt-1">Output Formats:</h3>
-            <ul>
-                <li>Inspirational memoir book for other middle-aged beginners</li>
-                <li>Social content documenting training methods</li>
-                <li>Private journal tracking mental transformation</li>
-            </ul>
+            <div class="highlight-box mt-2">
+                <h3>Output Formats</h3>
+                <div class="grid-container" style="margin: 0">
+                    <div>
+                        <strong>Inspirational Memoir</strong>
+                        <p>Book for other middle-aged beginners</p>
+                    </div>
+                    <div>
+                        <strong>Training Content</strong>
+                        <p>Social posts documenting methods</p>
+                    </div>
+                    <div>
+                        <strong>Personal Journal</strong>
+                        <p>Private tracking of mental transformation</p>
+                    </div>
+                </div>
+            </div>
         </div>
         
         <!-- Section Title: Part 3 -->
@@ -503,16 +665,16 @@
                         <li>Digital + physical formats (1 book/year)</li>
                     </ul>
                 </div>
-            </div>
-            
-            <div class="highlight-box mt-2">
-                <h3>Professional: $29.99/month</h3>
-                <ul>
-                    <li>Everything in Premium</li>
-                    <li>Priority AI processing</li>
-                    <li>Advanced analytics</li>
-                    <li>Collaborative storytelling tools</li>
-                </ul>
+                
+                <div class="highlight-box">
+                    <h3>Professional: $29.99/month</h3>
+                    <ul>
+                        <li>Everything in Premium</li>
+                        <li>Priority AI processing</li>
+                        <li>Advanced analytics</li>
+                        <li>Collaborative storytelling tools</li>
+                    </ul>
+                </div>
             </div>
             
             <h3 class="mt-2">Additional Revenue:</h3>
@@ -527,38 +689,45 @@
         <div class="slide">
             <h2>Go-To-Market Strategy</h2>
             
-            <div class="highlight-box">
-                <h3>Phase 1: Targeted Launch (Months 1-6)</h3>
-                <ul>
-                    <li>Focus on three core user segments:
-                        <ul>
-                            <li>New parents documenting family beginnings</li>
-                            <li>Mid-life individuals seeking meaning</li>
-                            <li>Life transition navigators (career changes, relocations)</li>
-                        </ul>
-                    </li>
-                    <li>Waitlist creation with exclusive benefits</li>
-                    <li>Influencer partnerships in wellness space</li>
-                </ul>
+            <div class="placeholder-img">
+                Go-to-Market Timeline Visual
             </div>
             
-            <div class="highlight-box">
-                <h3>Phase 2: Expansion (Months 7-18)</h3>
-                <ul>
-                    <li>Broader audience targeting</li>
-                    <li>Therapist network integration</li>
-                    <li>Family plan introduction</li>
-                    <li>Key API partnerships</li>
-                </ul>
-            </div>
-            
-            <div class="highlight-box">
-                <h3>Phase 3: Ecosystem Development (Months 19+)</h3>
-                <ul>
-                    <li>Enterprise solutions</li>
-                    <li>Global expansion</li>
-                    <li>Physical experience add-ons</li>
-                </ul>
+            <div class="phase-container">
+                <div class="phase">
+                    <div class="phase-number">1</div>
+                    <h3>Targeted Launch</h3>
+                    <p>Months 1-6</p>
+                    <ul>
+                        <li>New parents</li>
+                        <li>Mid-life seekers</li>
+                        <li>Life transition navigators</li>
+                        <li>Influencer partnerships</li>
+                    </ul>
+                </div>
+                
+                <div class="phase">
+                    <div class="phase-number">2</div>
+                    <h3>Expansion</h3>
+                    <p>Months 7-18</p>
+                    <ul>
+                        <li>Broader audience</li>
+                        <li>Therapist integration</li>
+                        <li>Family plans</li>
+                        <li>API partnerships</li>
+                    </ul>
+                </div>
+                
+                <div class="phase">
+                    <div class="phase-number">3</div>
+                    <h3>Ecosystem</h3>
+                    <p>Months 19+</p>
+                    <ul>
+                        <li>Enterprise solutions</li>
+                        <li>Global expansion</li>
+                        <li>Physical experiences</li>
+                    </ul>
+                </div>
             </div>
         </div>
         
@@ -567,31 +736,26 @@
             <h2>The Team</h2>
             
             <div class="grid-container">
-                <div class="highlight-box">
-                    <h3>Marko Vaik, Founder & CEO</h3>
-                    <ul>
-                        <li>Co-founded Estonia's largest mental health platform (Serenity Platform)</li>
-                        <li>Deep expertise in user-centered wellbeing technology</li>
-                    </ul>
+                <div class="team-box">
+                    <div class="team-photo">MV</div>
+                    <h3>Marko Vaik</h3>
+                    <p class="role">Founder & CEO</p>
+                    <p>Co-founded Estonia's largest mental health platform (Serenity Platform). Deep expertise in user-centered wellbeing technology.</p>
                 </div>
                 
-                <div class="highlight-box">
-                    <h3>Merike Sisask, Co-Founder & Chief Scientific Officer</h3>
-                    <ul>
-                        <li>Social health professor, Centre of Excellence for Well-Being Sciences</li>
-                        <li>Author of 100+ scientific publications on wellbeing</li>
-                        <li>Bridges science and storytelling</li>
-                    </ul>
+                <div class="team-box">
+                    <div class="team-photo">MS</div>
+                    <h3>Merike Sisask</h3>
+                    <p class="role">Co-Founder & CSO</p>
+                    <p>Social health professor, Centre of Excellence for Well-Being Sciences. Author of 100+ scientific publications on wellbeing.</p>
                 </div>
-            </div>
-            
-            <div class="highlight-box mt-2">
-                <h3>Lars-Erik Hion, Co-Founder & CTO</h3>
-                <ul>
-                    <li>Digital innovation veteran (SEB, Swedbank, Telia)</li>
-                    <li>Co-founder of Tailwind and founder of Rethink</li>
-                    <li>Expert in creating human-centered technology at scale</li>
-                </ul>
+                
+                <div class="team-box">
+                    <div class="team-photo">LH</div>
+                    <h3>Lars-Erik Hion</h3>
+                    <p class="role">Co-Founder & CTO</p>
+                    <p>Digital innovation veteran (SEB, Swedbank, Telia). Co-founder of Tailwind and founder of Rethink.</p>
+                </div>
             </div>
         </div>
         
@@ -600,17 +764,17 @@
             <h2>Current Traction</h2>
             
             <div class="grid-container">
-                <div>
-                    <h3>Product Development:</h3>
+                <div class="highlight-box">
+                    <h3>Product Development</h3>
                     <ul>
                         <li>MVP architecture complete</li>
-                        <li>AI prototyping with 87% user satisfaction in testing</li>
+                        <li>AI prototyping with 87% user satisfaction</li>
                         <li>Initial UI/UX tested with 95 users</li>
                     </ul>
                 </div>
                 
-                <div>
-                    <h3>Early Validation:</h3>
+                <div class="highlight-box">
+                    <h3>Early Validation</h3>
                     <ul>
                         <li>1,500+ waitlist sign-ups from soft launch</li>
                         <li>3 therapeutic partnerships in negotiation</li>
@@ -618,14 +782,14 @@
                         <li>Featured in TechCrunch "Startups to Watch"</li>
                     </ul>
                 </div>
-            </div>
-            
-            <div class="mt-2">
-                <h3>IP & Assets:</h3>
-                <ul>
-                    <li>2 patent applications filed</li>
-                    <li>Proprietary AI narrative generation algorithms</li>
-                </ul>
+                
+                <div class="highlight-box">
+                    <h3>IP & Assets</h3>
+                    <ul>
+                        <li>2 patent applications filed</li>
+                        <li>Proprietary AI narrative generation algorithms</li>
+                    </ul>
+                </div>
             </div>
         </div>
         
@@ -633,13 +797,13 @@
         <div class="slide">
             <h2>Funding Request & Use of Capital</h2>
             
-            <div class="highlight-box">
-                <h3 class="text-center">Seeking $1.5M in Seed Funding</h3>
+            <div class="highlight-box text-center">
+                <h3>Seeking $1.5M in Seed Funding</h3>
             </div>
             
             <div class="grid-container mt-2">
-                <div>
-                    <h3>Allocation:</h3>
+                <div class="highlight-box">
+                    <h3>Allocation</h3>
                     <ul>
                         <li>40% - Engineering & Product Development</li>
                         <li>25% - AI Training & Optimization</li>
@@ -649,8 +813,8 @@
                     </ul>
                 </div>
                 
-                <div>
-                    <h3>Key Milestones:</h3>
+                <div class="highlight-box">
+                    <h3>Key Milestones</h3>
                     <ul>
                         <li>Full product launch in 6 months</li>
                         <li>10,000 active users by month 12</li>
@@ -717,22 +881,24 @@
             
             <p><strong>We're not just building another app. We're creating:</strong></p>
             
-            <div class="highlight-box">
-                <h3>1. A new category</h3>
-                <p>at the intersection of wellbeing, legacy, and storytelling</p>
+            <div class="grid-container">
+                <div class="highlight-box">
+                    <h3>1. A new category</h3>
+                    <p>at the intersection of wellbeing, legacy, and storytelling</p>
+                </div>
+                
+                <div class="highlight-box">
+                    <h3>2. A technology platform</h3>
+                    <p>that grows more valuable with each life story added</p>
+                </div>
+                
+                <div class="highlight-box">
+                    <h3>3. A lasting solution</h3>
+                    <p>to one of humanity's oldest challenges: preserving and sharing who we truly are</p>
+                </div>
             </div>
             
-            <div class="highlight-box">
-                <h3>2. A technology platform</h3>
-                <p>that grows more valuable with each life story added</p>
-            </div>
-            
-            <div class="highlight-box">
-                <h3>3. A lasting solution</h3>
-                <p>to one of humanity's oldest challenges: preserving and sharing who we truly are</p>
-            </div>
-            
-            <p class="mt-2"><em>This is more than an investment opportunity. It's a chance to shape how future generations will remember us.</em></p>
+            <p class="mt-2 text-center"><em>This is more than an investment opportunity. It's a chance to shape how future generations will remember us.</em></p>
         </div>
         
         <!-- Slide: Thank You -->
