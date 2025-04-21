@@ -1,1356 +1,559 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sentimental - Investor Pitch Deck</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        :root {
-            --primary: #8639E8;
-            --primary-dark: #7529D8;
-            --secondary: #FF6B6B;
-            --dark: #333333;
-            --light: #FFFFFF;
-            --gray: #F5F5F5;
-            --text: #4A4A4A;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            color: var(--text);
-            line-height: 1.6;
-            background-color: #f9f9f9;
-        }
-        
-        h1, h2, h3, h4 {
-            font-family: 'Playfair Display', serif;
-            margin-bottom: 0.5em;
-        }
-        
-        h1 {
-            font-size: 3rem;
-            color: var(--primary);
-        }
-        
-        h2 {
-            font-size: 2.2rem;
-            color: var(--primary);
-        }
-        
-        h3 {
-            font-size: 1.6rem;
-            color: var(--dark);
-        }
-        
-        p {
-            margin-bottom: 1em;
-        }
-        
-        ul {
-            margin-left: 1.5em;
-            margin-bottom: 1em;
-        }
-        
-        .pitch-deck {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2em;
-        }
-        
-        .slide {
-            margin-bottom: 3em;
-            padding: 2.5em;
-            border-radius: 10px;
-            background: var(--light);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-        }
-        
-        .cover-slide {
-            text-align: center;
-            padding: 4em 2em;
-            background: linear-gradient(135deg, #8639E8 0%, #FF6B6B 100%);
-            color: white;
-        }
-        
-        .cover-slide h1, 
-        .cover-slide h2, 
-        .cover-slide h3 {
-            color: white;
-        }
-        
-        .section-title {
-            text-align: center;
-            padding: 2em;
-            background-color: var(--dark);
-            color: white;
-            margin-bottom: 2em;
-            border-radius: 10px;
-        }
-        
-        .section-title h2 {
-            color: white;
-            margin-bottom: 0;
-        }
-        
-        .highlight-box {
-            padding: 1.5em;
-            background-color: var(--gray);
-            border-left: 3px solid var(--primary);
-            margin: 1.5em 0;
-            border-radius: 5px;
-        }
-        
-        blockquote {
-            font-style: italic;
-            border-left: 3px solid var(--primary);
-            padding-left: 1em;
-            margin: 1.5em 0;
-            color: var(--primary-dark);
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 1.5em 0;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-        
-        th, td {
-            padding: 0.75em;
-            border: 1px solid #eee;
-            text-align: left;
-        }
-        
-        th {
-            background-color: var(--primary);
-            color: white;
-        }
-        
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5em;
-            margin: 1.5em 0;
-        }
-        
-        .text-center {
-            text-align: center;
-        }
-        
-        .mb-1 {
-            margin-bottom: 1em;
-        }
-        
-        .mb-2 {
-            margin-bottom: 2em;
-        }
-        
-        .mt-1 {
-            margin-top: 1em;
-        }
-        
-        .mt-2 {
-            margin-top: 2em;
-        }
-        
-        .checkmark {
-            color: var(--primary);
-            font-weight: bold;
-        }
-        
-        .team-card {
-            background-color: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            height: 100%;
-        }
-        
-        .team-header {
-            height: 160px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .team-purple {
-            background-color: var(--primary);
-        }
-        
-        .team-blue {
-            background-color: #4267B2;
-        }
-        
-        .team-green {
-            background-color: #34A853;
-        }
-        
-        .team-avatar {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background-color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 2.5rem;
-            font-weight: bold;
-        }
-        
-        .team-purple .team-avatar {
-            color: var(--primary);
-        }
-        
-        .team-blue .team-avatar {
-            color: #4267B2;
-        }
-        
-        .team-green .team-avatar {
-            color: #34A853;
-        }
-        
-        .team-content {
-            padding: 1.5em;
-        }
-        
-        .team-content h3 {
-            margin-bottom: 0.2em;
-        }
-        
-        .team-role {
-            font-weight: 600;
-            margin-bottom: 1em;
-        }
-        
-        .team-purple + .team-content .team-role {
-            color: var(--primary);
-        }
-        
-        .team-blue + .team-content .team-role {
-            color: #4267B2;
-        }
-        
-        .team-green + .team-content .team-role {
-            color: #34A853;
-        }
-        
-        .user-flow {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 2em 0;
-        }
-        
-        .four-layers-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1.5em;
-            margin-top: 2em;
-        }
-        
-        .layer-box {
-            background-color: white;
-            padding: 1.5em;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            align-items: center;
-            text-align: center;
-            transition: transform 0.3s ease;
-        }
-        
-        .layer-box:hover {
-            transform: translateY(-5px);
-        }
-        
-        .layer-box h3 {
-            color: var(--primary);
-            margin: 0.5em 0;
-        }
-        
-        .layer-icon {
-            width: 60px;
-            height: 60px;
-            background-color: var(--gray);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 0.5em;
-        }
-        
-        .layer-icon i {
-            font-size: 1.5rem;
-            color: var(--primary);
-        }
-        
-        /* Style for the Go-to-Market timeline */
-        .timeline-container {
-            position: relative;
-            margin: 2em 0;
-        }
-        
-        .timeline {
-            display: flex;
-            justify-content: space-between;
-            position: relative;
-            margin-top: 50px;
-        }
-        
-        .timeline::before {
-            content: "";
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(to right, #8639E8, #FF6B6B);
-            transform: translateY(-50%);
-            z-index: 1;
-        }
-        
-        .timeline-point {
-            position: relative;
-            z-index: 2;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 30%;
-        }
-        
-        .timeline-marker {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            background-color: white;
-            border: 4px solid var(--primary);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 15px;
-            box-shadow: 0 0 15px rgba(134, 57, 232, 0.3);
-        }
-        
-        .timeline-phase {
-            font-weight: bold;
-            font-size: 1.2rem;
-            margin-bottom: 5px;
-            color: var(--primary);
-        }
-        
-        .timeline-time {
-            font-size: 0.9rem;
-            margin-bottom: 15px;
-            color: var(--text);
-        }
-        
-        .timeline-content {
-            background-color: white;
-            border-radius: 10px;
-            padding: 15px;
-            width: 100%;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sentimental Pitch Deck</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f9fafb;
+    }
+    
+    .slide {
+      height: 100vh;
+      padding: 60px;
+      box-sizing: border-box;
+      scroll-snap-align: start;
+    }
+    
+    .slide-container {
+      scroll-snap-type: y mandatory;
+      overflow-y: scroll;
+      height: 100vh;
+      scroll-behavior: smooth;
+    }
+    
+    h1, h2, h3, h4 {
+      font-family: 'Playfair Display', serif;
+    }
+    
+    .gradient-bg {
+      background: linear-gradient(135deg, #8639E8 0%, #FF6B6B 100%);
+    }
+    
+    .gradient-text {
+      background: linear-gradient(135deg, #8639E8 0%, #FF6B6B 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    
+    .header-underline {
+      height: 4px;
+      width: 80px;
+      background: linear-gradient(135deg, #8639E8 0%, #FF6B6B 100%);
+      margin: 12px 0 24px 0;
+    }
+    
+    .navigation {
+      position: fixed;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+    }
+    
+    .nav-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin: 8px 0;
+      background-color: rgba(156, 163, 175, 0.5);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .nav-dot:hover, .nav-dot.active {
+      background-color: #8639E8;
+      transform: scale(1.2);
+    }
+    
+    .team-image {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      background-color: #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      font-weight: bold;
+      color: #8639E8;
+    }
+    
+    .card {
+      transition: all 0.3s ease;
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    .chart-bar {
+      height: 30px;
+      background: linear-gradient(90deg, #8639E8 0%, #FF6B6B 100%);
+      border-radius: 4px;
+      transition: width 1s ease-in-out;
+    }
+  </style>
 </head>
 <body>
-    <div class="pitch-deck">
-        <!-- Cover Slide -->
-        <div class="slide cover-slide">
-            <h1>SENTIMENTAL</h1>
-            <h2>Your Life, Your Story</h2>
-            <h3>$1.5M Seed Round</h3>
+  <div class="navigation" id="navigation">
+    <!-- Navigation dots will be added via JavaScript -->
+  </div>
+
+  <div class="slide-container">
+    <!-- Title Slide -->
+    <section class="slide flex items-center justify-center gradient-bg text-white" id="slide-1">
+      <div class="text-center">
+        <h1 class="text-6xl font-bold mb-6">Sentimental</h1>
+        <p class="text-2xl mb-8">Transform Your Life Story into Netflix-Style Series & More</p>
+        <div class="flex justify-center">
+          <img src="https://via.placeholder.com/400x200?text=Sentimental+Logo" alt="Sentimental Logo" class="rounded-xl">
+        </div>
+      </div>
+    </section>
+    
+    <!-- The Problem -->
+    <section class="slide flex flex-col justify-center bg-white" id="slide-2">
+      <h2 class="text-4xl font-bold text-gray-800">The Problem</h2>
+      <div class="header-underline"></div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+        <div class="bg-gray-50 p-8 rounded-xl shadow-lg card">
+          <div class="text-5xl text-purple-600 mb-4">
+            <i class="fab fa-instagram"></i>
+          </div>
+          <h3 class="text-2xl font-bold mb-4">Social Media Shows a Façade</h3>
+          <p class="text-gray-600">Instagram: Picture-perfect moments</p>
+          <p class="text-gray-600">TikTok: Entertainment & viral trends</p>
+          <p class="text-gray-600">LinkedIn: Professional achievements</p>
+          <p class="mt-4 text-gray-700">Our digital identities are curated, not authentic.</p>
         </div>
         
-        <!-- Section Title: Part 1 -->
-        <div class="section-title">
-            <h2>PART 1: THE VISION AND OPPORTUNITY</h2>
+        <div class="bg-gray-50 p-8 rounded-xl shadow-lg card">
+          <div class="text-5xl text-purple-600 mb-4">
+            <i class="fas fa-user-secret"></i>
+          </div>
+          <h3 class="text-2xl font-bold mb-4">Real Stories Remain Untold</h3>
+          <p class="text-gray-600">No platform for meaningful reflection</p>
+          <p class="text-gray-600">Limited tools for processing experiences</p>
+          <p class="text-gray-600">Authentic stories remain hidden</p>
+          <p class="mt-4 text-gray-700">The most powerful narratives never reach an audience.</p>
         </div>
         
-        <!-- Slide: The Last Frontier -->
-        <div class="slide">
-            <h2>The Last Frontier of Human Experience</h2>
-            
-            <p><strong>In a world increasingly defined by algorithms and artificial experiences...</strong></p>
-            
-            <div class="highlight-box">
-                <em>Your authentic life story is the most deeply human treasure you possess.</em>
-            </div>
-            
-            <p>We're building the platform that ensures it's preserved, understood, and shared in meaningful ways.</p>
+        <div class="bg-gray-50 p-8 rounded-xl shadow-lg card">
+          <div class="text-5xl text-purple-600 mb-4">
+            <i class="fas fa-brain"></i>
+          </div>
+          <h3 class="text-2xl font-bold mb-4">Prevention Isn't Engaging</h3>
+          <p class="text-gray-600">Mental health tools are clinical, not creative</p>
+          <p class="text-gray-600">Self-reflection lacks structure and guidance</p>
+          <p class="text-gray-600">Content creation requires technical skills</p>
+          <p class="mt-4 text-gray-700">Prevention should be as engaging as entertainment.</p>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Our Solution -->
+    <section class="slide flex flex-col justify-center bg-gray-50" id="slide-3">
+      <h2 class="text-4xl font-bold text-gray-800">Our Solution</h2>
+      <div class="header-underline"></div>
+      
+      <div class="text-center mb-8">
+        <p class="text-2xl text-gray-700 max-w-4xl mx-auto mt-8">
+          <span class="gradient-text font-semibold">Sentimental uses AI to transform personal experiences into cinematic stories, podcasts, and meaningful content with therapeutic insights.</span>
+        </p>
+      </div>
+      
+      <div class="flex flex-col md:flex-row justify-between gap-8 mt-4">
+        <div class="bg-white p-8 rounded-xl shadow-md flex-1 card">
+          <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="fas fa-microphone text-2xl"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-4 text-center">Capture</h3>
+          <p class="text-gray-600 text-center">
+            Record thoughts and experiences through voice memos, text, or guided prompts. No need for writing skills or structure.
+          </p>
         </div>
         
-        <!-- Slide: The Problem -->
-        <div class="slide">
-            <h2>The Problem: Our Stories Are Being Lost</h2>
-            
-            <ul>
-                <li><strong>Fragmentation</strong>: Our lives are scattered across devices, platforms, and formats</li>
-                <li><strong>Overwhelm</strong>: Too many moments, too little meaning</li>
-                <li><strong>Skills Gap</strong>: Most people can't effectively tell their own stories</li>
-                <li><strong>Lost Legacy</strong>: The next generation will inherit social feeds, not life stories</li>
-                <li><strong>Format Mismatch</strong>: The same story doesn't work for all audiences</li>
+        <div class="bg-white p-8 rounded-xl shadow-md flex-1 card">
+          <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="fas fa-magic text-2xl"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-4 text-center">Transform</h3>
+          <p class="text-gray-600 text-center">
+            AI creates compelling stories with therapeutic insights in multiple formats. Netflix-style series, podcasts, or books that bring new perspectives.
+          </p>
+        </div>
+        
+        <div class="bg-white p-8 rounded-xl shadow-md flex-1 card">
+          <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="fas fa-share-alt text-2xl"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-4 text-center">Share</h3>
+          <p class="text-gray-600 text-center">
+            Keep private, share with specific people, or publish to inspire others. Create different versions for different audiences.
+          </p>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Why Now -->
+    <section class="slide flex flex-col justify-center bg-white" id="slide-4">
+      <h2 class="text-4xl font-bold text-gray-800">Why Now?</h2>
+      <div class="header-underline"></div>
+      
+      <p class="text-xl text-gray-700 mb-8">Three powerful trends converging:</p>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="bg-gray-50 p-8 rounded-xl shadow-lg card">
+          <div class="text-5xl text-purple-600 mb-4">
+            <i class="fas fa-robot"></i>
+          </div>
+          <h3 class="text-2xl font-bold mb-4">AI Storytelling Revolution</h3>
+          <p class="text-gray-600">Generative AI makes personalized content creation possible at scale</p>
+          <p class="text-gray-600 mt-4">Natural language models can now understand emotional arcs and narrative structure</p>
+          <p class="text-gray-600 mt-4">Content personalization increasingly expected by consumers</p>
+        </div>
+        
+        <div class="bg-gray-50 p-8 rounded-xl shadow-lg card">
+          <div class="text-5xl text-purple-600 mb-4">
+            <i class="fas fa-heartbeat"></i>
+          </div>
+          <h3 class="text-2xl font-bold mb-4">Mental Health Awareness</h3>
+          <p class="text-gray-600">40% increase in seeking mental health resources since 2020</p>
+          <p class="text-gray-600 mt-4">Prevention increasingly recognized as vital in healthcare</p>
+          <p class="text-gray-600 mt-4">78% of people want mental health support that fits into their lifestyle</p>
+        </div>
+        
+        <div class="bg-gray-50 p-8 rounded-xl shadow-lg card">
+          <div class="text-5xl text-purple-600 mb-4">
+            <i class="fas fa-film"></i>
+          </div>
+          <h3 class="text-2xl font-bold mb-4">Content Consumption Shift</h3>
+          <p class="text-gray-600">Streaming platforms demonstrate appetite for personal narratives</p>
+          <p class="text-gray-600 mt-4">Podcasting growth shows desire for intimate, authentic stories</p>
+          <p class="text-gray-600 mt-4">Demand for authentic content in a world of filters and fakery</p>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Product Experience -->
+    <section class="slide flex flex-col justify-center bg-gray-50" id="slide-5">
+      <h2 class="text-4xl font-bold text-gray-800">Product Experience</h2>
+      <div class="header-underline"></div>
+      
+      <div class="flex flex-col md:flex-row gap-12 mt-8">
+        <div class="md:w-1/2">
+          <img src="https://via.placeholder.com/600x400?text=Netflix-Style+Series" alt="Netflix-Style Series" class="rounded-xl shadow-lg">
+        </div>
+        
+        <div class="md:w-1/2 flex flex-col justify-center">
+          <h3 class="text-2xl font-bold mb-6">From scattered thoughts to cinematic storytelling</h3>
+          
+          <div class="mb-6">
+            <h4 class="text-xl font-bold text-purple-600 mb-2">Multiple formats</h4>
+            <ul class="space-y-2">
+              <li class="flex items-start">
+                <i class="fas fa-check text-purple-600 mt-1 mr-2"></i>
+                <span>Netflix-style visual stories with chapters and themes</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fas fa-check text-purple-600 mt-1 mr-2"></i>
+                <span>Spotify-quality audio narratives with music</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fas fa-check text-purple-600 mt-1 mr-2"></i>
+                <span>Beautiful digital books and illustrated journals</span>
+              </li>
             </ul>
-            
-            <blockquote>"Future generations will know what we looked like, but not who we were."</blockquote>
-        </div>
-        
-        <!-- Slide: Current Solutions -->
-        <div class="slide">
-            <h2>Current Solutions Fall Short</h2>
-            
-            <table>
-                <tr>
-                    <th>Approach</th>
-                    <th>Limitations</th>
-                </tr>
-                <tr>
-                    <td><strong>Social Media</strong></td>
-                    <td>Surface-level, performative, doesn't capture real substance</td>
-                </tr>
-                <tr>
-                    <td><strong>Journals/Diaries</strong></td>
-                    <td>Time-consuming, requires writing skill, single-format</td>
-                </tr>
-                <tr>
-                    <td><strong>Photo/Video Services</strong></td>
-                    <td>Visual only, no narrative structure, poor organization</td>
-                </tr>
-                <tr>
-                    <td><strong>Memoir Writing</strong></td>
-                    <td>Expensive, one-time creation, requires significant skill</td>
-                </tr>
-                <tr>
-                    <td><strong>Legacy Services</strong></td>
-                    <td>Focus only on end-of-life, not ongoing story creation</td>
-                </tr>
-            </table>
-        </div>
-        
-        <!-- Slide: Market Opportunity -->
-        <div class="slide">
-            <h2>Market Opportunity</h2>
-            
-            <div class="highlight-box">
-                <strong>$117B+ Total Addressable Market</strong>
-            </div>
-            
-            <ul>
-                <li><strong>$42B</strong> Personal Development Market</li>
-                <li><strong>$31B</strong> Digital Content Creation Tools</li>
-                <li><strong>$25B</strong> Memory Preservation Services</li>
-                <li><strong>$19B</strong> Legacy Planning Services</li>
+          </div>
+          
+          <div>
+            <h4 class="text-xl font-bold text-purple-600 mb-2">Therapeutic layer</h4>
+            <ul class="space-y-2">
+              <li class="flex items-start">
+                <i class="fas fa-check text-purple-600 mt-1 mr-2"></i>
+                <span>AI-powered reflection and insights</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fas fa-check text-purple-600 mt-1 mr-2"></i>
+                <span>Pattern recognition across experiences</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fas fa-check text-purple-600 mt-1 mr-2"></i>
+                <span>New perspectives on personal journey</span>
+              </li>
             </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Market Opportunity -->
+    <section class="slide flex flex-col justify-center bg-white" id="slide-6">
+      <h2 class="text-4xl font-bold text-gray-800">Market Opportunity</h2>
+      <div class="header-underline"></div>
+      
+      <p class="text-xl text-gray-700 mb-8">Sentimental sits at the intersection of three massive markets:</p>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+        <div class="bg-gray-50 p-8 rounded-xl shadow-lg card">
+          <div class="text-center mb-4">
+            <span class="text-3xl font-bold gradient-text">$5.2B</span>
+            <p class="text-gray-500">17.5% CAGR</p>
+          </div>
+          <h3 class="text-2xl font-bold mb-4 text-center">Mental Health Apps</h3>
+          <p class="text-gray-600 text-center">Digital mental health solutions growing rapidly post-pandemic</p>
+        </div>
+        
+        <div class="bg-gray-50 p-8 rounded-xl shadow-lg card">
+          <div class="text-center mb-4">
+            <span class="text-3xl font-bold gradient-text">$41.8B</span>
+            <p class="text-gray-500">5.1% CAGR</p>
+          </div>
+          <h3 class="text-2xl font-bold mb-4 text-center">Personal Development</h3>
+          <p class="text-gray-600 text-center">Self-improvement and reflection tools for life enhancement</p>
+        </div>
+        
+        <div class="bg-gray-50 p-8 rounded-xl shadow-lg card">
+          <div class="text-center mb-4">
+            <span class="text-3xl font-bold gradient-text">$11.6B</span>
+            <p class="text-gray-500">12% CAGR</p>
+          </div>
+          <h3 class="text-2xl font-bold mb-4 text-center">Content Creation</h3>
+          <p class="text-gray-600 text-center">Tools that help create professional-quality content</p>
+        </div>
+      </div>
+      
+      <div class="bg-purple-100 p-8 rounded-xl text-center">
+        <h3 class="text-2xl font-bold text-purple-800 mb-2">Total Addressable Market</h3>
+        <p class="text-4xl font-bold gradient-text">$58.6B</p>
+      </div>
+    </section>
+    
+    <!-- Business Model -->
+    <section class="slide flex flex-col justify-center bg-gray-50" id="slide-7">
+      <h2 class="text-4xl font-bold text-gray-800">Business Model</h2>
+      <div class="header-underline"></div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-12 mt-8">
+        <div>
+          <h3 class="text-2xl font-bold mb-6">B2C Subscription with premium tiers:</h3>
+          
+          <div class="space-y-8">
+            <div class="bg-white p-6 rounded-xl shadow-md">
+              <div class="flex justify-between items-center mb-4">
+                <h4 class="text-xl font-bold">Free</h4>
+                <span class="bg-gray-200 text-gray-700 px-4 py-1 rounded-full text-sm font-semibold">$0</span>
+              </div>
+              <p class="text-gray-600 mb-2">Basic story creation with ads</p>
+              <p class="text-gray-600">Limited formats and insights</p>
+            </div>
             
-            <h3 class="mt-2">Key Market Drivers:</h3>
-            <ul>
-                <li>Aging population seeking meaning</li>
-                <li>Digital natives creating personal brands</li>
-                <li>Remote families needing deeper connection</li>
-                <li>Rising self-documentation culture</li>
+            <div class="bg-white p-6 rounded-xl shadow-md border-2 border-purple-500">
+              <div class="flex justify-between items-center mb-4">
+                <h4 class="text-xl font-bold text-purple-600">Premium</h4>
+                <span class="bg-purple-600 text-white px-4 py-1 rounded-full text-sm font-semibold">$7.99/month</span>
+              </div>
+              <p class="text-gray-600 mb-2">Ad-free with all story formats</p>
+              <p class="text-gray-600">Full therapeutic insights and unlimited stories</p>
+            </div>
+            
+            <div class="bg-white p-6 rounded-xl shadow-md">
+              <div class="flex justify-between items-center mb-4">
+                <h4 class="text-xl font-bold">Creator+</h4>
+                <span class="bg-gray-800 text-white px-4 py-1 rounded-full text-sm font-semibold">$14.99/month</span>
+              </div>
+              <p class="text-gray-600 mb-2">Premium features and exclusive formats</p>
+              <p class="text-gray-600">Revenue sharing opportunities and early access</p>
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <h3 class="text-2xl font-bold mb-6">Revenue Projections:</h3>
+          
+          <div class="space-y-6">
+            <div>
+              <div class="flex justify-between mb-2">
+                <span class="font-bold">Year 1: $1M ARR</span>
+                <span>10,500 paying subscribers</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-4">
+                <div class="chart-bar w-[10%]"></div>
+              </div>
+            </div>
+            
+            <div>
+              <div class="flex justify-between mb-2">
+                <span class="font-bold">Year 3: $24M ARR</span>
+                <span>120,000 paying subscribers</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-4">
+                <div class="chart-bar w-[50%]"></div>
+              </div>
+            </div>
+            
+            <div>
+              <div class="flex justify-between mb-2">
+                <span class="font-bold">Year 5: $120M ARR</span>
+                <span>500,000 paying subscribers</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-4">
+                <div class="chart-bar w-[80%]"></div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mt-12 bg-purple-100 p-6 rounded-xl">
+            <h4 class="text-xl font-bold text-purple-800 mb-4">Additional Revenue Streams (Year 2+)</h4>
+            <ul class="space-y-2">
+              <li class="flex items-start">
+                <i class="fas fa-check text-purple-600 mt-1 mr-2"></i>
+                <span><strong>Teaser Partnerships</strong>: Short-form content teasers for Netflix, social platforms while keeping full stories on Sentimental</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fas fa-check text-purple-600 mt-1 mr-2"></i>
+                <span><strong>In-App Purchases</strong>: Premium story templates, special effects, and exclusive formats</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fas fa-check text-purple-600 mt-1 mr-2"></i>
+                <span><strong>Creator Economy</strong>: Marketplace for popular storytellers with revenue sharing model</span>
+              </li>
             </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Go-To-Market Strategy -->
+    <section class="slide flex flex-col justify-center bg-white" id="slide-8">
+      <h2 class="text-4xl font-bold text-gray-800">Go-To-Market Strategy</h2>
+      <div class="header-underline"></div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
+        <div class="bg-gray-50 p-8 rounded-xl shadow-lg card">
+          <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <span class="text-2xl font-bold">1</span>
+          </div>
+          <h3 class="text-xl font-bold mb-4 text-center">Launch Phase (0-6 months)</h3>
+          <ul class="space-y-3">
+            <li class="flex items-start">
+              <i class="fas fa-check text-purple-600 mt-1 mr-2"></i>
+              <span>Waitlist-driven exclusivity</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-check text-purple-600 mt-1 mr-2"></i>
+              <span>Targeted influencer partnerships</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-check text-purple-600 mt-1 mr-2"></i>
+              <span>Content marketing focused on mental wellbeing</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-check text-purple-600 mt-1 mr-2"></i>
+              <span>Early adoption by content creators and storytellers</span>
+            </li>
+          </ul>
         </div>
         
-        <!-- Slide: Introducing Sentimental -->
-        <div class="slide">
-            <h2>Introducing Sentimental</h2>
-            
-            <div class="highlight-box">
-                <strong>The first AI platform that transforms how people document, understand, and share their life stories across multiple formats and audiences.</strong>
-            </div>
-            
-            <p><em>We're not just building another content tool. We're creating the future of human storytelling.</em></p>
+        <div class="bg-gray-50 p-8 rounded-xl shadow-lg card">
+          <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <span class="text-2xl font-bold">2</span>
+          </div>
+          <h3 class="text-xl font-bold mb-4 text-center">Growth Phase (6-18 months)</h3>
+          <ul class="space-y-3">
+            <li class="flex items-start">
+              <i class="fas fa-check text-purple-600 mt-1 mr-2"></i>
+              <span>Community-driven expansion</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-check text-purple-600 mt-1 mr-2"></i>
+              <span>Strategic partnerships with wellness platforms</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-check text-purple-600 mt-1 mr-2"></i>
+              <span>Referral program rewarding authentic sharing</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-check text-purple-600 mt-1 mr-2"></i>
+              <span>First content licensing deals with producers</span>
+            </li>
+          </ul>
         </div>
         
-        <!-- Section Title: Part 2 -->
-        <div class="section-title">
-            <h2>PART 2: THE PRODUCT AND DIFFERENTIATION</h2>
+        <div class="bg-gray-50 p-8 rounded-xl shadow-lg card">
+          <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <span class="text-2xl font-bold">3</span>
+          </div>
+          <h3 class="text-xl font-bold mb-4 text-center">Scale Phase (18+ months)</h3>
+          <ul class="space-y-3">
+            <li class="flex items-start">
+              <i class="fas fa-check text-purple-600 mt-1 mr-2"></i>
+              <span>International expansion</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-check text-purple-600 mt-1 mr-2"></i>
+              <span>Strategic teaser partnerships while maintaining core storytelling on platform</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-check text-purple-600 mt-1 mr-2"></i>
+              <span>B2B offerings for employee wellbeing</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-check text-purple-600 mt-1 mr-2"></i>
+              <span>API for third-party integrations</span>
+            </li>
+          </ul>
         </div>
-        
-        <!-- Slide: How Sentimental Works -->
-        <div class="slide">
-            <h2>How Sentimental Works</h2>
-            
-            <p><strong>1. Capture Moments Easily</strong><br>
-            Quick voice notes, photos, and simple prompts help document life without disrupting the experience</p>
-            
-            <p><strong>2. AI Creates Cohesive Stories</strong><br>
-            Your scattered moments become compelling narratives, organized by themes and emotional arcs</p>
-            
-            <p><strong>3. Different Stories For Different Audiences</strong><br>
-            Create separate versions for personal reflection, family legacy, or public sharing</p>
-            
-            <p><strong>4. Multiple Formats, One Story</strong><br>
-            Turn your experiences into books, audiobooks, social posts, or mini-documentaries</p>
-        </div>
-        
-        <!-- Slide: Four Layers -->
-        <div class="slide">
-            <h2>The Four Layers of Your Life Story</h2>
-            
-            <div style="display: flex; justify-content: center; position: relative; height: 450px; margin-bottom: 1em;">
-                <svg width="100%" height="450" viewBox="0 0 1000 450">
-                    <defs>
-                        <radialGradient id="therapeutic-gradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-                            <stop offset="0%" style="stop-color:#8639E8;stop-opacity:0.9" />
-                            <stop offset="100%" style="stop-color:#8639E8;stop-opacity:0.6" />
-                        </radialGradient>
-                        
-                        <radialGradient id="legacy-gradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-                            <stop offset="0%" style="stop-color:#A142D0;stop-opacity:0.1" />
-                            <stop offset="100%" style="stop-color:#A142D0;stop-opacity:0.4" />
-                        </radialGradient>
-                        
-                        <radialGradient id="social-gradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-                            <stop offset="0%" style="stop-color:#BC4BB9;stop-opacity:0.1" />
-                            <stop offset="100%" style="stop-color:#BC4BB9;stop-opacity:0.3" />
-                        </radialGradient>
-                        
-                        <radialGradient id="memory-gradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-                            <stop offset="0%" style="stop-color:#FF6B6B;stop-opacity:0.1" />
-                            <stop offset="100%" style="stop-color:#FF6B6B;stop-opacity:0.2" />
-                        </radialGradient>
-                        
-                        <filter id="layer-glow" x="-50%" y="-50%" width="200%" height="200%">
-                            <feGaussianBlur stdDeviation="5" result="blur" />
-                            <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                        </filter>
-                        
-                        <filter id="drop-shadow-layer" x="-10%" y="-10%" width="120%" height="120%">
-                            <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#00000022" />
-                        </filter>
-                    </defs>
-                    
-                    <!-- Person Silhouette in Center -->
-                    <g transform="translate(500, 200)">
-                        <circle cx="0" cy="0" r="70" fill="white" stroke="#8639E8" stroke-width="3" filter="url(#drop-shadow-layer)" />
-                        <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#8639E8" font-size="60">&#xf007;</text>
-                        <text x="0" y="100" text-anchor="middle" font-family="Playfair Display, serif" fill="#333" font-size="20" font-weight="bold">Your Life Story</text>
-                    </g>
-                    
-                    <!-- Layer 4 - Memory Layer (Outermost) -->
-                    <g transform="translate(500, 200)">
-                        <circle cx="0" cy="0" r="220" fill="url(#memory-gradient)" stroke="#FF6B6B" stroke-width="3" stroke-dasharray="5,5" filter="url(#layer-glow)" />
-                        
-                        <!-- Memory Layer Label -->
-                        <g transform="translate(0, -220)">
-                            <rect x="-75" y="-20" width="150" height="40" rx="20" ry="20" fill="white" stroke="#FF6B6B" stroke-width="2" />
-                            <text x="0" y="5" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#FF6B6B" font-size="14">MEMORY LAYER</text>
-                        </g>
-                        
-                        <!-- Memory Icon -->
-                        <g transform="translate(180, 0)">
-                            <circle cx="0" cy="0" r="30" fill="white" stroke="#FF6B6B" stroke-width="2" />
-                            <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#FF6B6B" font-size="24">&#xf1da;</text>
-                        </g>
-                        
-                        <!-- Memory Feature -->
-                        <g transform="translate(140, 80)">
-                            <rect x="-70" y="-15" width="140" height="30" rx="15" ry="15" fill="white" stroke="#FF6B6B" stroke-width="1" />
-                            <text x="0" y="5" text-anchor="middle" font-family="Inter, sans-serif" fill="#FF6B6B" font-size="12">Complete Archive</text>
-                        </g>
-                    </g>
-                    
-                    <!-- Layer 3 - Social Layer -->
-                    <g transform="translate(500, 200)">
-                        <circle cx="0" cy="0" r="170" fill="url(#social-gradient)" stroke="#BC4BB9" stroke-width="3" filter="url(#layer-glow)" />
-                        
-                        <!-- Social Layer Label -->
-                        <g transform="translate(0, -170)">
-                            <rect x="-75" y="-20" width="150" height="40" rx="20" ry="20" fill="white" stroke="#BC4BB9" stroke-width="2" />
-                            <text x="0" y="5" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#BC4BB9" font-size="14">SOCIAL LAYER</text>
-                        </g>
-                        
-                        <!-- Social Icon -->
-                        <g transform="translate(0, 140)">
-                            <circle cx="0" cy="0" r="30" fill="white" stroke="#BC4BB9" stroke-width="2" />
-                            <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#BC4BB9" font-size="24">&#xf1e0;</text>
-                        </g>
-                        
-                        <!-- Social Feature -->
-                        <g transform="translate(-100, 100)">
-                            <rect x="-70" y="-15" width="140" height="30" rx="15" ry="15" fill="white" stroke="#BC4BB9" stroke-width="1" />
-                            <text x="0" y="5" text-anchor="middle" font-family="Inter, sans-serif" fill="#BC4BB9" font-size="12">Public Sharing</text>
-                        </g>
-                    </g>
-                    
-                    <!-- Layer 2 - Legacy Layer -->
-                    <g transform="translate(500, 200)">
-                        <circle cx="0" cy="0" r="120" fill="url(#legacy-gradient)" stroke="#A142D0" stroke-width="3" filter="url(#layer-glow)" />
-                        
-                        <!-- Legacy Layer Label -->
-                        <g transform="translate(0, -120)">
-                            <rect x="-75" y="-20" width="150" height="40" rx="20" ry="20" fill="white" stroke="#A142D0" stroke-width="2" />
-                            <text x="0" y="5" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#A142D0" font-size="14">LEGACY LAYER</text>
-                        </g>
-                        
-                        <!-- Legacy Icon -->
-                        <g transform="translate(-90, 0)">
-                            <circle cx="0" cy="0" r="30" fill="white" stroke="#A142D0" stroke-width="2" />
-                            <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#A142D0" font-size="24">&#xf06c;</text>
-                        </g>
-                        
-                        <!-- Legacy Feature -->
-                        <g transform="translate(60, -80)">
-                            <rect x="-70" y="-15" width="140" height="30" rx="15" ry="15" fill="white" stroke="#A142D0" stroke-width="1" />
-                            <text x="0" y="5" text-anchor="middle" font-family="Inter, sans-serif" fill="#A142D0" font-size="12">Family Histories</text>
-                        </g>
-                    </g>
-                    
-                    <!-- Layer 1 - Therapeutic Layer (Innermost) -->
-                    <g transform="translate(500, 200)">
-                        <circle cx="0" cy="0" r="80" fill="url(#therapeutic-gradient)" stroke="#8639E8" stroke-width="3" filter="url(#layer-glow)" />
-                        
-                        <!-- Therapeutic Layer Label on Person -->
-                        <g transform="translate(0, -80)">
-                            <rect x="-75" y="-20" width="150" height="40" rx="20" ry="20" fill="white" stroke="#8639E8" stroke-width="2" />
-                            <text x="0" y="5" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#8639E8" font-size="14">THERAPEUTIC LAYER</text>
-                        </g>
-                        
-                        <!-- Therapeutic Feature -->
-                        <g transform="translate(-55, 40)">
-                            <rect x="-55" y="-15" width="110" height="30" rx="15" ry="15" fill="white" stroke="#8639E8" stroke-width="1" />
-                            <text x="0" y="5" text-anchor="middle" font-family="Inter, sans-serif" fill="#8639E8" font-size="12">Personal Growth</text>
-                        </g>
-                    </g>
-                    
-                    <!-- Connection Lines -->
-                    <line x1="180" y1="450" x2="320" y2="370" stroke="#8639E8" stroke-width="2" stroke-dasharray="5,5" />
-                    <line x1="380" y1="450" x2="410" y2="370" stroke="#A142D0" stroke-width="2" stroke-dasharray="5,5" />
-                    <line x1="580" y1="450" x2="560" y2="370" stroke="#BC4BB9" stroke-width="2" stroke-dasharray="5,5" />
-                    <line x1="780" y1="450" x2="680" y2="370" stroke="#FF6B6B" stroke-width="2" stroke-dasharray="5,5" />
-                </svg>
-            </div>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 15px; margin-top: 0;">
-                <div style="background: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 1.5em; border-top: 3px solid #8639E8; display: flex; flex-direction: column; align-items: center; text-align: center; transition: transform 0.3s ease;">
-                    <div style="width: 50px; height: 50px; background: #F0E6FD; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-bottom: 1em;">
-                        <i class="fas fa-heart" style="color: #8639E8; font-size: 22px;"></i>
-                    </div>
-                    <h3 style="color: #8639E8; margin-bottom: 0.5em;">Therapeutic Layer</h3>
-                    <p style="font-size: 0.9em; color: #666;">Private reflections for personal growth and therapy sessions</p>
-                </div>
-                
-                <div style="background: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 1.5em; border-top: 3px solid #A142D0; display: flex; flex-direction: column; align-items: center; text-align: center; transition: transform 0.3s ease;">
-                    <div style="width: 50px; height: 50px; background: #F0E6FD; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-bottom: 1em;">
-                        <i class="fas fa-seedling" style="color: #A142D0; font-size: 22px;"></i>
-                    </div>
-                    <h3 style="color: #A142D0; margin-bottom: 0.5em;">Legacy Layer</h3>
-                    <p style="font-size: 0.9em; color: #666;">Meaningful narratives for loved ones and future generations</p>
-                </div>
-                
-                <div style="background: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 1.5em; border-top: 3px solid #BC4BB9; display: flex; flex-direction: column; align-items: center; text-align: center; transition: transform 0.3s ease;">
-                    <div style="width: 50px; height: 50px; background: #F0E6FD; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-bottom: 1em;">
-                        <i class="fas fa-share-alt" style="color: #BC4BB9; font-size: 22px;"></i>
-                    </div>
-                    <h3 style="color: #BC4BB9; margin-bottom: 0.5em;">Social Layer</h3>
-                    <p style="font-size: 0.9em; color: #666;">Polished content for followers and professional networks</p>
-                </div>
-                
-                <div style="background: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 1.5em; border-top: 3px solid #FF6B6B; display: flex; flex-direction: column; align-items: center; text-align: center; transition: transform 0.3s ease;">
-                    <div style="width: 50px; height: 50px; background: #F0E6FD; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-bottom: 1em;">
-                        <i class="fas fa-history" style="color: #FF6B6B; font-size: 22px;"></i>
-                    </div>
-                    <h3 style="color: #FF6B6B; margin-bottom: 0.5em;">Memory Layer</h3>
-                    <p style="font-size: 0.9em; color: #666;">The complete archive for your future self</p>
-                </div>
-            </div>
-            
-            <p class="text-center" style="margin-top: 1.5em; font-style: italic; color: #8639E8;">One life. Multiple narratives. Share what matters with who matters.</p>
-        </div>
-        
-        <!-- Slide: Competitive Landscape -->
-        <div class="slide">
-            <h2>Competitive Landscape</h2>
-            
-            <table>
-                <tr>
-                    <th></th>
-                    <th>Sentimental</th>
-                    <th>Social Media</th>
-                    <th>Journaling Apps</th>
-                    <th>Memoir Services</th>
-                    <th>Digital Legacy</th>
-                </tr>
-                <tr>
-                    <td><strong>AI Story Creation</strong></td>
-                    <td class="checkmark">✓</td>
-                    <td></td>
-                    <td></td>
-                    <td>Limited</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td><strong>Multiple Audiences</strong></td>
-                    <td class="checkmark">✓</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td><strong>Format Flexibility</strong></td>
-                    <td class="checkmark">✓</td>
-                    <td>Limited</td>
-                    <td></td>
-                    <td>Limited</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td><strong>Therapeutic Value</strong></td>
-                    <td class="checkmark">✓</td>
-                    <td></td>
-                    <td>Limited</td>
-                    <td>Limited</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td><strong>Preservation Focus</strong></td>
-                    <td class="checkmark">✓</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td class="checkmark">✓</td>
-                </tr>
-                <tr>
-                    <td><strong>Ongoing Creation</strong></td>
-                    <td class="checkmark">✓</td>
-                    <td class="checkmark">✓</td>
-                    <td class="checkmark">✓</td>
-                    <td></td>
-                    <td></td>
-                </tr>
-            </table>
-        </div>
-        
-        <!-- Slide: Technology Advantage -->
-        <div class="slide">
-            <h2>Our Technology Advantage</h2>
-            
-            <div class="grid-container">
-                <div class="highlight-box">
-                    <h3>1. Contextual AI</h3>
-                    <ul>
-                        <li>Understands emotional significance of moments</li>
-                        <li>Creates natural narrative flow from fragments</li>
-                        <li>Learns your personal style and preferences</li>
-                    </ul>
-                </div>
-                
-                <div class="highlight-box">
-                    <h3>2. Multi-Context Translation</h3>
-                    <ul>
-                        <li>Adapts content for different audiences</li>
-                        <li>Preserves authenticity while tailoring presentation</li>
-                    </ul>
-                </div>
-                
-                <div class="highlight-box">
-                    <h3>3. Format-Fluid Design</h3>
-                    <ul>
-                        <li>Single-input, multi-output architecture</li>
-                        <li>Seamless transitions between formats</li>
-                    </ul>
-                </div>
-                
-                <div class="highlight-box">
-                    <h3>4. Ethical Privacy Architecture</h3>
-                    <ul>
-                        <li>Granular controls for sharing</li>
-                        <li>Advanced encryption for sensitive content</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Slide: User Experience -->
-        <div class="slide">
-            <h2>User Experience: Sarah's Marathon Journey</h2>
-            
-            <div style="margin: 2em 0;">
-                <svg width="100%" height="400" viewBox="0 0 900 400">
-                    <defs>
-                        <linearGradient id="user-flow-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" style="stop-color:#8639E8;stop-opacity:1" />
-                            <stop offset="100%" style="stop-color:#FF6B6B;stop-opacity:1" />
-                        </linearGradient>
-                        <filter id="drop-shadow" x="-20%" y="-20%" width="140%" height="140%">
-                            <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#00000022" />
-                        </filter>
-                    </defs>
-                    
-                    <!-- Sarah Running Silhouette -->
-                    <g transform="translate(450, 50)">
-                        <ellipse cx="0" cy="0" rx="35" ry="35" fill="#F0E6FD" />
-                        <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#8639E8" font-size="28">&#xf70c;</text>
-                        <text x="0" y="50" text-anchor="middle" font-family="Playfair Display, serif" fill="#333" font-size="16" font-weight="bold">Sarah's Marathon Journey</text>
-                    </g>
-                    
-                    <!-- Main Flow Path -->
-                    <path d="M100,200 C150,120 320,240 450,200 C580,160 750,280 800,200" stroke="url(#user-flow-gradient)" stroke-width="6" fill="none" stroke-linecap="round" filter="url(#drop-shadow)" />
-                    
-                    <!-- First Stage: Input -->
-                    <g transform="translate(100, 200)">
-                        <!-- Stage Circle -->
-                        <circle cx="0" cy="0" r="65" fill="white" stroke="#8639E8" stroke-width="3" filter="url(#drop-shadow)" />
-                        <circle cx="0" cy="-25" r="25" fill="#F0E6FD" />
-                        <text x="0" y="-25" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#8639E8" font-size="18">&#xf0c0;</text>
-                        <text x="0" y="15" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#8639E8" font-size="14">CAPTURE</text>
-                        
-                        <!-- Input Examples -->
-                        <g transform="translate(-45, 120)">
-                            <rect x="-40" y="-40" width="80" height="80" rx="10" ry="10" fill="white" stroke="#8639E8" stroke-width="2" />
-                            <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#8639E8" font-size="22">&#xf130;</text>
-                            <text x="0" y="50" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Voice Notes</text>
-                        </g>
-                        
-                        <g transform="translate(45, 120)">
-                            <rect x="-40" y="-40" width="80" height="80" rx="10" ry="10" fill="white" stroke="#8639E8" stroke-width="2" />
-                            <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#8639E8" font-size="22">&#xf03e;</text>
-                            <text x="0" y="50" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Training Photos</text>
-                        </g>
-                        
-                        <g transform="translate(0, 200)">
-                            <rect x="-40" y="-40" width="80" height="80" rx="10" ry="10" fill="white" stroke="#8639E8" stroke-width="2" />
-                            <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#8639E8" font-size="22">&#xf201;</text>
-                            <text x="0" y="50" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Fitness Data</text>
-                        </g>
-                    </g>
-                    
-                    <!-- Second Stage: AI Processing -->
-                    <g transform="translate(450, 200)">
-                        <!-- Stage Circle -->
-                        <circle cx="0" cy="0" r="65" fill="white" stroke="#BE4BB9" stroke-width="3" filter="url(#drop-shadow)" />
-                        <circle cx="0" cy="-25" r="25" fill="#F0E6FD" />
-                        <text x="0" y="-25" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#BE4BB9" font-size="18">&#xf085;</text>
-                        <text x="0" y="15" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#BE4BB9" font-size="14">PROCESS</text>
-                        
-                        <!-- AI Processing Animation -->
-                        <g transform="translate(0, 120)">
-                            <rect x="-100" y="-60" width="200" height="120" rx="10" ry="10" fill="white" stroke="#BE4BB9" stroke-width="2" />
-                            <text x="0" y="-30" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#BE4BB9" font-size="14">AI TRANSFORMATION</text>
-                            
-                            <!-- Animation Lines -->
-                            <line x1="-80" y1="-10" x2="80" y2="-10" stroke="#BE4BB9" stroke-width="3" stroke-dasharray="5,5" />
-                            <line x1="-75" y1="10" x2="75" y2="10" stroke="#BE4BB9" stroke-width="3" stroke-dasharray="5,5" />
-                            <line x1="-70" y1="30" x2="70" y2="30" stroke="#BE4BB9" stroke-width="3" stroke-dasharray="5,5" />
-                            
-                            <text x="0" y="65" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Creating emotional narrative arc</text>
-                        </g>
-                    </g>
-                    
-                    <!-- Third Stage: Output -->
-                    <g transform="translate(800, 200)">
-                        <!-- Stage Circle -->
-                        <circle cx="0" cy="0" r="65" fill="white" stroke="#FF6B6B" stroke-width="3" filter="url(#drop-shadow)" />
-                        <circle cx="0" cy="-25" r="25" fill="#F0E6FD" />
-                        <text x="0" y="-25" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#FF6B6B" font-size="18">&#xf0ee;</text>
-                        <text x="0" y="15" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#FF6B6B" font-size="14">SHARE</text>
-                        
-                        <!-- Output Formats -->
-                        <g transform="translate(-45, 120)">
-                            <rect x="-40" y="-40" width="80" height="80" rx="10" ry="10" fill="white" stroke="#FF6B6B" stroke-width="2" />
-                            <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#FF6B6B" font-size="22">&#xf02d;</text>
-                            <text x="0" y="50" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Memoir</text>
-                        </g>
-                        
-                        <g transform="translate(45, 120)">
-                            <rect x="-40" y="-40" width="80" height="80" rx="10" ry="10" fill="white" stroke="#FF6B6B" stroke-width="2" />
-                            <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#FF6B6B" font-size="22">&#xf1e0;</text>
-                            <text x="0" y="50" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Social Content</text>
-                        </g>
-                        
-                        <g transform="translate(0, 200)">
-                            <rect x="-40" y="-40" width="80" height="80" rx="10" ry="10" fill="white" stroke="#FF6B6B" stroke-width="2" />
-                            <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#FF6B6B" font-size="22">&#xf5b9;</text>
-                            <text x="0" y="50" text-anchor="middle" font-family="Inter, sans-serif" fill="#4A4A4A" font-size="12">Private Journal</text>
-                        </g>
-                    </g>
-                </svg>
-            </div>
-            
-            <div class="grid-container" style="grid-template-columns: 1fr 1fr 1fr; margin-bottom: 2em;">
-                <div class="highlight-box" style="border-left-color: #8639E8; margin-bottom: 0;">
-                    <h3 style="color: #8639E8; text-align: center;"><i class="fas fa-microphone" style="margin-right: 8px;"></i>Capture</h3>
-                    <ul>
-                        <li>"Just finished a 10-mile run today. My knees were hurting but I pushed through."</li>
-                        <li>Photos of her first race bib and medal</li>
-                        <li>Heart rate and pace data from her watch</li>
-                        <li>Weekly reflection on mental barriers</li>
-                    </ul>
-                </div>
-                
-                <div class="highlight-box" style="border-left-color: #BE4BB9; margin-bottom: 0;">
-                    <h3 style="color: #BE4BB9; text-align: center;"><i class="fas fa-brain" style="margin-right: 8px;"></i>Process</h3>
-                    <ul>
-                        <li>Identified mental resilience theme across entries</li>
-                        <li>Connected physical milestones to emotional growth</li>
-                        <li>Organized fragmented moments into compelling narrative arc</li>
-                        <li>Applied appropriate tone for each audience</li>
-                    </ul>
-                </div>
-                
-                <div class="highlight-box" style="border-left-color: #FF6B6B; margin-bottom: 0;">
-                    <h3 style="color: #FF6B6B; text-align: center;"><i class="fas fa-share-alt" style="margin-right: 8px;"></i>Share</h3>
-                    <ul>
-                        <li>Inspirational book: "From Couch to Marathon at 45"</li>
-                        <li>Social content series featuring training methods</li>
-                        <li>Private journal tracking confidence transformation</li>
-                        <li>All from the same input, tailored for each context</li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="text-center">
-                <p style="font-style: italic; color: #8639E8; font-size: 1.2em;">"Sarah's journey shows how scattered moments become meaningful, tailored narratives."</p>
-            </div>
-        </div>
-        
-        <!-- Section Title: Part 3 -->
-        <div class="section-title">
-            <h2>PART 3: BUSINESS MODEL AND INVESTMENT</h2>
-        </div>
-        
-        <!-- Slide: Business Model -->
-        <div class="slide">
-            <h2>Business Model</h2>
-            
-            <h3>Three-Tiered Subscription Model:</h3>
-            
-            <div class="grid-container">
-                <div class="highlight-box">
-                    <h3>Essentials: $7.99/month</h3>
-                    <ul>
-                        <li>Basic AI story creation</li>
-                        <li>Two audience layers</li>
-                        <li>Digital formats only</li>
-                    </ul>
-                </div>
-                
-                <div class="highlight-box">
-                    <h3>Premium: $14.99/month</h3>
-                    <ul>
-                        <li>Advanced AI story creation</li>
-                        <li>All audience layers</li>
-                        <li>Digital + physical formats (1 book/year)</li>
-                    </ul>
-                </div>
-                
-                <div class="highlight-box">
-                    <h3>Professional: $29.99/month</h3>
-                    <ul>
-                        <li>Everything in Premium</li>
-                        <li>Priority AI processing</li>
-                        <li>Advanced analytics</li>
-                        <li>Collaborative storytelling tools</li>
-                    </ul>
-                </div>
-            </div>
-            
-            <h3 class="mt-2">Additional Revenue:</h3>
-            <ul>
-                <li>Premium physical products (extra books, custom formats)</li>
-                <li>API for therapists and legacy planners</li>
-                <li>Enterprise solution for senior living communities</li>
-            </ul>
-        </div>
-        
-        <!-- Slide: Go-To-Market Strategy -->
-        <div class="slide">
-            <h2>Go-To-Market Strategy</h2>
-            
-            <svg width="100%" height="350" viewBox="0 0 900 350">
-                <defs>
-                    <linearGradient id="road-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" style="stop-color:#8639E8;stop-opacity:1" />
-                        <stop offset="100%" style="stop-color:#FF6B6B;stop-opacity:1" />
-                    </linearGradient>
-                    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                        <feGaussianBlur stdDeviation="5" result="blur" />
-                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                    </filter>
-                    <filter id="card-shadow" x="-10%" y="-10%" width="120%" height="120%">
-                        <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#00000022" />
-                    </filter>
-                </defs>
-                
-                <!-- Road Background -->
-                <rect x="50" y="150" width="800" height="60" rx="30" ry="30" fill="url(#road-gradient)" />
-                
-                <!-- Dotted Center Line -->
-                <line x1="50" y1="180" x2="850" y2="180" stroke="white" stroke-width="4" stroke-dasharray="15,10" />
-                
-                <!-- Phase 1: Targeted Launch -->
-                <g transform="translate(175, 180)">
-                    <!-- Milestone Circle -->
-                    <circle cx="0" cy="0" r="40" fill="white" stroke="#8639E8" stroke-width="3" filter="url(#card-shadow)" />
-                    <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Playfair Display, serif" font-weight="bold" fill="#8639E8" font-size="30">1</text>
-                    
-                    <!-- Phase Label -->
-                    <text x="0" y="70" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#333" font-size="16">Targeted Launch</text>
-                    <text x="0" y="90" text-anchor="middle" font-family="Inter, sans-serif" fill="#666" font-size="14">Months 1-6</text>
-                    
-                    <!-- Target Audience Card -->
-                    <g transform="translate(0, -120)">
-                        <rect x="-100" y="-60" width="200" height="120" rx="10" ry="10" fill="white" stroke="#8639E8" stroke-width="2" filter="url(#card-shadow)" />
-                        
-                        <!-- Card Content -->
-                        <text x="0" y="-35" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#8639E8" font-size="14">TARGET AUDIENCES</text>
-                        
-                        <g transform="translate(-75, 0)">
-                            <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#8639E8" font-size="16">&#xf77c;</text>
-                            <text x="60" y="0" text-anchor="start" font-family="Inter, sans-serif" fill="#333" font-size="12">New Parents</text>
-                        </g>
-                        
-                        <g transform="translate(-75, 25)">
-                            <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#8639E8" font-size="16">&#xf5b3;</text>
-                            <text x="60" y="0" text-anchor="start" font-family="Inter, sans-serif" fill="#333" font-size="12">Life Transitions</text>
-                        </g>
-                    </g>
-                </g>
-                
-                <!-- Phase 2: Expansion -->
-                <g transform="translate(450, 180)">
-                    <!-- Milestone Circle -->
-                    <circle cx="0" cy="0" r="40" fill="white" stroke="#BE4BB9" stroke-width="3" filter="url(#card-shadow)" />
-                    <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Playfair Display, serif" font-weight="bold" fill="#BE4BB9" font-size="30">2</text>
-                    
-                    <!-- Phase Label -->
-                    <text x="0" y="70" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#333" font-size="16">Expansion</text>
-                    <text x="0" y="90" text-anchor="middle" font-family="Inter, sans-serif" fill="#666" font-size="14">Months 7-18</text>
-                    
-                    <!-- Strategy Card -->
-                    <g transform="translate(0, -120)">
-                        <rect x="-100" y="-60" width="200" height="120" rx="10" ry="10" fill="white" stroke="#BE4BB9" stroke-width="2" filter="url(#card-shadow)" />
-                        
-                        <!-- Card Content -->
-                        <text x="0" y="-35" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#BE4BB9" font-size="14">KEY INITIATIVES</text>
-                        
-                        <g transform="translate(-75, 0)">
-                            <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#BE4BB9" font-size="16">&#xf0e8;</text>
-                            <text x="60" y="0" text-anchor="start" font-family="Inter, sans-serif" fill="#333" font-size="12">Therapist Network</text>
-                        </g>
-                        
-                        <g transform="translate(-75, 25)">
-                            <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#BE4BB9" font-size="16">&#xf1e0;</text>
-                            <text x="60" y="0" text-anchor="start" font-family="Inter, sans-serif" fill="#333" font-size="12">API Partnerships</text>
-                        </g>
-                    </g>
-                </g>
-                
-                <!-- Phase 3: Ecosystem -->
-                <g transform="translate(725, 180)">
-                    <!-- Milestone Circle -->
-                    <circle cx="0" cy="0" r="40" fill="white" stroke="#FF6B6B" stroke-width="3" filter="url(#card-shadow)" />
-                    <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Playfair Display, serif" font-weight="bold" fill="#FF6B6B" font-size="30">3</text>
-                    
-                    <!-- Phase Label -->
-                    <text x="0" y="70" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#333" font-size="16">Ecosystem</text>
-                    <text x="0" y="90" text-anchor="middle" font-family="Inter, sans-serif" fill="#666" font-size="14">Months 19+</text>
-                    
-                    <!-- Expansion Card -->
-                    <g transform="translate(0, -120)">
-                        <rect x="-100" y="-60" width="200" height="120" rx="10" ry="10" fill="white" stroke="#FF6B6B" stroke-width="2" filter="url(#card-shadow)" />
-                        
-                        <!-- Card Content -->
-                        <text x="0" y="-35" text-anchor="middle" font-family="Inter, sans-serif" font-weight="bold" fill="#FF6B6B" font-size="14">GLOBAL SCALE</text>
-                        
-                        <g transform="translate(-75, 0)">
-                            <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#FF6B6B" font-size="16">&#xf1ad;</text>
-                            <text x="60" y="0" text-anchor="start" font-family="Inter, sans-serif" fill="#333" font-size="12">Enterprise Solutions</text>
-                        </g>
-                        
-                        <g transform="translate(-75, 25)">
-                            <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Font Awesome 6 Free" font-weight="900" fill="#FF6B6B" font-size="16">&#xf0ac;</text>
-                            <text x="60" y="0" text-anchor="start" font-family="Inter, sans-serif" fill="#333" font-size="12">Global Markets</text>
-                        </g>
-                    </g>
-                </g>
-            </svg>
-            
-            <div class="grid-container" style="grid-template-columns: 1fr 1fr 1fr; margin-top: 0;">
-                <div style="background: white; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); padding: 1.5em; border-top: 4px solid #8639E8;">
-                    <h3 style="color: #8639E8; text-align: center; margin-bottom: 1em;">Phase 1: Targeted Launch</h3>
-                    <ul style="list-style-type: none; padding-left: 0;">
-                        <li style="margin-bottom: 0.5em; display: flex; align-items: center;">
-                            <i class="fas fa-baby" style="color: #8639E8; width: 24px; margin-right: 10px;"></i>
-                            <span>New parents documenting beginnings</span>
-                        </li>
-                        <li style="margin-bottom: 0.5em; display: flex; align-items: center;">
-                            <i class="fas fa-hiking" style="color: #8639E8; width: 24px; margin-right: 10px;"></i>
-                            <span>Mid-life individuals seeking meaning</span>
-                        </li>
-                        <li style="margin-bottom: 0.5em; display: flex; align-items: center;">
-                            <i class="fas fa-exchange-alt" style="color: #8639E8; width: 24px; margin-right: 10px;"></i>
-                            <span>Life transition navigators</span>
-                        </li>
-                        <li style="margin-bottom: 0.5em; display: flex; align-items: center;">
-                            <i class="fas fa-users" style="color: #8639E8; width: 24px; margin-right: 10px;"></i>
-                            <span>Wellness influencer partnerships</span>
-                        </li>
-                    </ul>
-                </div>
-                
-                <div style="background: white; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); padding: 1.5em; border-top: 4px solid #BE4BB9;">
-                    <h3 style="color: #BE4BB9; text-align: center; margin-bottom: 1em;">Phase 2: Expansion</h3>
-                    <ul style="list-style-type: none; padding-left: 0;">
-                        <li style="margin-bottom: 0.5em; display: flex; align-items: center;">
-                            <i class="fas fa-bullseye" style="color: #BE4BB9; width: 24px; margin-right: 10px;"></i>
-                            <span>Broader audience targeting</span>
-                        </li>
-                        <li style="margin-bottom: 0.5em; display: flex; align-items: center;">
-                            <i class="fas fa-user-md" style="color: #BE4BB9; width: 24px; margin-right: 10px;"></i>
-                            <span>Therapist network integration</span>
-                        </li>
-                        <li style="margin-bottom: 0.5em; display: flex; align-items: center;">
-                            <i class="fas fa-home" style="color: #BE4BB9; width: 24px; margin-right: 10px;"></i>
-                            <span>Family plan introduction</span>
-                        </li>
-                        <li style="margin-bottom: 0.5em; display: flex; align-items: center;">
-                            <i class="fas fa-plug" style="color: #BE4BB9; width: 24px; margin-right: 10px;"></i>
-                            <span>Key API partnerships</span>
-                        </li>
-                    </ul>
-                </div>
-                
-                <div style="background: white; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); padding: 1.5em; border-top: 4px solid #FF6B6B;">
-                    <h3 style="color: #FF6B6B; text-align: center; margin-bottom: 1em;">Phase 3: Ecosystem</h3>
-                    <ul style="list-style-type: none; padding-left: 0;">
-                        <li style="margin-bottom: 0.5em; display: flex; align-items: center;">
-                            <i class="fas fa-building" style="color: #FF6B6B; width: 24px; margin-right: 10px;"></i>
-                            <span>Enterprise solutions</span>
-                        </li>
-                        <li style="margin-bottom: 0.5em; display: flex; align-items: center;">
-                            <i class="fas fa-globe" style="color: #FF6B6B; width: 24px; margin-right: 10px;"></i>
-                            <span>Global expansion</span>
-                        </li>
-                        <li style="margin-bottom: 0.5em; display: flex; align-items: center;">
-                            <i class="fas fa-box-open" style="color: #FF6B6B; width: 24px; margin-right: 10px;"></i>
-                            <span>Physical experience add-ons</span>
-                        </li>
-                        <li style="margin-bottom: 0.5em; display: flex; align-items: center;">
-                            <i class="fas fa-store" style="color: #FF6B6B; width: 24px; margin-right: 10px;"></i>
-                            <span>Creator marketplace</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Slide: The Team -->
-        <div class="slide">
-            <h2>The Team</h2>
-            
-            <div class="grid-container">
-                <div class="team-card">
-                    <div class="team-header team-purple">
-                        <div class="team-avatar">
-                            MV
-                        </div>
-                    </div>
-                    <div class="team-content">
-                        <h3>Marko Vaik</h3>
-                        <p class="team-role">Founder and CEO</p>
-                        <p>Co-founded Estonia's largest mental health platform (Serenity Platform). Deep expertise in user-centered wellbeing technology.</p>
-                    </div>
-                </div>
-                
-                <div class="team-card">
-                    <div class="team-header team-blue">
-                        <div class="team-avatar">
-                            MS
-                        </div>
-                    </div>
-                    <div class="team-content">
-                        <h3>Merike Sisask</h3>
-                        <p class="team-role">Co-Founder and CSO</p>
-                        <p>Social health professor, Centre of Excellence for Well-Being Sciences. Author of 100+ scientific publications on wellbeing.</p>
-                    </div>
-                </div>
-                
-                <div class="team-card">
-                    <div class="team-header team-green">
-                        <div class="team-avatar">
-                            LH
-                        </div>
-                    </div>
-                    <div class="team-content">
-                        <h3>Lars-Erik Hion</h3>
-                        <p class="team-role">Co-Founder and CTO</p>
-                        <p>Digital innovation veteran (SEB, Swedbank, Telia). Co-founder of Tailwind and founder of Rethink.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Slide: Current Traction -->
-        <div class="slide">
-            <h2>Current Traction</h2>
-            
-            <div class="grid-container">
-                <div class="highlight-box">
-                    <h3>Product Development</h3>
-                    <ul>
-                        <li>MVP architecture complete</li>
-                        <li>AI prototyping with 87% user satisfaction</li>
-                        <li>Initial UI/UX tested with 95 users</li>
-                    </ul>
-                </div>
-                
-                <div class="highlight-box">
-                    <h3>Early Validation</h3>
-                    <ul>
-                        <li>1,500+ waitlist sign-ups from soft launch</li>
-                        <li>3 therapeutic partnerships in negotiation</li>
-                        <li>LOI from senior living community (2,300 residents)</li>
-                        <li>Featured in TechCrunch "Startups to Watch"</li>
-                    </ul>
-                </div>
-                
-                <div class="highlight-box">
-                    <h3>IP and Assets</h3>
-                    <ul>
-                        <li>2 patent applications filed</li>
-                        <li>Proprietary AI narrative generation algorithms</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Slide: Funding Request -->
-        <div class="slide">
-            <h2>Funding Request and Use of Capital</h2>
-            
-            <div class="highlight-box text-center">
-                <h3>Seeking $1.5M in Seed Funding</h3>
-            </div>
-            
-            <div class="grid-container mt-2">
-                <div class="highlight-box">
-                    <h3>Allocation</h3>
-                    <ul>
-                        <li>40% - Engineering and Product Development</li>
-                        <li>25% - AI Training and Optimization</li>
-                        <li>20% - Initial Marketing and Customer Acquisition</li>
-                        <li>10% - Operations and Team Expansion</li>
-                        <li>5% - Legal and Administrative</li>
-                    </ul>
-                </div>
-                
-                <div class="highlight-box">
-                    <h3>Key Milestones</h3>
-                    <ul>
-                        <li>Full product launch in 6 months</li>
-                        <li>10,000 active users by month 12</li>
-                        <li>Positive unit economics by month 15</li>
-                        <li>Series A readiness by month 18</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Slide: Financial Projections -->
-        <div class="slide">
-            <h2>Financial Projections</h2>
-            
-            <table>
-                <tr>
-                    <th></th>
-                    <th>Year 1</th>
-                    <th>Year 2</th>
-                    <th>Year 3</th>
-                    <th>Year 5</th>
-                </tr>
-                <tr>
-                    <td><strong>Active Users</strong></td>
-                    <td>25,000</td>
-                    <td>125,000</td>
-                    <td>450,000</td>
-                    <td>2,500,000</td>
-                </tr>
-                <tr>
-                    <td><strong>Revenue</strong></td>
-                    <td>$1.8M</td>
-                    <td>$9.3M</td>
-                    <td>$32.5M</td>
-                    <td>$187M</td>
-                </tr>
-                <tr>
-                    <td><strong>Gross Margin</strong></td>
-                    <td>68%</td>
-                    <td>72%</td>
-                    <td>75%</td>
-                    <td>81%</td>
-                </tr>
-                <tr>
-                    <td><strong>Operating Expenses</strong></td>
-                    <td>$2.7M</td>
-                    <td>$7.1M</td>
-                    <td>$22.3M</td>
-                    <td>$112M</td>
-                </tr>
-                <tr>
-                    <td><strong>EBITDA</strong></td>
-                    <td>-$0.9M</td>
-                    <td>$2.2M</td>
-                    <td>$10.2M</td>
-                    <td>$75M</td>
-                </tr>
-            </table>
-        </div>
-        
-        <!-- Slide: The Opportunity -->
-        <div class="slide">
-            <h2>The Opportunity Before Us</h2>
-            
-            <p><strong>We're not just building another app. We're creating:</strong></p>
-            
-            <div class="grid-container">
-                <div class="highlight-box">
-                    <h3>1. A new category</h3>
-                    <p>at the intersection of wellbeing, legacy, and storytelling</p>
-                </div>
-                
-                <div class="highlight-box">
-                    <h3>2. A technology platform</h3>
-                    <p>that grows more valuable with each life story added</p>
-                </div>
-                
-                <div class="highlight-box">
-                    <h3>3. A lasting solution</h3>
-                    <p>to one of humanity's oldest challenges: preserving and sharing who we truly are</p>
-                </div>
-            </div>
-            
-            <p class="mt-2 text-center"><em>This is more than an investment opportunity. It's a chance to shape how future generations will remember us.</em></p>
-        </div>
-        
-        <!-- Slide: Thank You -->
-        <div class="slide cover-slide">
-            <h2>Thank You</h2>
-            
-            <p class="mb-2"><strong>Contact:</strong><br>
-            Marko Vaik, Founder and CEO<br>
-            marko@sentimentalapp.com<br>
-            +372 555 1234</p>
-            
-            <p><strong>www.sentimentalapp.com</strong></p>
-        </div>
-    </div>
-</body>
-</html>
+      </div>
+    </section>
+    
+    <!-- Competitive Landscape -->
+    <section class="slide flex flex-col justify-center bg-gray-50" id="slide-9">
+      <h2 class="text-4xl font-bold text-gray-800">Competitive Landscape</h2>
+      <div class="header-underline"></div>
+      
+      <div class="overflow-x-auto mt-8">
+        <table class="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
+          <thead class="bg-gray-100">
+            <tr>
+              <th class="py-4 px-6 text-left text-lg font-bold"></th>
+              <th class="py-4 px-6 text-center text-lg font-bold text-purple-600">Sentimental</th>
+              <th class="py-4 px-6 text-center text-lg">Journaling Apps</th>
+              <th class="py-4 px-6 text-center text-lg">Therapy Apps</th>
+              <th class="py-4 px-6 text-center text-lg">Social Media</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr>
+              <td class="py-4 px-6 font-semibold">Storytelling</td>
+              <td class="py-4 px-6 text-center text-purple-600 font-bold">✓✓✓</td>
+              <td class="py-4 px-6 text-center">✓</td>
+              <td class="py-4 px-6 text-center">✗</td>
+              <td class="py-4 px-6 text-center">✓</td>
+            </tr>
+            <tr>
+              <td class="py-4 px-6 font-semibold">Mental Health</td>
+              <td class="py-4 px-6 text-center text-purple-600 font-bold">✓✓✓</td>
+              <td class="py-4 px-6 text-center">✓</td>
+              <td class="py-4 px-6 text-center">✓✓✓</td>
+              <td class="py-4 px-6 text-center">✗</td>
+            </tr>
+            <tr>
+              <td class="py-4 px-6 font-semibold">Media Creation</td>
+              <td class="py-4 px-6 text-center text-purple-600 font-bold">✓✓✓</td>
+              <td class="py-4 px-6 text-center">✗</td>
+              <td class="py-4 px-6 text-center">✗</td>
+              <td class="
