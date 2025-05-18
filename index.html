@@ -1,18 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-GHR6MC542E"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-GHR6MC542E');
-</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sentimental - Your Life, Your Story</title>
+    <title>Sentimental - Fixed Navigation</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -20,10 +11,6 @@
 
         body {
             font-family: 'Inter', sans-serif;
-        }
-        
-        h1, h2, h3, h4 {
-            font-family: 'Playfair Display', serif;
         }
         
         .gradient-bg {
@@ -36,27 +23,12 @@
             padding: 0.75rem 1.5rem;
             border-radius: 9999px;
             font-weight: 600;
-            transition: all 0.3s ease;
         }
         
-        .btn-primary:hover {
-            background-color: #7529D8;
-            box-shadow: 0 10px 15px rgba(134, 57, 232, 0.2);
-        }
-        
-        .layer-card {
-            transition: all 0.3s ease;
-        }
-        
-        .layer-card:hover {
-            transform: translateY(-5px);
-        }
-        
-        /* Fix for scrolling behavior */
-        section {
-            scroll-margin-top: 80px;
-            padding-top: 30px;
-            padding-bottom: 30px;
+        /* Make sure the beta section is properly positioned */
+        #beta-section {
+            padding-top: 100px;
+            margin-top: -80px; /* To account for the fixed header */
         }
         
         /* Mobile menu styles */
@@ -75,25 +47,9 @@
         .mobile-menu.active {
             display: block;
         }
-        
-        .mobile-menu a {
-            display: block;
-            padding: 0.75rem 0;
-            text-align: center;
-            border-bottom: 1px solid #f3f4f6;
-        }
-        
-        .mobile-menu a:last-child {
-            border-bottom: none;
-        }
-        
-        /* Fix to ensure the form is visible and accessible */
-        #beta-signup {
-            position: relative; /* Ensure positioning context */
-        }
     </style>
 </head>
-<body class="bg-gray-50">
+<body>
     <!-- Navigation -->
     <nav class="bg-white sticky top-0 z-50 shadow-sm py-4 px-6">
         <div class="container mx-auto flex justify-between items-center">
@@ -102,7 +58,7 @@
                 <a href="#how-it-works" class="hover:text-purple-600 transition">How It Works</a>
                 <a href="#examples" class="hover:text-purple-600 transition">Examples</a>
                 <a href="#team" class="hover:text-purple-600 transition">Team</a>
-                <a href="#beta-signup" class="btn-primary btn-scroll">Try Our Beta</a>
+                <button onclick="document.getElementById('beta-section').scrollIntoView()" class="btn-primary">Try Our Beta</button>
             </div>
             <button id="mobile-menu-button" class="md:hidden">
                 <i class="fas fa-bars text-2xl"></i>
@@ -112,348 +68,83 @@
     
     <!-- Mobile Menu -->
     <div id="mobile-menu" class="mobile-menu">
-        <a href="#how-it-works" class="hover:text-purple-600 transition">How It Works</a>
-        <a href="#examples" class="hover:text-purple-600 transition">Examples</a>
-        <a href="#team" class="hover:text-purple-600 transition">Team</a>
-        <a href="#beta-signup" class="hover:text-purple-600 font-bold transition btn-scroll">Try Our Beta</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#examples">Examples</a>
+        <a href="#team">Team</a>
+        <button onclick="document.getElementById('beta-section').scrollIntoView()" class="w-full text-left py-2 text-purple-600 font-bold">Try Our Beta</button>
     </div>
 
     <!-- Hero Section -->
-    <section class="pt-24 pb-20 px-6 gradient-bg text-white">
-        <div class="container mx-auto">
-            <div class="max-w-4xl mx-auto text-center">
-                <h1 class="text-5xl md:text-6xl font-bold mb-8 leading-tight">
-                    Your Life as a Netflix Series or Spotify Hit
-                </h1>
-                <p class="text-xl mb-10 leading-relaxed max-w-3xl mx-auto">
-                    Everyone has a story — but few have a place to truly tell it. Sentimental uses AI to transform your personal moments into cinematic stories, music, and meaningful content with therapeutic insights that help you understand your life's journey.
-                </p>
-                <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-                    <a href="#beta-signup" class="btn-primary btn-scroll">
-                        Try Our Beta
-                    </a>
-                    <a href="#how-it-works" class="bg-white text-purple-600 px-6 py-3 rounded-full font-medium hover:bg-purple-50 transition">
-                        See How It Works
-                    </a>
-                </div>
-            </div>
+    <section class="py-20 px-6 gradient-bg text-white">
+        <div class="container mx-auto text-center">
+            <h1 class="text-4xl font-bold mb-8">Your Life as a Netflix Series</h1>
+            <p class="mb-10">
+                Everyone has a story — but few have a place to truly tell it.
+            </p>
+            <button onclick="document.getElementById('beta-section').scrollIntoView()" class="btn-primary">
+                Try Our Beta
+            </button>
         </div>
     </section>
 
-    <!-- Value Proposition Section -->
-    <section class="py-20 px-6 bg-white">
-        <div class="container mx-auto">
-            <div class="max-w-5xl mx-auto">
-                <div class="text-center mb-16">
-                    <h2 class="text-4xl font-bold mb-6">Find Meaning in a World of Efficiency</h2>
-                    <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                       We live in an era where efficiency is everywhere, but meaning is rare. At Sentimental, we're building a journey that bridges self-reflection and cultural expression, therapy and aesthetics. Whether it's everyday moments, major milestones, or personal reflections, your experiences deserve a form that is not just therapeutic, but expressive, shareable, and deeply human.
-                    </p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-                    <!-- Value 1 -->
-                    <div class="bg-gray-50 rounded-xl shadow-md p-8 text-center">
-                        <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <i class="fas fa-lightbulb text-2xl"></i>
-                        </div>
-                        <h3 class="text-xl font-bold mb-4">Discover Patterns</h3>
-                        <p class="text-gray-600">
-                            AI helps you identify themes and insights in your life that might otherwise go unnoticed.
-                        </p>
-                    </div>
-                    
-                    <!-- Value 2 -->
-                    <div class="bg-gray-50 rounded-xl shadow-md p-8 text-center">
-                        <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <i class="fas fa-film text-2xl"></i>
-                        </div>
-                        <h3 class="text-xl font-bold mb-4">Cinematic Transformation</h3>
-                        <p class="text-gray-600">
-                            See your life transformed into Netflix-style series, music, or books that feel professionally produced.
-                        </p>
-                    </div>
-                    
-                    <!-- Value 3 -->
-                    <div class="bg-gray-50 rounded-xl shadow-md p-8 text-center">
-                        <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <i class="fas fa-share-alt text-2xl"></i>
-                        </div>
-                        <h3 class="text-xl font-bold mb-4">Meaningful Sharing</h3>
-                        <p class="text-gray-600">
-                            Create different versions of your experiences to inspire friends, family, or your professional network.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- How It Works - Simplified -->
+    <!-- Simple sections for testing navigation -->
     <section id="how-it-works" class="py-20 px-6 bg-gray-50">
-        <div class="container mx-auto">
-            <div class="max-w-5xl mx-auto">
-                <div class="text-center mb-16">
-                    <h2 class="text-4xl font-bold mb-6">How It Works</h2>
-                </div>
-
-                <div class="space-y-12">
-                    <!-- Step 1 -->
-                    <div class="flex flex-col md:flex-row items-center bg-white rounded-xl shadow-md overflow-hidden">
-                        <div class="md:w-1/3 bg-purple-600 text-white p-8 flex items-center justify-center">
-                            <div class="text-center py-8">
-                                <div class="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <span class="text-3xl font-bold">1</span>
-                                </div>
-                                <h3 class="text-2xl font-bold">Capture</h3>
-                            </div>
-                        </div>
-                        <div class="md:w-2/3 p-8">
-                            <p class="text-gray-600 text-lg">
-                                Record your thoughts, experiences, and moments through simple voice memos, text entries, or by answering AI-guided questions. No need for writing skills or structure—just your authentic voice.
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <!-- Step 2 -->
-                    <div class="flex flex-col md:flex-row items-center bg-white rounded-xl shadow-md overflow-hidden">
-                        <div class="md:w-1/3 bg-blue-600 text-white p-8 flex items-center justify-center">
-                            <div class="text-center py-8">
-                                <div class="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <span class="text-3xl font-bold">2</span>
-                                </div>
-                                <h3 class="text-2xl font-bold">Transform</h3>
-                            </div>
-                        </div>
-                        <div class="md:w-2/3 p-8">
-                            <p class="text-gray-600 text-lg">
-                                Our AI helps you see your experiences in multiple dimensions—imagine turning a memory into a song, a heartbreak into a podcast episode, or a breakthrough into a beautifully crafted visual story that reveals patterns you never noticed before.
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <!-- Step 3 -->
-                    <div class="flex flex-col md:flex-row items-center bg-white rounded-xl shadow-md overflow-hidden">
-                        <div class="md:w-1/3 bg-green-600 text-white p-8 flex items-center justify-center">
-                            <div class="text-center py-8">
-                                <div class="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <span class="text-3xl font-bold">3</span>
-                                </div>
-                                <h3 class="text-2xl font-bold">Share</h3>
-                            </div>
-                        </div>
-                        <div class="md:w-2/3 p-8">
-                            <p class="text-gray-600 text-lg">
-                                In a world where attention is fragmented and authenticity is in crisis, share your transformed stories in ways that truly connect. Create different versions for different audiences or keep them as personal touchstones for your own journey.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="container mx-auto text-center">
+            <h2 class="text-3xl font-bold mb-6">How It Works</h2>
+            <p>This is the how it works section.</p>
         </div>
     </section>
 
-    <!-- Examples - One Simplified Example -->
     <section id="examples" class="py-20 px-6 bg-white">
-        <div class="container mx-auto">
-            <div class="max-w-5xl mx-auto">
-                <div class="text-center mb-16">
-                    <h2 class="text-4xl font-bold mb-6">See the Possibilities</h2>
-                    <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                        Swipe through emotional dimensions of your story as if flipping through alternate realities of your experiences—each with its own aesthetic, insight, and purpose.
-                    </p>
-                </div>
-
-                <div class="bg-gray-50 rounded-xl shadow-md overflow-hidden">
-                    <div class="md:flex">
-                        <div class="md:w-1/3 bg-purple-600 text-white p-8 flex items-center justify-center">
-                            <div class="text-center">
-                                <div class="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <i class="fas fa-mountain text-3xl"></i>
-                                </div>
-                                <h3 class="text-2xl font-bold">Life Adventures</h3>
-                                <p class="mt-2 text-purple-100">From everyday to extraordinary</p>
-                            </div>
-                        </div>
-                        <div class="md:w-2/3 p-8">
-                            <p class="text-gray-600 mb-6">
-                                With Sentimental, your experiences become meaningful stories. A travel journey becomes a cinematic adventure. Career milestones transform into an inspiring podcast series. Family memories evolve into a beautiful keepsake book. Personal reflections gain new perspective through AI insights.
-                            </p>
-                            <h4 class="font-bold text-xl mb-4">Your Sentimental Story Could Become:</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div class="bg-purple-50 p-4 rounded-lg">
-                                    <div class="font-bold text-purple-600 mb-2">Netflix-Style Series</div>
-                                    <p class="text-sm text-gray-600">
-                                        Your year abroad with visual chapters, themes, and emotional arcs
-                                    </p>
-                                </div>
-                                <div class="bg-purple-50 p-4 rounded-lg">
-                                    <div class="font-bold text-purple-600 mb-2">Podcast Episodes</div>
-                                    <p class="text-sm text-gray-600">
-                                        Your career insights narrated with music and professional quality
-                                    </p>
-                                </div>
-                                <div class="bg-purple-50 p-4 rounded-lg">
-                                    <div class="font-bold text-purple-600 mb-2">Illustrated Journal</div>
-                                    <p class="text-sm text-gray-600">
-                                        Your personal growth journey with beautiful visuals and insights
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="container mx-auto text-center">
+            <h2 class="text-3xl font-bold mb-6">Examples</h2>
+            <p>This is the examples section.</p>
         </div>
     </section>
 
-    <!-- Team Section -->
     <section id="team" class="py-20 px-6 bg-gray-50">
-        <div class="container mx-auto">
-            <div class="max-w-5xl mx-auto">
-                <div class="text-center mb-16">
-                    <h2 class="text-4xl font-bold mb-6">Meet the Team</h2>
-                    <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                        Blending expertise in storytelling, technology, and human experience.
-                    </p>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-                    <!-- Founder 1 -->
-                    <div class="bg-white rounded-xl shadow-md overflow-hidden">
-                        <div class="h-48 bg-purple-600 flex items-center justify-center">
-                            <div class="w-32 h-32 bg-white rounded-full flex items-center justify-center text-purple-600 text-4xl font-bold">
-                                MV
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <h3 class="text-xl font-bold mb-2">Marko Vaik</h3>
-                            <p class="text-purple-600 font-semibold mb-4">Founder & CEO</p>
-                            <p class="text-gray-600">
-                                Co-founded Estonia's largest mental health platform, Serenity Platform. Marko's vision for user-centered wellbeing technology drives Sentimental's mission to transform personal storytelling.
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <!-- Founder 2 -->
-                    <div class="bg-white rounded-xl shadow-md overflow-hidden">
-                        <div class="h-48 bg-blue-600 flex items-center justify-center">
-                            <div class="w-32 h-32 bg-white rounded-full flex items-center justify-center text-blue-600 text-4xl font-bold">
-                                MS
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <h3 class="text-xl font-bold mb-2">Merike Sisask</h3>
-                            <p class="text-blue-600 font-semibold mb-4">Co-Founder & Chief Scientific Officer</p>
-                            <p class="text-gray-600">
-                                Social health professor and member of The Centre of Excellence for Well-Being Sciences. Author of 100+ scientific publications. Merike bridges the gap between personal storytelling and mental wellbeing, giving Sentimental its scientific foundation in meaningful ways.
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <!-- Founder 3 -->
-                    <div class="bg-white rounded-xl shadow-md overflow-hidden">
-                        <div class="h-48 bg-green-600 flex items-center justify-center">
-                            <div class="w-32 h-32 bg-white rounded-full flex items-center justify-center text-green-600 text-4xl font-bold">
-                                LH
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <h3 class="text-xl font-bold mb-2">Lars-Erik Hion</h3>
-                            <p class="text-green-600 font-semibold mb-4">Co-Founder & CTO</p>
-                            <p class="text-gray-600">
-                                Digital innovation veteran who's built scalable solutions for SEB, Swedbank, and Telia. Co-founder of Tailwind and founder of Rethink, Lars-Erik creates powerful technology that feels effortlessly simple in meaningful ways.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="container mx-auto text-center">
+            <h2 class="text-3xl font-bold mb-6">Team</h2>
+            <p>This is the team section.</p>
         </div>
     </section>
 
-    <!-- Call to Action - Beta Signup -->
-    <section id="beta-signup" class="py-20 px-6 gradient-bg text-white">
-        <div class="container mx-auto">
-            <div class="max-w-4xl mx-auto text-center">
-                <h2 class="text-4xl font-bold mb-6">Try Our Beta Experience</h2>
-                <p class="text-xl mb-10 max-w-2xl mx-auto">
-                    Share your personal story and receive a free therapeutic insight plus creative content based on your experience.
-                </p>
-                
-               <div class="bg-white bg-opacity-10 backdrop-filter backdrop-blur-md p-8 rounded-xl max-w-xl mx-auto">
-                    <form id="betaForm" action="story.html" method="get">
-                        <div class="mb-4">
-                            <input type="text" name="name" placeholder="Your name" class="w-full px-4 py-3 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-600" required>
-                        </div>
-                        <div class="mb-4">
-                            <input type="email" name="email" placeholder="Your email address" class="w-full px-4 py-3 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-600" required>
-                        </div>
-                        <button type="submit" class="w-full bg-white text-purple-600 font-bold py-3 rounded-lg hover:bg-gray-100 transition">
-                            Start Sharing Your Story
-                        </button>
-                    </form>
-                    <p class="mt-4 text-sm text-white opacity-80">
-                        By participating, you agree that we may use your story to create personalized content. Your email will only be used to send your results.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-12 px-6">
-        <div class="container mx-auto">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-8 md:mb-0">
-                    <a href="/" class="text-2xl font-bold">Sentimental</a>
-                    <p class="mt-2 text-gray-400">Your Life, Your Story.</p>
-                </div>
-                <div class="flex space-x-6">
-                    <a href="#" class="hover:text-purple-400 transition"><i class="fab fa-x-twitter text-xl"></i></a>
-                    <a href="#" class="hover:text-purple-400 transition"><i class="fab fa-instagram text-xl"></i></a>
-                    <a href="#" class="hover:text-purple-400 transition"><i class="fab fa-linkedin text-xl"></i></a>
-                </div>
-            </div>
-            <hr class="border-gray-800 my-8">
-            <div class="text-center text-gray-400">
-                <p>&copy; 2025 Sentimental. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Simple JavaScript for functionality -->
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Mobile menu functionality
-        const mobileMenuButton = document.getElementById('mobile-menu-button');
-        const mobileMenu = document.getElementById('mobile-menu');
-        
-        if (mobileMenuButton && mobileMenu) {
-            mobileMenuButton.addEventListener('click', function() {
-                mobileMenu.classList.toggle('active');
-            });
+    <!-- Beta Section - Notice the ID is different from beta-signup -->
+    <section id="beta-section" class="py-20 px-6 gradient-bg text-white">
+        <div class="container mx-auto text-center">
+            <h2 class="text-3xl font-bold mb-6">Try Our Beta Experience</h2>
+            <p class="mb-10">
+                Share your personal story and receive a free therapeutic insight.
+            </p>
             
-            // Close mobile menu when clicking on a link
-            const mobileMenuLinks = mobileMenu.querySelectorAll('a');
-            mobileMenuLinks.forEach(link => {
-                link.addEventListener('click', function() {
-                    mobileMenu.classList.remove('active');
+           <div class="bg-white bg-opacity-10 p-8 rounded-xl max-w-xl mx-auto">
+                <form id="betaForm" action="story.html" method="get">
+                    <div class="mb-4">
+                        <input type="text" name="name" placeholder="Your name" class="w-full px-4 py-3 rounded-lg text-gray-800" required>
+                    </div>
+                    <div class="mb-4">
+                        <input type="email" name="email" placeholder="Your email address" class="w-full px-4 py-3 rounded-lg text-gray-800" required>
+                    </div>
+                    <button type="submit" class="w-full bg-white text-purple-600 font-bold py-3 rounded-lg">
+                        Start Sharing Your Story
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Only mobile menu functionality - no scroll handling
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('active');
                 });
-            });
-        }
-        
-        // Fix initial scroll position if page loads with a hash
-        if (window.location.hash) {
-            // Wait for page to fully load
-            setTimeout(function() {
-                // Adjust scroll position to account for fixed header
-                window.scrollBy(0, -80);
-            }, 300);
-        }
-        
-        // We're no longer using JavaScript for scrolling at all
-        // All navigation is now handled by the browser's native hash behavior
-        // The scroll-margin-top CSS property handles the offset
-    });
+            }
+        });
     </script>
 </body>
 </html>
