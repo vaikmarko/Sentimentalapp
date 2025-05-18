@@ -20,6 +20,7 @@
 
         body {
             font-family: 'Inter', sans-serif;
+            scroll-padding-top: 80px; /* Add scroll padding to account for fixed header */
         }
         
         h1, h2, h3, h4 {
@@ -51,6 +52,10 @@
         .layer-card:hover {
             transform: translateY(-5px);
         }
+        
+        html {
+            scroll-behavior: smooth; /* Enable smooth scrolling for the entire page */
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -81,10 +86,10 @@
                     Everyone has a story — but few have a place to truly tell it. Sentimental uses AI to transform your personal moments into cinematic stories, music, and meaningful content with therapeutic insights that help you understand your life's journey.
                 </p>
                 <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-                    <a href="#waitlist" class="btn-primary">
+                    <a href="#waitlist" class="btn-primary scroll-to-btn">
                         Try Our Beta
                     </a>
-                    <a href="#how-it-works" class="bg-white text-purple-600 px-6 py-3 rounded-full font-medium hover:bg-purple-50 transition">
+                    <a href="#how-it-works" class="bg-white text-purple-600 px-6 py-3 rounded-full font-medium hover:bg-purple-50 transition scroll-to-btn">
                         See How It Works
                     </a>
                 </div>
@@ -372,7 +377,7 @@
         </div>
     </footer>
     <script>
-    // Smooth scrolling for anchor links
+    // Improved smooth scrolling for anchor links with offset for fixed header
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             e.preventDefault();
@@ -381,9 +386,15 @@
             const targetElement = document.querySelector(targetId);
             
             if (targetElement) {
+                // Get the height of the fixed header
+                const headerHeight = document.querySelector('nav').offsetHeight;
+                
+                // Calculate the scroll position with offset
+                const scrollPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - headerHeight - 20; // Extra 20px for padding
+                
                 // Scroll to the element
                 window.scrollTo({
-                    top: targetElement.offsetTop,
+                    top: scrollPosition,
                     behavior: 'smooth'
                 });
                 
@@ -391,6 +402,23 @@
                 history.pushState(null, null, targetId);
             }
         });
+    });
+    
+    // Force scroll if the page loads with a hash
+    window.addEventListener('load', function() {
+        if (window.location.hash) {
+            const targetElement = document.querySelector(window.location.hash);
+            if (targetElement) {
+                setTimeout(function() {
+                    const headerHeight = document.querySelector('nav').offsetHeight;
+                    const scrollPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - headerHeight - 20;
+                    window.scrollTo({
+                        top: scrollPosition,
+                        behavior: 'smooth'
+                    });
+                }, 100);
+            }
+        }
     });
 </script>
 </body>
