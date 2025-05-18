@@ -433,8 +433,40 @@
             });
         }
         
-        // Basic smooth scrolling without overcomplicated calculations
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        // Direct approach for beta buttons - completely bypasses normal scroll behavior
+        document.querySelectorAll('.btn-scroll, a[href="#beta-signup"]').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Direct access to form element
+                const betaSection = document.getElementById('beta-signup');
+                if (betaSection) {
+                    // Get the element's position relative to the document
+                    const rect = betaSection.getBoundingClientRect();
+                    const absoluteTop = rect.top + window.pageYOffset;
+                    const navHeight = 80; // Fixed navbar height
+                    
+                    // Use a timer to ensure consistent behavior
+                    setTimeout(function() {
+                        window.scrollTo({
+                            top: absoluteTop - navHeight,
+                            behavior: 'auto' // Use 'auto' instead of 'smooth' for more reliability
+                        });
+                        
+                        // Focus on the first input to show the user where they are
+                        const firstInput = betaSection.querySelector('input');
+                        if (firstInput) {
+                            setTimeout(function() {
+                                firstInput.focus();
+                            }, 100);
+                        }
+                    }, 50);
+                }
+            });
+        });
+        
+        // Standard smooth scrolling for other links
+        document.querySelectorAll('a[href^="#"]:not(.btn-scroll):not([href="#beta-signup"])').forEach(anchor => {
             anchor.addEventListener('click', function(e) {
                 e.preventDefault();
                 
