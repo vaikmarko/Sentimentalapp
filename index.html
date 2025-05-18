@@ -57,12 +57,12 @@
     <!-- Navigation -->
     <nav class="bg-white sticky top-0 z-50 shadow-sm py-4 px-6">
         <div class="container mx-auto flex justify-between items-center">
-            <a href="#" class="text-3xl font-bold text-purple-600">Sentimental</a>
+            <a href="javascript:void(0)" onclick="window.scrollTo(0,0)" class="text-3xl font-bold text-purple-600">Sentimental</a>
             <div class="hidden md:flex space-x-8 items-center">
-                <a href="javascript:void(0)" onclick="scrollToSection('how-it-works')" class="hover:text-purple-600 transition">How It Works</a>
-                <a href="javascript:void(0)" onclick="scrollToSection('examples')" class="hover:text-purple-600 transition">Examples</a>
-                <a href="javascript:void(0)" onclick="scrollToSection('team')" class="hover:text-purple-600 transition">Team</a>
-                <a href="javascript:void(0)" onclick="scrollToSection('waitlist')" class="btn-primary">Try Our Beta</a>
+                <button onclick="scrollToElement('how-it-works')" class="hover:text-purple-600 transition bg-transparent border-none cursor-pointer">How It Works</button>
+                <button onclick="scrollToElement('examples')" class="hover:text-purple-600 transition bg-transparent border-none cursor-pointer">Examples</button>
+                <button onclick="scrollToElement('team')" class="hover:text-purple-600 transition bg-transparent border-none cursor-pointer">Team</button>
+                <button onclick="scrollToElement('waitlist')" class="btn-primary border-none cursor-pointer">Try Our Beta</button>
             </div>
             <button class="md:hidden">
                 <i class="fas fa-bars text-2xl"></i>
@@ -81,12 +81,12 @@
                     Everyone has a story — but few have a place to truly tell it. Sentimental uses AI to transform your personal moments into cinematic stories, music, and meaningful content with therapeutic insights that help you understand your life's journey.
                 </p>
                 <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-                    <a href="javascript:void(0)" onclick="scrollToSection('waitlist')" class="btn-primary">
+                    <button onclick="scrollToElement('waitlist')" class="btn-primary border-none cursor-pointer">
                         Try Our Beta
-                    </a>
-                    <a href="javascript:void(0)" onclick="scrollToSection('how-it-works')" class="bg-white text-purple-600 px-6 py-3 rounded-full font-medium hover:bg-purple-50 transition">
+                    </button>
+                    <button onclick="scrollToElement('how-it-works')" class="bg-white text-purple-600 px-6 py-3 rounded-full font-medium hover:bg-purple-50 transition border-none cursor-pointer">
                         See How It Works
-                    </a>
+                    </button>
                 </div>
             </div>
         </div>
@@ -356,13 +356,13 @@
         <div class="container mx-auto">
             <div class="flex flex-col md:flex-row justify-between items-center">
                 <div class="mb-8 md:mb-0">
-                    <a href="/" class="text-2xl font-bold">Sentimental</a>
+                    <button onclick="window.scrollTo(0,0)" class="text-2xl font-bold bg-transparent border-none cursor-pointer text-white">Sentimental</button>
                     <p class="mt-2 text-gray-400">Your Life, Your Story.</p>
                 </div>
                 <div class="flex space-x-6">
-                    <a href="#" class="hover:text-purple-400 transition"><i class="fab fa-x-twitter text-xl"></i></a>
-                    <a href="#" class="hover:text-purple-400 transition"><i class="fab fa-instagram text-xl"></i></a>
-                    <a href="#" class="hover:text-purple-400 transition"><i class="fab fa-linkedin text-xl"></i></a>
+                    <a href="javascript:void(0)" class="hover:text-purple-400 transition"><i class="fab fa-x-twitter text-xl"></i></a>
+                    <a href="javascript:void(0)" class="hover:text-purple-400 transition"><i class="fab fa-instagram text-xl"></i></a>
+                    <a href="javascript:void(0)" class="hover:text-purple-400 transition"><i class="fab fa-linkedin text-xl"></i></a>
                 </div>
             </div>
             <hr class="border-gray-800 my-8">
@@ -373,41 +373,38 @@
     </footer>
 
     <script>
-    // Simple direct JavaScript function to scroll to sections
-    function scrollToSection(sectionId) {
-        // Find the section element
-        const section = document.getElementById(sectionId);
+    // A completely different approach - button-based with direct DOM access
+    function scrollToElement(elementId) {
+        // Get the target element
+        const targetElement = document.getElementById(elementId);
+        if (!targetElement) return;
         
-        if (!section) return;
+        // Get header height
+        const header = document.querySelector('nav');
+        const headerHeight = header ? header.offsetHeight : 0;
         
-        // Get nav height for offset
-        const navHeight = document.querySelector('nav').offsetHeight;
+        // Get element position
+        const elementPosition = targetElement.getBoundingClientRect().top;
         
-        // Special handling for Safari which can be problematic
-        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        // Calculate position to scroll to
+        let offsetPosition = window.pageYOffset + elementPosition - headerHeight - 20;
         
-        // Calculate position (different approach for Safari)
-        let scrollPosition;
-        
-        if (isSafari) {
-            // Direct approach for Safari
-            scrollPosition = section.offsetTop - navHeight - 20;
-        } else {
-            // For other browsers
-            scrollPosition = section.getBoundingClientRect().top + window.pageYOffset - navHeight - 20;
+        // Extra padding for waitlist section
+        if (elementId === 'waitlist') {
+            offsetPosition += 100; // Add extra padding for the waitlist section
         }
         
-        // Add extra offset for #waitlist to ensure form is visible
-        if (sectionId === 'waitlist') {
-            scrollPosition += 100; // Scroll a bit further down
-        }
-        
-        // Perform the scroll
+        // Scroll to the element
         window.scrollTo({
-            top: scrollPosition,
+            top: offsetPosition,
             behavior: 'smooth'
         });
     }
+    
+    // Add event listener for button clicks
+    document.addEventListener('DOMContentLoaded', function() {
+        // Nothing to do here, all handlers are directly attached to buttons
+    });
     </script>
 </body>
 </html>
