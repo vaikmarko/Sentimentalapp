@@ -52,8 +52,11 @@
             transform: translateY(-5px);
         }
         
-        #beta-signup, #how-it-works, #examples, #team {
+        /* Fix for scrolling behavior */
+        section {
             scroll-margin-top: 80px;
+            padding-top: 30px;
+            padding-bottom: 30px;
         }
         
         /* Mobile menu styles */
@@ -82,6 +85,11 @@
         
         .mobile-menu a:last-child {
             border-bottom: none;
+        }
+        
+        /* Fix to ensure the form is visible and accessible */
+        #beta-signup {
+            position: relative; /* Ensure positioning context */
         }
     </style>
 </head>
@@ -433,45 +441,18 @@
             });
         }
         
-        // Ultra-direct method for beta signup buttons - no scrolling calculations at all
-        document.querySelectorAll('.btn-scroll, a[href="#beta-signup"]').forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                // Get a reference to the signup section
-                const betaSection = document.getElementById('beta-signup');
-                if (!betaSection) return;
-                
-                // Scroll directly to the element with no animations or calculations
-                // Use native DOM method directly by calling scrollIntoView
-                betaSection.scrollIntoView();
-                
-                // Fix offset after the direct scrolling
-                window.scrollBy(0, -80); // Account for fixed header
-                
-                // Focus on first form element
-                const firstInput = betaSection.querySelector('input');
-                if (firstInput) {
-                    firstInput.focus();
-                }
-            });
-        });
+        // Fix initial scroll position if page loads with a hash
+        if (window.location.hash) {
+            // Wait for page to fully load
+            setTimeout(function() {
+                // Adjust scroll position to account for fixed header
+                window.scrollBy(0, -80);
+            }, 300);
+        }
         
-        // Standard smooth scrolling for other links
-        document.querySelectorAll('a[href^="#"]:not(.btn-scroll):not([href="#beta-signup"])').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                const targetId = this.getAttribute('href');
-                if (targetId === '#') return;
-                
-                const targetElement = document.querySelector(targetId);
-                if (!targetElement) return;
-                
-                targetElement.scrollIntoView({behavior: 'smooth'});
-                window.scrollBy(0, -80); // Account for fixed header
-            });
-        });
+        // We're no longer using JavaScript for scrolling at all
+        // All navigation is now handled by the browser's native hash behavior
+        // The scroll-margin-top CSS property handles the offset
     });
     </script>
 </body>
