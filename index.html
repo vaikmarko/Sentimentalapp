@@ -57,6 +57,15 @@
             scroll-behavior: smooth;
         }
         
+        /* Fix for scrolling behavior */
+        #beta-signup {
+            scroll-margin-top: 80px;
+        }
+        
+        #how-it-works, #examples, #team {
+            scroll-margin-top: 80px;
+        }
+        
         /* Mobile menu styles */
         .mobile-menu {
             display: none;
@@ -84,7 +93,6 @@
         .mobile-menu a:last-child {
             border-bottom: none;
         }
-    </style>
 </head>
 <body class="bg-gray-50">
     <!-- Navigation -->
@@ -95,7 +103,7 @@
                 <a href="#how-it-works" class="hover:text-purple-600 transition">How It Works</a>
                 <a href="#examples" class="hover:text-purple-600 transition">Examples</a>
                 <a href="#team" class="hover:text-purple-600 transition">Team</a>
-                <a href="#beta-signup" class="btn-primary">Try Our Beta</a>
+                <a href="#beta-signup" class="btn-primary btn-scroll">Try Our Beta</a>
             </div>
             <button id="mobile-menu-button" class="md:hidden">
                 <i class="fas fa-bars text-2xl"></i>
@@ -108,7 +116,7 @@
         <a href="#how-it-works" class="hover:text-purple-600 transition">How It Works</a>
         <a href="#examples" class="hover:text-purple-600 transition">Examples</a>
         <a href="#team" class="hover:text-purple-600 transition">Team</a>
-        <a href="#beta-signup" class="hover:text-purple-600 font-bold transition">Try Our Beta</a>
+        <a href="#beta-signup" class="hover:text-purple-600 font-bold transition btn-scroll">Try Our Beta</a>
     </div>
 
     <!-- Hero Section -->
@@ -122,7 +130,7 @@
                     Everyone has a story — but few have a place to truly tell it. Sentimental uses AI to transform your personal moments into cinematic stories, music, and meaningful content with therapeutic insights that help you understand your life's journey.
                 </p>
                 <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-                    <a href="#beta-signup" class="btn-primary">
+                    <a href="#beta-signup" class="btn-primary btn-scroll">
                         Try Our Beta
                     </a>
                     <a href="#how-it-works" class="bg-white text-purple-600 px-6 py-3 rounded-full font-medium hover:bg-purple-50 transition">
@@ -413,9 +421,10 @@
         </div>
     </footer>
 
-    <!-- JavaScript for mobile menu toggle -->
+    <!-- JavaScript for mobile menu and smooth scrolling -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu functionality
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const mobileMenu = document.getElementById('mobile-menu');
             
@@ -436,6 +445,46 @@
                 if (!mobileMenu.contains(event.target) && !mobileMenuButton.contains(event.target) && mobileMenu.classList.contains('active')) {
                     mobileMenu.classList.remove('active');
                 }
+            });
+            
+            // Improved smooth scrolling for all anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return; // Skip if href is just "#"
+                    
+                    const targetElement = document.querySelector(targetId);
+                    if (!targetElement) return; // Skip if target element doesn't exist
+                    
+                    // Get the height of the fixed navbar
+                    const navHeight = document.querySelector('nav').offsetHeight;
+                    
+                    // Calculate the correct scroll position with offset
+                    const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - navHeight - 20;
+                    
+                    // Smooth scroll to target
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                });
+            });
+            
+            // Additional handling for the "Try Our Beta" buttons for more reliability
+            document.querySelectorAll('.btn-scroll').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const betaSection = document.getElementById('beta-signup');
+                    const navHeight = document.querySelector('nav').offsetHeight;
+                    
+                    // Force scroll to the beta section with offset
+                    window.scrollTo({
+                        top: betaSection.offsetTop - navHeight - 20,
+                        behavior: 'smooth'
+                    });
+                });
             });
         });
     </script>
