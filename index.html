@@ -20,7 +20,6 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            scroll-padding-top: 100px; /* This adds padding to account for fixed header */
         }
         
         h1, h2, h3, h4 {
@@ -53,16 +52,7 @@
             transform: translateY(-5px);
         }
         
-        html {
-            scroll-behavior: smooth;
-        }
-        
-        /* Fix for scrolling behavior */
-        #beta-signup {
-            scroll-margin-top: 80px;
-        }
-        
-        #how-it-works, #examples, #team {
+        #beta-signup, #how-it-works, #examples, #team {
             scroll-margin-top: 80px;
         }
         
@@ -93,6 +83,7 @@
         .mobile-menu a:last-child {
             border-bottom: none;
         }
+    </style>
 </head>
 <body class="bg-gray-50">
     <!-- Navigation -->
@@ -421,13 +412,14 @@
         </div>
     </footer>
 
-    <!-- JavaScript for mobile menu and smooth scrolling -->
+    <!-- Simple JavaScript for functionality -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Mobile menu functionality
-            const mobileMenuButton = document.getElementById('mobile-menu-button');
-            const mobileMenu = document.getElementById('mobile-menu');
-            
+    document.addEventListener('DOMContentLoaded', function() {
+        // Mobile menu functionality
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        if (mobileMenuButton && mobileMenu) {
             mobileMenuButton.addEventListener('click', function() {
                 mobileMenu.classList.toggle('active');
             });
@@ -439,54 +431,30 @@
                     mobileMenu.classList.remove('active');
                 });
             });
-            
-            // Close mobile menu when clicking outside
-            document.addEventListener('click', function(event) {
-                if (!mobileMenu.contains(event.target) && !mobileMenuButton.contains(event.target) && mobileMenu.classList.contains('active')) {
-                    mobileMenu.classList.remove('active');
-                }
-            });
-            
-            // Improved smooth scrolling for all anchor links
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    const targetId = this.getAttribute('href');
-                    if (targetId === '#') return; // Skip if href is just "#"
-                    
-                    const targetElement = document.querySelector(targetId);
-                    if (!targetElement) return; // Skip if target element doesn't exist
-                    
-                    // Get the height of the fixed navbar
-                    const navHeight = document.querySelector('nav').offsetHeight;
-                    
-                    // Calculate the correct scroll position with offset
-                    const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - navHeight - 20;
-                    
-                    // Smooth scroll to target
-                    window.scrollTo({
-                        top: targetPosition,
-                        behavior: 'smooth'
-                    });
-                });
-            });
-            
-            // Additional handling for the "Try Our Beta" buttons for more reliability
-            document.querySelectorAll('.btn-scroll').forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const betaSection = document.getElementById('beta-signup');
-                    const navHeight = document.querySelector('nav').offsetHeight;
-                    
-                    // Force scroll to the beta section with offset
-                    window.scrollTo({
-                        top: betaSection.offsetTop - navHeight - 20,
-                        behavior: 'smooth'
-                    });
+        }
+        
+        // Basic smooth scrolling without overcomplicated calculations
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (!targetElement) return;
+                
+                // Simple offset for navbar
+                const offset = 80;
+                const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - offset;
+                
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: 'smooth'
                 });
             });
         });
+    });
     </script>
 </body>
 </html>
