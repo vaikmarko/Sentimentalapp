@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-GHR6MC542E"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-GHR6MC542E');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Share Your Story - Sentimental</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        h1, h2, h3, h4 {
+            font-family: 'Playfair Display', serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #8639E8 0%, #FF6B6B 100%);
+        }
+
+        .btn-primary {
+            background-color: #8639E8;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: #7529D8;
+            box-shadow: 0 10px 15px rgba(134, 57, 232, 0.2);
+        }
+        
+        .message {
+            padding: 10px 16px;
+            border-radius: 18px;
+            margin-bottom: 12px;
+            max-width: 80%;
+        }
+
+        .user {
+            background-color: #8639E8;
+            color: white;
+            margin-left: auto;
+        }
+
+        .bot {
+            background-color: #f3f4f6;
+            color: #374151;
+            margin-right: auto;
+        }
+
+        #chat-messages {
+            overflow-y: auto;
+            max-height: 400px;
+        }
+
+        #chat-container {
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white sticky top-0 z-50 shadow-sm py-4 px-6">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="/" class="text-3xl font-bold text-purple-600">Sentimental</a>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-12">
+        <div class="max-w-3xl mx-auto">
+            <div class="text-center mb-10">
+                <h1 class="text-4xl font-bold mb-4">Share Your Story</h1>
+                <p class="text-xl text-gray-600">
+                    Tell us something meaningful from your life. Our AI will guide you through the process.
+                </p>
+            </div>
+            
+            <!-- Chat Interface -->
+            <div id="chat-container" class="bg-white shadow-lg rounded-xl overflow-hidden mb-10">
+                <div id="chat-messages" class="p-6 space-y-4 h-96 overflow-y-auto">
+                    <!-- Messages will appear here -->
+                    <div class="message bot">
+                        Hello! I'm here to help you share your story. What personal experience would you like to tell me about today?
+                    </div>
+                </div>
+                
+                <div class="border-t border-gray-200 p-4 bg-gray-50">
+                    <div class="flex items-center">
+                        <textarea id="user-input" placeholder="Type your message here..." class="flex-grow p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600" rows="2"></textarea>
+                        <button id="send-button" class="ml-4 btn-primary">
+                            <i class="fas fa-paper-plane mr-2"></i>Send
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Options Section (Initially Hidden) -->
+            <div id="options-section" class="bg-white shadow-lg rounded-xl p-8 mb-10" style="display: none;">
+                <h2 class="text-2xl font-bold mb-6 text-center">Customize Your Experience</h2>
+                
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-medium mb-2">Choose a Music Style:</label>
+                    <select id="music-style" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600">
+                        <option value="acoustic">Acoustic/Folk</option>
+                        <option value="electronic">Electronic</option>
+                        <option value="classical">Classical</option>
+                        <option value="jazz">Jazz</option>
+                        <option value="rock">Rock</option>
+                        <option value="ambient">Ambient</option>
+                    </select>
+                </div>
+                
+                <div class="mb-8">
+                    <label class="block text-gray-700 font-medium mb-2">Upload Your Photo (Optional):</label>
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                        <input type="file" id="photo-upload" accept="image/*" class="hidden">
+                        <label for="photo-upload" class="cursor-pointer">
+                            <div id="upload-icon" class="mx-auto mb-4">
+                                <i class="fas fa-cloud-upload-alt text-4xl text-purple-600"></i>
+                            </div>
+                            <div id="upload-text">
+                                <p class="text-gray-700 mb-1">Drag and drop a file or click to browse</p>
+                                <p class="text-sm text-gray-500">JPG, PNG, or GIF (max 5MB)</p>
+                            </div>
+                            <div id="upload-preview" class="mt-4" style="display: none;">
+                                <img id="preview-image" class="max-h-40 mx-auto rounded">
+                                <p class="text-sm text-green-600 mt-2">Photo selected</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <button id="submit-story" class="btn-primary text-lg px-10 py-4">
+                        <i class="fas fa-paper-plane mr-2"></i>Submit My Story
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 px-6 mt-auto">
+        <div class="container mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-8 md:mb-0">
+                    <a href="/" class="text-2xl font-bold">Sentimental</a>
+                    <p class="mt-2 text-gray-400">Your Life, Your Story.</p>
+                </div>
+            </div>
+            <hr class="border-gray-800 my-8">
+            <div class="text-center text-gray-400">
+                <p>&copy; 2025 Sentimental. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Firebase Config -->
+    <script src="firebase-config.js"></script>
+    
+    <script>
+        // Simple chat variables
+        const chatMessages = document.getElementById('chat-messages');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        const optionsSection = document.getElementById('options-section');
+        const submitStoryButton = document.getElementById('submit-story');
+        const photoUpload = document.getElementById('photo-upload');
+        const uploadPreview = document.getElementById('upload-preview');
+        const previewImage = document.getElementById('preview-image');
+        const uploadIcon = document.getElementById('upload-icon');
+        const uploadText = document.getElementById('upload-text');
+        
+        // Store conversation history
+        let conversationHistory = [
+            {role: "system", content: "You are a helpful assistant guiding users to share personal stories. Ask meaningful questions that help users provide rich details about their experiences. After 4-5 exchanges, suggest they're ready to submit their story."},
+            {role: "assistant", content: "Hello! I'm here to help you share your story. What personal experience would you like to tell me about today?"}
+        ];
+        
+        // Get user name and email from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const userName = urlParams.get('name');
+        const userEmail = urlParams.get('email');
+        
+        // Message exchange counter
+        let messageCount = 0;
+        let userPhotoFile = null;
+        
+        // Handle photo upload
+        photoUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // Check file size (limit to 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Please choose a file smaller than 5MB');
+                this.value = '';
+                return;
+            }
+            
+            userPhotoFile = file;
+            
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                uploadPreview.style.display = 'block';
+                uploadIcon.style.display = 'none';
+                uploadText.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        });
+        
+        // Send button click event
+        sendButton.addEventListener('click', function() {
+            const userMessage = userInput.value.trim();
+            if (!userMessage) return;
+            
+            // Add user message to chat
+            appendMessage('user', userMessage);
+            userInput.value = '';
+            
+            // Add to conversation history
+            conversationHistory.push({role: "user", content: userMessage});
+            
+            // Increment message counter
+            messageCount++;
+            
+            // Here you would call the OpenAI API
+            // For now, using simple responses
+            setTimeout(() => {
+                let botResponse;
+                
+                if (messageCount >= 4) {
+                    botResponse = "Thank you so much for sharing your story. This is great material to work with! Would you like to add anything else? When you're ready, scroll down to customize your experience and submit your story.";
+                    optionsSection.style.display = 'block';
+                } else if (messageCount === 1) {
+                    botResponse = "That's interesting! Could you tell me more about how that experience made you feel?";
+                } else if (messageCount === 2) {
+                    botResponse = "Thank you for sharing those feelings. How do you think this experience has shaped who you are today?";
+                } else {
+                    botResponse = "I appreciate you opening up about this. Did this experience change your perspective on anything in particular?";
+                }
+                
+                appendMessage('bot', botResponse);
+                conversationHistory.push({role: "assistant", content: botResponse});
+            }, 1000);
+        });
+        
+        // Allow sending with Enter key
+        userInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendButton.click();
+            }
+        });
+        
+        // Function to add messages to the chat
+        function appendMessage(sender, message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', sender);
+            messageDiv.textContent = message;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Submit story button
+        submitStoryButton.addEventListener('click', async function() {
+            // Show loading state
+            this.disabled = true;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Submitting...';
+            
+            const musicStyle = document.getElementById('music-style').value;
+            
+            try {
+                // Create a unique ID for this submission
+                const submissionId = `${Date.now()}-${userName.replace(/\s+/g, '-').toLowerCase()}`;
+                
+                // Prepare story data
+                const storyData = {
+                    id: submissionId,
+                    name: userName,
+                    email: userEmail,
+                    conversation: conversationHistory,
+                    musicStyle: musicStyle,
+                    submittedAt: new Date().toISOString(),
+                    status: 'new'
+                };
+                
+                // If there's a photo, upload it to Firebase Storage
+                if (userPhotoFile) {
+                    const storageRef = storage.ref(`user-photos/${submissionId}`);
+                    await storageRef.put(userPhotoFile);
+                    
+                    // Get the download URL
+                    const photoURL = await storageRef.getDownloadURL();
+                    storyData.photoURL = photoURL;
+                }
+                
+                // Save to Firestore
+                await db.collection('submissions').doc(submissionId).set(storyData);
+                
+                // Redirect to thank you page
+                window.location.href = "thanks.html?submitted=true";
+                
+            } catch (error) {
+                console.error("Error submitting story:", error);
+                alert("There was an error submitting your story. Please try again.");
+                
+                // Reset button
+                this.disabled = false;
+                this.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Submit My Story';
+            }
+        });
+    </script>
+</body>
+</html>
