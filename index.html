@@ -59,10 +59,10 @@
         <div class="container mx-auto flex justify-between items-center">
             <a href="#" class="text-3xl font-bold text-purple-600">Sentimental</a>
             <div class="hidden md:flex space-x-8 items-center">
-                <a href="#how-it-works" class="hover:text-purple-600 transition scroll-link">How It Works</a>
-                <a href="#examples" class="hover:text-purple-600 transition scroll-link">Examples</a>
-                <a href="#team" class="hover:text-purple-600 transition scroll-link">Team</a>
-                <a href="#waitlist" class="btn-primary scroll-link">Try Our Beta</a>
+                <a href="javascript:void(0)" onclick="scrollToSection('how-it-works')" class="hover:text-purple-600 transition">How It Works</a>
+                <a href="javascript:void(0)" onclick="scrollToSection('examples')" class="hover:text-purple-600 transition">Examples</a>
+                <a href="javascript:void(0)" onclick="scrollToSection('team')" class="hover:text-purple-600 transition">Team</a>
+                <a href="javascript:void(0)" onclick="scrollToSection('waitlist')" class="btn-primary">Try Our Beta</a>
             </div>
             <button class="md:hidden">
                 <i class="fas fa-bars text-2xl"></i>
@@ -81,10 +81,10 @@
                     Everyone has a story — but few have a place to truly tell it. Sentimental uses AI to transform your personal moments into cinematic stories, music, and meaningful content with therapeutic insights that help you understand your life's journey.
                 </p>
                 <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-                    <a href="#waitlist" class="btn-primary scroll-link">
+                    <a href="javascript:void(0)" onclick="scrollToSection('waitlist')" class="btn-primary">
                         Try Our Beta
                     </a>
-                    <a href="#how-it-works" class="bg-white text-purple-600 px-6 py-3 rounded-full font-medium hover:bg-purple-50 transition scroll-link">
+                    <a href="javascript:void(0)" onclick="scrollToSection('how-it-works')" class="bg-white text-purple-600 px-6 py-3 rounded-full font-medium hover:bg-purple-50 transition">
                         See How It Works
                     </a>
                 </div>
@@ -373,33 +373,41 @@
     </footer>
 
     <script>
-    // A simpler direct approach to scrolling
-    document.addEventListener('DOMContentLoaded', function() {
-        // Add the scroll-link class to all anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(link => {
-            link.classList.add('scroll-link');
-        });
+    // Simple direct JavaScript function to scroll to sections
+    function scrollToSection(sectionId) {
+        // Find the section element
+        const section = document.getElementById(sectionId);
         
-        // Direct method - set up click handlers for all scroll links
-        document.querySelectorAll('.scroll-link').forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                // Get the target section ID
-                const targetId = this.getAttribute('href');
-                
-                // For the waitlist section specifically
-                if (targetId === '#waitlist') {
-                    // Force jump directly to the form section - most reliable method
-                    const formElement = document.getElementById('betaForm');
-                    if (formElement) {
-                        // Calculate position accounting for navigation
-                        const navHeight = document.querySelector('nav').offsetHeight;
-                        const topPosition = formElement.getBoundingClientRect().top + window.pageYOffset - navHeight - 50;
-                        
-                        // Scroll there directly
-                        window.scrollTo({
-                            top: topPosition,
-                            behavior: 'smooth'
-                        });
-                        re
+        if (!section) return;
+        
+        // Get nav height for offset
+        const navHeight = document.querySelector('nav').offsetHeight;
+        
+        // Special handling for Safari which can be problematic
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        
+        // Calculate position (different approach for Safari)
+        let scrollPosition;
+        
+        if (isSafari) {
+            // Direct approach for Safari
+            scrollPosition = section.offsetTop - navHeight - 20;
+        } else {
+            // For other browsers
+            scrollPosition = section.getBoundingClientRect().top + window.pageYOffset - navHeight - 20;
+        }
+        
+        // Add extra offset for #waitlist to ensure form is visible
+        if (sectionId === 'waitlist') {
+            scrollPosition += 100; // Scroll a bit further down
+        }
+        
+        // Perform the scroll
+        window.scrollTo({
+            top: scrollPosition,
+            behavior: 'smooth'
+        });
+    }
+    </script>
+</body>
+</html>
