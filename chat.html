@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-GHR6MC542E"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-GHR6MC542E');
+  </script>
+  
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sentimental - Share Your Story</title>
@@ -13,6 +22,9 @@
       font-family: 'Inter', sans-serif;
       background-color: #f7f7f8;
       color: #343541;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
     }
 
     .chat-container {
@@ -88,6 +100,7 @@
       background-color: #ffffff;
       padding: 15px 20px;
       border-top: 1px solid #e5e5e6;
+      z-index: 10;
     }
 
     .chat-input {
@@ -244,6 +257,38 @@
       font-size: 24px;
     }
 
+    /* Typing indicator */
+    .typing-indicator {
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .typing-indicator span {
+      height: 5px;
+      width: 5px;
+      margin: 0 1px;
+      background-color: #8639E8;
+      display: block;
+      border-radius: 50%;
+      opacity: 0.4;
+    }
+
+    .typing-indicator span:nth-of-type(1) {
+      animation: 1s blink infinite 0.3333s;
+    }
+    .typing-indicator span:nth-of-type(2) {
+      animation: 1s blink infinite 0.6666s;
+    }
+    .typing-indicator span:nth-of-type(3) {
+      animation: 1s blink infinite 0.9999s;
+    }
+
+    @keyframes blink {
+      50% {
+        opacity: 1;
+      }
+    }
+
     /* Mobile-specific styles */
     @media (max-width: 640px) {
       .chat-container {
@@ -278,13 +323,34 @@
         height: 30px;
       }
     }
+
+    .navbar {
+      background: white;
+      padding: 12px 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-weight: 700;
+      font-size: 20px;
+      color: #8639E8;
+      text-decoration: none;
+    }
   </style>
 </head>
 <body>
+  <!-- Simple Navbar -->
+  <div class="navbar">
+    <a href="/" class="logo">Sentimental</a>
+  </div>
+
   <!-- Chat Interface -->
   <div id="chat-view">
     <div class="chat-container">
-      <!-- Messages will be inserted here -->
+      <!-- Messages will be inserted here by JavaScript -->
     </div>
     
     <div class="input-area">
@@ -464,7 +530,7 @@ So, what would you like to talk about today?`, false);
         
         const avatar = document.createElement('div');
         avatar.className = isUser ? 'avatar user-avatar' : 'avatar bot-avatar';
-        avatar.textContent = isUser ? 'U' : 'S';
+        avatar.textContent = isUser ? 'Y' : 'S';
         
         const messageContent = document.createElement('div');
         messageContent.className = 'message-content';
@@ -489,6 +555,14 @@ So, what would you like to talk about today?`, false);
           if (userMessageCount >= 2) {
             finishBtn.style.display = 'flex';
           }
+          
+          // Track in Google Analytics
+          if (typeof gtag === 'function') {
+            gtag('event', 'share_story_part', {
+              'event_category': 'engagement',
+              'event_label': 'User shared part of story'
+            });
+          }
         }
       }
       
@@ -497,32 +571,37 @@ So, what would you like to talk about today?`, false);
         return botPrompts[Math.floor(Math.random() * botPrompts.length)];
       }
       
-      // Simulate bot response
+      // Simulate bot response with typing indicator
       function botResponse() {
         // Add typing indicator
-        const typingRow = document.createElement('div');
-        typingRow.className = 'message-row bot typing';
+        const messageRow = document.createElement('div');
+        messageRow.className = 'message-row bot';
         
         const avatar = document.createElement('div');
         avatar.className = 'avatar bot-avatar';
         avatar.textContent = 'S';
         
+        const messageContent = document.createElement('div');
+        messageContent.className = 'message-content';
+        
         const typingIndicator = document.createElement('div');
         typingIndicator.className = 'typing-indicator';
-        typingIndicator.innerHTML = '<span>•</span><span>•</span><span>•</span>';
+        typingIndicator.innerHTML = '<span></span><span></span><span></span>';
         
-        typingRow.appendChild(avatar);
-        typingRow.appendChild(typingIndicator);
-        chatContainer.appendChild(typingRow);
+        messageContent.appendChild(typingIndicator);
+        messageRow.appendChild(avatar);
+        messageRow.appendChild(messageContent);
+        
+        chatContainer.appendChild(messageRow);
         
         // Scroll to bottom
         chatContainer.scrollTop = chatContainer.scrollHeight;
         
         // Remove typing indicator after delay and add actual message
         setTimeout(() => {
-          chatContainer.removeChild(typingRow);
+          chatContainer.removeChild(messageRow);
           addMessage(getRandomPrompt(), false);
-        }, 1500);
+        }, 1500 + Math.random() * 1000); // Random delay between 1.5-2.5 seconds
       }
       
       // Send message
@@ -538,6 +617,14 @@ So, what would you like to talk about today?`, false);
       
       // Finish sharing story
       function finishSharing() {
+        // Track in Google Analytics
+        if (typeof gtag === 'function') {
+          gtag('event', 'finish_story', {
+            'event_category': 'engagement',
+            'event_label': 'User finished sharing story'
+          });
+        }
+        
         // Add final bot message
         addMessage(`Thank you so much for sharing your story with me. Your experiences and insights are valuable, and I appreciate your openness.
 
@@ -549,6 +636,9 @@ Let's continue to the next step where you can choose your preferred formats.`, f
         setTimeout(() => {
           chatView.style.display = 'none';
           formatSelection.style.display = 'block';
+          
+          // Save story (even if user doesn't continue)
+          saveStory(fullStory, [], "");
           
           // Scroll to top
           window.scrollTo(0, 0);
@@ -569,9 +659,21 @@ Let's continue to the next step where you can choose your preferred formats.`, f
           return;
         }
         
+        // Track in Google Analytics
+        if (typeof gtag === 'function') {
+          gtag('event', 'selected_formats', {
+            'event_category': 'engagement',
+            'event_label': 'User selected formats',
+            'formats': selectedFormats.join(',')
+          });
+        }
+        
         // Show email collection
         formatSelection.style.display = 'none';
         emailCollection.style.display = 'block';
+        
+        // Update database with selected formats
+        saveStory(fullStory, selectedFormats, "");
         
         // Scroll to top
         window.scrollTo(0, 0);
@@ -590,10 +692,16 @@ Let's continue to the next step where you can choose your preferred formats.`, f
           return;
         }
         
-        // Here you would normally send the data to your server
-        console.log('Story:', fullStory);
-        console.log('Selected formats:', selectedFormats);
-        console.log('Email:', email);
+        // Track in Google Analytics
+        if (typeof gtag === 'function') {
+          gtag('event', 'submitted_email', {
+            'event_category': 'conversion',
+            'event_label': 'User submitted email'
+          });
+        }
+        
+        // Save everything to database/endpoint
+        saveStory(fullStory, selectedFormats, email);
         
         // Show success view
         emailCollection.style.display = 'none';
@@ -601,6 +709,41 @@ Let's continue to the next step where you can choose your preferred formats.`, f
         
         // Scroll to top
         window.scrollTo(0, 0);
+      }
+      
+      // Save story to database/endpoint
+      function saveStory(story, formats, email) {
+        console.log('Saving story to database...');
+        console.log('Story:', story);
+        console.log('Selected formats:', formats);
+        console.log('Email:', email);
+        
+        // For now, just log to console. In production, you would send this data to your server
+        // This will help you collect stories even if users don't complete all steps
+        
+        /* 
+        Example of how to implement server-side storage when ready:
+        
+        fetch('/api/save-story', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            story: story,
+            formats: formats,
+            email: email,
+            timestamp: new Date().toISOString()
+          }),
+        })
+        .then(response => response.json())
+        .then(data => {
+          console.log('Success:', data);
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+        */
       }
       
       // Event listeners
