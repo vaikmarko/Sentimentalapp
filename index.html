@@ -62,7 +62,7 @@ transform: translateY(-5px);
 <a href="#how-it-works" class="hover:text-purple-600 transition">How It Works</a>
 <a href="#examples" class="hover:text-purple-600 transition">Examples</a>
 <a href="#team" class="hover:text-purple-600 transition">Team</a>
-<a href="#try-beta" class="btn-primary">Try Beta Now</a>
+<a href="https://chat.sentimentalapp.com" class="btn-primary">Try Beta Now</a>
 </div>
 <button class="md:hidden">
 <i class="fas fa-bars text-2xl"></i>
@@ -81,12 +81,9 @@ Your Life as a Netflix Series or Spotify Hit
                     Sentimental uses AI to transform your personal moments into cinematic stories, music, and meaningful content with therapeutic insights that help you understand your life's journey.
                     Everyone has a story — but few have a place to truly tell it.
 </p>
-<div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-<a href="#try-beta" class="btn-primary">
+<div class="flex justify-center">
+<a href="https://chat.sentimentalapp.com" class="btn-primary text-center px-8 py-4 text-lg">
 Try Our Beta Product
-</a>
-<a href="#how-it-works" class="bg-white text-purple-600 px-6 py-3 rounded-full font-medium hover:bg-purple-50 transition">
-See How It Works
 </a>
 </div>
 </div>
@@ -351,7 +348,7 @@ Digital innovation veteran who's built scalable solutions for SEB, Swedbank, and
 <p class="mt-2 text-gray-400">Your Life, Your Story.</p>
 </div>
 <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6">
-<a href="#try-beta" class="btn-primary">Try Beta Now</a>
+<a href="https://chat.sentimentalapp.com" class="btn-primary">Try Beta Now</a>
 <div class="flex space-x-6">
 <a href="#" class="hover:text-purple-400 transition"><i class="fab fa-x-twitter text-xl"></i></a>
 <a href="#" class="hover:text-purple-400 transition"><i class="fab fa-instagram text-xl"></i></a>
@@ -365,5 +362,63 @@ Digital innovation veteran who's built scalable solutions for SEB, Swedbank, and
 </div>
 </div>
 </footer>
+
+<!-- Mobile Menu Script -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const menuButton = document.querySelector('button.md\\:hidden');
+    const mobileMenu = document.createElement('div');
+    mobileMenu.className = 'fixed inset-0 bg-gray-900 bg-opacity-90 z-50 flex flex-col items-center justify-center transform translate-x-full transition-transform duration-300 ease-in-out';
+    mobileMenu.style.display = 'none';
+    
+    // Create close button
+    const closeButton = document.createElement('button');
+    closeButton.className = 'absolute top-6 right-6 text-white text-3xl';
+    closeButton.innerHTML = '<i class="fas fa-times"></i>';
+    mobileMenu.appendChild(closeButton);
+    
+    // Create menu items
+    const menuItems = document.createElement('div');
+    menuItems.className = 'flex flex-col space-y-8 text-center';
+    
+    const navItems = [
+      { text: 'How It Works', href: '#how-it-works' },
+      { text: 'Examples', href: '#examples' },
+      { text: 'Team', href: '#team' },
+      { text: 'Try Beta Now', href: 'https://chat.sentimentalapp.com', class: 'bg-purple-600 text-white px-6 py-3 rounded-full' }
+    ];
+    
+    navItems.forEach(item => {
+      const link = document.createElement('a');
+      link.href = item.href;
+      link.textContent = item.text;
+      link.className = item.class ? item.class : 'text-white text-2xl';
+      
+      link.addEventListener('click', function() {
+        mobileMenu.style.transform = 'translateX(100%)';
+        setTimeout(() => { mobileMenu.style.display = 'none'; }, 300);
+      });
+      
+      menuItems.appendChild(link);
+    });
+    
+    mobileMenu.appendChild(menuItems);
+    document.body.appendChild(mobileMenu);
+    
+    // Toggle menu
+    menuButton.addEventListener('click', function() {
+      if (mobileMenu.style.display === 'none') {
+        mobileMenu.style.display = 'flex';
+        setTimeout(() => { mobileMenu.style.transform = 'translateX(0)'; }, 10);
+      }
+    });
+    
+    // Close menu
+    closeButton.addEventListener('click', function() {
+      mobileMenu.style.transform = 'translateX(100%)';
+      setTimeout(() => { mobileMenu.style.display = 'none'; }, 300);
+    });
+  });
+</script>
 </body>
 </html>
