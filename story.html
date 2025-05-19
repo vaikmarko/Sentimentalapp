@@ -311,4 +311,187 @@
         });
         
         // Handle photo upload
-        photoUpload.addEventListener('ch
+        photoUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // Check file size (limit to 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Please choose a file smaller than 5MB');
+                this.value = '';
+                return;
+            }
+            
+            userPhotoFile = file;
+            
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                uploadPreview.style.display = 'block';
+                uploadIcon.style.display = 'none';
+                uploadText.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        });
+        
+        // Helper function to create typing indicator
+        function showTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.classList.add('message', 'bot', 'typing-indicator-container');
+            typingDiv.id = 'typing-indicator';
+            
+            const typingIndicator = document.createElement('div');
+            typingIndicator.classList.add('typing-indicator');
+            typingIndicator.innerHTML = '<span></span><span></span><span></span>';
+            
+            typingDiv.appendChild(typingIndicator);
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        function removeTypingIndicator() {
+            const typingIndicator = document.getElementById('typing-indicator');
+            if (typingIndicator) {
+                chatMessages.removeChild(typingIndicator);
+            }
+        }
+        
+        // Send button click event
+        sendButton.addEventListener('click', async function() {
+            const userMessage = userInput.value.trim();
+            if (!userMessage) return;
+            
+            // Disable input while processing
+            userInput.disabled = true;
+            sendButton.disabled = true;
+            
+            // Add user message to chat
+            appendMessage('user', userMessage);
+            userInput.value = '';
+            
+            // Add to conversation history
+            conversationHistory.push({role: "user", content: userMessage});
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            try {
+                // Call Firebase Function
+                const response = await fetch(CLOUD_FUNCTION_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        messages: conversationHistory
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // Remove typing indicator
+                removeTypingIndicator();
+                
+                if (data.message && data.message.content) {
+                    const aiMessage = data.message.content;
+                    
+                    // Add AI response to chat
+                    appendMessage('bot', aiMessage);
+                    conversationHistory.push({role: "assistant", content: aiMessage});
+                    
+                    // Increment message counter
+                    messageCount++;
+                    
+                    // Show options section after 4 exchanges
+                    if (messageCount >= 4) {
+                        optionsSection.style.display = 'block';
+                        
+                        // Scroll to options section after a short delay
+                        setTimeout(() => {
+                            optionsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 500);
+                    }
+                } else {
+                    appendMessage('bot', "I'm having trouble generating a response. Please try again.");
+                }
+            } catch (error) {
+                console.error("Error calling backend:", error);
+                removeTypingIndicator();
+                appendMessage('bot', "I'm sorry, there was an error processing your message. Please try again.");
+            }
+            
+            // Re-enable input
+            userInput.disabled = false;
+            sendButton.disabled = false;
+            userInput.focus();
+        });
+        
+        // Allow sending with Enter key
+        userInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendButton.click();
+            }
+        });
+        
+        // Function to add messages to the chat
+        function appendMessage(sender, message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', sender);
+            messageDiv.textContent = message;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Submit story button
+        submitStoryButton.addEventListener('click', async function() {
+            // Show loading state
+            this.disabled = true;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Submitting...';
+            
+            const musicStyle = musicStyleInput.value;
+            
+            try {
+                // Create a unique ID for this submission
+                const submissionId = `${Date.now()}-${userName.replace(/\s+/g, '-').toLowerCase()}`;
+                
+                // Prepare story data
+                const storyData = {
+                    id: submissionId,
+                    name: userName,
+                    email: userEmail,
+                    conversation: conversationHistory,
+                    musicStyle: musicStyle,
+                    submittedAt: new Date().toISOString(),
+                    status: 'new'
+                };
+                
+                // If there's a photo, upload it to Firebase Storage
+                if (userPhotoFile) {
+                    const storageRef = storage.ref(`user-photos/${submissionId}`);
+                    await storageRef.put(userPhotoFile);
+                    
+                    // Get the download URL
+                    const photoURL = await storageRef.getDownloadURL();
+                    storyData.photoURL = photoURL;
+                }
+                
+                // Save to Firestore
+                await db.collection('submissions').doc(submissionId).set(storyData);
+                
+                // Redirect to thank you page
+                window.location.href = "thanks.html?submitted=true";
+                
+            } catch (error) {
+                console.error("Error submitting story:", error);
+                alert("There was an error submitting your story. Please try again.");
+                
+                // Reset button
+                this.disabled = false;
+                this.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Submit My Story';
+            }
+        });
+    </script>
+</body>
+</html>
