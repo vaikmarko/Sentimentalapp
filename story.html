@@ -112,20 +112,6 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
-        .music-style-option {
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        
-        .music-style-option:hover {
-            transform: translateY(-5px);
-        }
-        
-        .music-style-option.selected {
-            border: 2px solid #8639E8;
-            transform: translateY(-5px);
-        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -166,55 +152,34 @@
             
             <!-- Options Section (Initially Hidden) -->
             <div id="options-section" class="bg-white shadow-lg rounded-xl p-8 mb-10" style="display: none;">
-                <h2 class="text-2xl font-bold mb-6 text-center">Customize Your Experience</h2>
+                <h2 class="text-2xl font-bold mb-6 text-center">Submit Your Story</h2>
                 
-                <div class="mb-8">
-                    <label class="block text-gray-700 font-medium mb-4">Choose a Music Style:</label>
-                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        <div class="music-style-option bg-gray-50 rounded-lg p-4 text-center hover:shadow-md selected" data-style="acoustic">
-                            <div class="w-12 h-12 mx-auto mb-2 bg-purple-100 rounded-full flex items-center justify-center">
-                                <i class="fas fa-guitar text-purple-600"></i>
+                <div class="mb-8 text-center">
+                    <p class="text-lg text-gray-700 mb-6">
+                        Thank you for sharing your story with us. Once you submit, our licensed counselors will review your story and prepare:
+                    </p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+                        <div class="bg-gray-50 rounded-xl p-6 text-center">
+                            <div class="w-16 h-16 mx-auto mb-4 bg-purple-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-brain text-purple-600 text-2xl"></i>
                             </div>
-                            <h4 class="font-semibold">Acoustic</h4>
-                            <p class="text-sm text-gray-500">Folksy, organic sounds</p>
+                            <h3 class="text-xl font-bold mb-2">Therapeutic Insight</h3>
+                            <p class="text-gray-600">
+                                A personalized therapeutic perspective based on your unique experience
+                            </p>
                         </div>
-                        <div class="music-style-option bg-gray-50 rounded-lg p-4 text-center hover:shadow-md" data-style="electronic">
-                            <div class="w-12 h-12 mx-auto mb-2 bg-purple-100 rounded-full flex items-center justify-center">
-                                <i class="fas fa-bolt text-purple-600"></i>
+                        
+                        <div class="bg-gray-50 rounded-xl p-6 text-center">
+                            <div class="w-16 h-16 mx-auto mb-4 bg-purple-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-share-alt text-purple-600 text-2xl"></i>
                             </div>
-                            <h4 class="font-semibold">Electronic</h4>
-                            <p class="text-sm text-gray-500">Modern digital beats</p>
-                        </div>
-                        <div class="music-style-option bg-gray-50 rounded-lg p-4 text-center hover:shadow-md" data-style="classical">
-                            <div class="w-12 h-12 mx-auto mb-2 bg-purple-100 rounded-full flex items-center justify-center">
-                                <i class="fas fa-music text-purple-600"></i>
-                            </div>
-                            <h4 class="font-semibold">Classical</h4>
-                            <p class="text-sm text-gray-500">Orchestral elegance</p>
-                        </div>
-                        <div class="music-style-option bg-gray-50 rounded-lg p-4 text-center hover:shadow-md" data-style="jazz">
-                            <div class="w-12 h-12 mx-auto mb-2 bg-purple-100 rounded-full flex items-center justify-center">
-                                <i class="fas fa-saxophone text-purple-600"></i>
-                            </div>
-                            <h4 class="font-semibold">Jazz</h4>
-                            <p class="text-sm text-gray-500">Smooth improvisations</p>
-                        </div>
-                        <div class="music-style-option bg-gray-50 rounded-lg p-4 text-center hover:shadow-md" data-style="rock">
-                            <div class="w-12 h-12 mx-auto mb-2 bg-purple-100 rounded-full flex items-center justify-center">
-                                <i class="fas fa-drum text-purple-600"></i>
-                            </div>
-                            <h4 class="font-semibold">Rock</h4>
-                            <p class="text-sm text-gray-500">Powerful and energetic</p>
-                        </div>
-                        <div class="music-style-option bg-gray-50 rounded-lg p-4 text-center hover:shadow-md" data-style="ambient">
-                            <div class="w-12 h-12 mx-auto mb-2 bg-purple-100 rounded-full flex items-center justify-center">
-                                <i class="fas fa-water text-purple-600"></i>
-                            </div>
-                            <h4 class="font-semibold">Ambient</h4>
-                            <p class="text-sm text-gray-500">Atmospheric textures</p>
+                            <h3 class="text-xl font-bold mb-2">Viral Content</h3>
+                            <p class="text-gray-600">
+                                Creative content inspired by your story that you can share
+                            </p>
                         </div>
                     </div>
-                    <input type="hidden" id="music-style" value="acoustic">
                 </div>
                 
                 <div class="mb-8">
@@ -266,6 +231,9 @@
     <script src="firebase-config.js"></script>
     
     <script>
+        // Initialize the callable function
+        const chatCompletionFunction = firebase.functions().httpsCallable('chatCompletion');
+        
         // Chat variables
         const chatMessages = document.getElementById('chat-messages');
         const userInput = document.getElementById('user-input');
@@ -277,15 +245,10 @@
         const previewImage = document.getElementById('preview-image');
         const uploadIcon = document.getElementById('upload-icon');
         const uploadText = document.getElementById('upload-text');
-        const musicStyleOptions = document.querySelectorAll('.music-style-option');
-        const musicStyleInput = document.getElementById('music-style');
-        
-        // Firebase Function URL (replace with your actual URL)
-        const CLOUD_FUNCTION_URL = "https://us-central1-sentimental-28cc9.cloudfunctions.net/chatCompletion";
         
         // Store conversation history
         let conversationHistory = [
-            {role: "system", content: "You are a compassionate AI assistant at Sentimental, guiding users to share meaningful personal stories. Help them open up about significant experiences that shaped them. Ask thoughtful questions to gradually get deeper insights. Focus on emotions, key moments, and personal growth. After about 4-5 exchanges when you've gathered enough story material, gently suggest they're ready to customize and submit their story. Your tone should be warm, understanding, and encouraging. Avoid clinical language or overly generic responses. If a user shares something sensitive, acknowledge their trust in sharing it. Don't rush them - let the conversation flow naturally."},
+            {role: "system", content: "You are a compassionate AI assistant at Sentimental, guiding users to share meaningful personal stories. Help them open up about significant experiences that shaped them. Ask thoughtful questions to gradually get deeper insights. Focus on emotions, key moments, and personal growth. After about 4-5 exchanges when you've gathered enough story material, gently suggest they're ready to submit their story. Your tone should be warm, understanding, and encouraging. Avoid clinical language or overly generic responses. If a user shares something sensitive, acknowledge their trust in sharing it. Don't rush them - let the conversation flow naturally."},
             {role: "assistant", content: "Hello! I'm here to help you share your story. What personal experience would you like to tell me about today?"}
         ];
         
@@ -297,18 +260,6 @@
         // Message exchange counter
         let messageCount = 0;
         let userPhotoFile = null;
-        
-        // Handle music style selection
-        musicStyleOptions.forEach(option => {
-            option.addEventListener('click', function() {
-                // Remove selected class from all options
-                musicStyleOptions.forEach(opt => opt.classList.remove('selected'));
-                // Add selected class to clicked option
-                this.classList.add('selected');
-                // Update hidden input value
-                musicStyleInput.value = this.dataset.style;
-            });
-        });
         
         // Handle photo upload
         photoUpload.addEventListener('change', function(e) {
@@ -377,24 +328,16 @@
             showTypingIndicator();
             
             try {
-                // Call Firebase Function
-                const response = await fetch(CLOUD_FUNCTION_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        messages: conversationHistory
-                    })
+                // Call Firebase Function using the callable approach
+                const result = await chatCompletionFunction({
+                    messages: conversationHistory
                 });
-                
-                const data = await response.json();
                 
                 // Remove typing indicator
                 removeTypingIndicator();
                 
-                if (data.message && data.message.content) {
-                    const aiMessage = data.message.content;
+                if (result.data && result.data.message && result.data.message.content) {
+                    const aiMessage = result.data.message.content;
                     
                     // Add AI response to chat
                     appendMessage('bot', aiMessage);
@@ -450,8 +393,6 @@
             this.disabled = true;
             this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Submitting...';
             
-            const musicStyle = musicStyleInput.value;
-            
             try {
                 // Create a unique ID for this submission
                 const submissionId = `${Date.now()}-${userName.replace(/\s+/g, '-').toLowerCase()}`;
@@ -462,7 +403,6 @@
                     name: userName,
                     email: userEmail,
                     conversation: conversationHistory,
-                    musicStyle: musicStyle,
                     submittedAt: new Date().toISOString(),
                     status: 'new'
                 };
