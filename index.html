@@ -51,6 +51,27 @@ transition: all 0.3s ease;
 .layer-card:hover {
 transform: translateY(-5px);
 }
+
+.pulse-animation {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(134, 57, 232, 0.7);
+  }
+  
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(134, 57, 232, 0);
+  }
+  
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(134, 57, 232, 0);
+  }
+}
 </style>
 </head>
 <body class="bg-gray-50">
@@ -62,7 +83,7 @@ transform: translateY(-5px);
 <a href="#how-it-works" class="hover:text-purple-600 transition">How It Works</a>
 <a href="#examples" class="hover:text-purple-600 transition">Examples</a>
 <a href="#team" class="hover:text-purple-600 transition">Team</a>
-<a href="#waitlist" class="btn-primary">Join Waitlist</a>
+<a href="#try-beta" class="btn-primary pulse-animation">Try Beta Now</a>
 </div>
 <button class="md:hidden">
 <i class="fas fa-bars text-2xl"></i>
@@ -82,8 +103,8 @@ Your Life as a Netflix Series or Spotify Hit
                     Everyone has a story — but few have a place to truly tell it. Sentimental uses AI to transform your personal moments into cinematic stories, music, and meaningful content with therapeutic insights that help you understand your life's journey.
 </p>
 <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-<a href="#waitlist" class="btn-primary">
-Join the Waitlist
+<a href="#try-beta" class="btn-primary pulse-animation">
+Try Our Beta Product
 </a>
 <a href="#how-it-works" class="bg-white text-purple-600 px-6 py-3 rounded-full font-medium hover:bg-purple-50 transition">
 See How It Works
@@ -98,10 +119,8 @@ See How It Works
 <div class="container mx-auto">
 <div class="max-w-5xl mx-auto">
 <div class="text-center mb-16">
-                    <h2 class="text-4xl font-bold mb-6">Find Meaning in Every Chapter of Your Story</h2>
                     <h2 class="text-4xl font-bold mb-6">Find Meaning in a World of Efficiency</h2>
 <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                       Whether it's everyday moments, major milestones, or personal reflections, Sentimental transforms your experiences into meaningful stories with therapeutic insights that deepen your self-understanding.
                        We live in an era where efficiency is everywhere, but meaning is rare. At Sentimental, we're building a journey that bridges self-reflection and cultural expression, therapy and aesthetics. Whether it's everyday moments, major milestones, or personal reflections, your experiences deserve a form that is not just therapeutic, but expressive, shareable, and deeply human.
 </p>
 </div>
@@ -165,7 +184,6 @@ Create different versions of your experiences to inspire friends, family, or you
 </div>
 <div class="md:w-2/3 p-8">
 <p class="text-gray-600 text-lg">
-                                Record your thoughts, experiences, and moments through simple voice memos, text entries, or by answering AI-guided questions. No need for writing skills or structure.
                                 Record your thoughts, experiences, and moments through simple voice memos, text entries, or by answering AI-guided questions. No need for writing skills or structure—just your authentic voice.
 </p>
 </div>
@@ -183,7 +201,6 @@ Create different versions of your experiences to inspire friends, family, or you
 </div>
 <div class="md:w-2/3 p-8">
 <p class="text-gray-600 text-lg">
-                                Our AI organizes your inputs into compelling stories with therapeutic insights and professional quality. Choose formats like a personal Netflix-style series, music, or beautifully written books that help you gain new perspectives.
                                 Our AI helps you see your experiences in multiple dimensions—imagine turning a memory into a song, a heartbreak into a podcast episode, or a breakthrough into a beautifully crafted visual story that reveals patterns you never noticed before.
 </p>
 </div>
@@ -201,7 +218,6 @@ Create different versions of your experiences to inspire friends, family, or you
 </div>
 <div class="md:w-2/3 p-8">
 <p class="text-gray-600 text-lg">
-                                Keep your stories private, share with specific people, or publish to inspire others. Create different versions for different audiences from the same source material.
                                 In a world where attention is fragmented and authenticity is in crisis, share your transformed stories in ways that truly connect. Create different versions for different audiences or keep them as personal touchstones for your own journey.
 </p>
 </div>
@@ -218,7 +234,6 @@ Create different versions of your experiences to inspire friends, family, or you
 <div class="text-center mb-16">
 <h2 class="text-4xl font-bold mb-6">See the Possibilities</h2>
 <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                        From everyday moments to major life changes, Sentimental helps you see your experiences in a new light.
                         Swipe through emotional dimensions of your story as if flipping through alternate realities of your experiences—each with its own aesthetic, insight, and purpose.
 </p>
 </div>
@@ -329,30 +344,34 @@ Digital innovation veteran who's built scalable solutions for SEB, Swedbank, and
 </div>
 </section>
 
-<!-- Call to Action -->
-<section id="waitlist" class="py-20 px-6 gradient-bg text-white">
+<!-- Try Beta Section (Replacing Waitlist Section) -->
+<section id="try-beta" class="py-20 px-6 gradient-bg text-white">
 <div class="container mx-auto">
 <div class="max-w-4xl mx-auto text-center">
-<h2 class="text-4xl font-bold mb-6">Be First to Experience Sentimental</h2>
+<h2 class="text-4xl font-bold mb-6">Transform Your Stories Into Viral Media</h2>
 <p class="text-xl mb-10 max-w-2xl mx-auto">
-                    Join our waitlist today for early access. See your life transformed into stories worth sharing.
-                    Join our waitlist today for early access to a space where you can transform your inner life into powerful narratives worth sharing—where meaning isn't just discovered, but created.
+    Be among the first to experience our next-generation media platform. Chat with our AI and see your personal stories transformed into content that people will actually engage with and share.
 </p>
 
 <div class="bg-white bg-opacity-10 backdrop-filter backdrop-blur-md p-8 rounded-xl max-w-xl mx-auto">
-<form action="https://formsubmit.co/join@sentimentalapp.com" method="POST">
-<!-- Form configuration -->
-<input type="hidden" name="_subject" value="New Sentimental Waitlist Signup!">
-<input type="hidden" name="_captcha" value="false">
-<input type="hidden" name="_next" value="https://sentimentalapp.com/thanks.html">
-
-<div class="mb-4">
-<input type="email" name="email" placeholder="Your email address" class="w-full px-4 py-3 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-600" required>
+<a href="https://chat.sentimentalapp.com" class="block w-full bg-white text-purple-600 font-bold py-4 rounded-lg hover:bg-gray-100 transition text-center text-xl pulse-animation">
+    Start Creating Now
+</a>
+<p class="text-sm mt-4 text-white opacity-80">Free to try. Get therapeutic insights and viral-ready content in minutes.</p>
 </div>
-<button type="submit" class="w-full bg-white text-purple-600 font-bold py-3 rounded-lg hover:bg-gray-100 transition">
-Join Waitlist
-</button>
-</form>
+
+<div class="mt-12 flex flex-col md:flex-row justify-center space-y-6 md:space-y-0 md:space-x-10">
+    <!-- Stat 1 -->
+    <div class="text-center">
+        <div class="text-5xl font-bold mb-2">5+</div>
+        <p class="opacity-80">Media Formats</p>
+    </div>
+    
+    <!-- Stat 2 -->
+    <div class="text-center">
+        <div class="text-5xl font-bold mb-2">100%</div>
+        <p class="opacity-80">Free to Try</p>
+    </div>
 </div>
 </div>
 </div>
@@ -366,10 +385,13 @@ Join Waitlist
 <a href="/" class="text-2xl font-bold">Sentimental</a>
 <p class="mt-2 text-gray-400">Your Life, Your Story.</p>
 </div>
+<div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6">
+<a href="#try-beta" class="btn-primary">Try Beta Now</a>
 <div class="flex space-x-6">
 <a href="#" class="hover:text-purple-400 transition"><i class="fab fa-x-twitter text-xl"></i></a>
 <a href="#" class="hover:text-purple-400 transition"><i class="fab fa-instagram text-xl"></i></a>
 <a href="#" class="hover:text-purple-400 transition"><i class="fab fa-linkedin text-xl"></i></a>
+</div>
 </div>
 </div>
 <hr class="border-gray-800 my-8">
