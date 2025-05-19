@@ -171,7 +171,7 @@
                 <div class="mb-8">
                     <label class="block text-gray-700 font-medium mb-4">Choose a Music Style:</label>
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        <div class="music-style-option bg-gray-50 rounded-lg p-4 text-center hover:shadow-md" data-style="acoustic">
+                        <div class="music-style-option bg-gray-50 rounded-lg p-4 text-center hover:shadow-md selected" data-style="acoustic">
                             <div class="w-12 h-12 mx-auto mb-2 bg-purple-100 rounded-full flex items-center justify-center">
                                 <i class="fas fa-guitar text-purple-600"></i>
                             </div>
@@ -266,9 +266,6 @@
     <script src="firebase-config.js"></script>
     
     <script>
-        // OpenAI API key - Replace with your actual key (ideally this would be stored securely)
-        const OPENAI_API_KEY = "YOUR_OPENAI_API_KEY";
-        
         // Chat variables
         const chatMessages = document.getElementById('chat-messages');
         const userInput = document.getElementById('user-input');
@@ -283,9 +280,12 @@
         const musicStyleOptions = document.querySelectorAll('.music-style-option');
         const musicStyleInput = document.getElementById('music-style');
         
+        // Firebase Function URL (replace with your actual URL)
+        const CLOUD_FUNCTION_URL = "https://us-central1-sentimental-28cc9.cloudfunctions.net/chatWithOpenAI";
+        
         // Store conversation history
         let conversationHistory = [
-            {role: "system", content: "You are a helpful assistant at Sentimental, an AI-powered platform that helps people share their personal stories. Your goal is to help users share meaningful experiences from their life by asking thoughtful questions. Be empathetic, compassionate, and encouraging. Keep your responses conversational and friendly. After 4-5 exchanges, suggest they're ready to customize and submit their story."},
+            {role: "system", content: "You are a compassionate AI assistant at Sentimental, guiding users to share meaningful personal stories. Help them open up about significant experiences that shaped them. Ask thoughtful questions to gradually get deeper insights. Focus on emotions, key moments, and personal growth. After about 4-5 exchanges when you've gathered enough story material, gently suggest they're ready to customize and submit their story. Your tone should be warm, understanding, and encouraging. Avoid clinical language or overly generic responses. If a user shares something sensitive, acknowledge their trust in sharing it. Don't rush them - let the conversation flow naturally."},
             {role: "assistant", content: "Hello! I'm here to help you share your story. What personal experience would you like to tell me about today?"}
         ];
         
@@ -311,191 +311,4 @@
         });
         
         // Handle photo upload
-        photoUpload.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            
-            // Check file size (limit to 5MB)
-            if (file.size > 5 * 1024 * 1024) {
-                alert('Please choose a file smaller than 5MB');
-                this.value = '';
-                return;
-            }
-            
-            userPhotoFile = file;
-            
-            // Show preview
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                previewImage.src = e.target.result;
-                uploadPreview.style.display = 'block';
-                uploadIcon.style.display = 'none';
-                uploadText.style.display = 'none';
-            };
-            reader.readAsDataURL(file);
-        });
-        
-        // Helper function to create typing indicator
-        function showTypingIndicator() {
-            const typingDiv = document.createElement('div');
-            typingDiv.classList.add('message', 'bot', 'typing-indicator-container');
-            typingDiv.id = 'typing-indicator';
-            
-            const typingIndicator = document.createElement('div');
-            typingIndicator.classList.add('typing-indicator');
-            typingIndicator.innerHTML = '<span></span><span></span><span></span>';
-            
-            typingDiv.appendChild(typingIndicator);
-            chatMessages.appendChild(typingDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-        
-        function removeTypingIndicator() {
-            const typingIndicator = document.getElementById('typing-indicator');
-            if (typingIndicator) {
-                chatMessages.removeChild(typingIndicator);
-            }
-        }
-        
-        // Send button click event
-        sendButton.addEventListener('click', async function() {
-            const userMessage = userInput.value.trim();
-            if (!userMessage) return;
-            
-            // Disable input while processing
-            userInput.disabled = true;
-            sendButton.disabled = true;
-            
-            // Add user message to chat
-            appendMessage('user', userMessage);
-            userInput.value = '';
-            
-            // Add to conversation history
-            conversationHistory.push({role: "user", content: userMessage});
-            
-            // Show typing indicator
-            showTypingIndicator();
-            
-            try {
-                // Call OpenAI API
-                const response = await fetch('https://api.openai.com/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${OPENAI_API_KEY}`
-                    },
-                    body: JSON.stringify({
-                        model: "gpt-4",
-                        messages: conversationHistory,
-                        temperature: 0.7,
-                        max_tokens: 500
-                    })
-                });
-                
-                const data = await response.json();
-                
-                // Remove typing indicator
-                removeTypingIndicator();
-                
-                if (data.choices && data.choices[0] && data.choices[0].message) {
-                    const aiMessage = data.choices[0].message.content;
-                    
-                    // Add AI response to chat
-                    appendMessage('bot', aiMessage);
-                    conversationHistory.push({role: "assistant", content: aiMessage});
-                    
-                    // Increment message counter
-                    messageCount++;
-                    
-                    // Show options section after 4 exchanges
-                    if (messageCount >= 4) {
-                        optionsSection.style.display = 'block';
-                        
-                        // Scroll to options section after a short delay
-                        setTimeout(() => {
-                            optionsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }, 500);
-                    }
-                } else {
-                    appendMessage('bot', "I'm having trouble generating a response. Please try again.");
-                }
-            } catch (error) {
-                console.error("Error calling OpenAI API:", error);
-                removeTypingIndicator();
-                appendMessage('bot', "I'm sorry, there was an error processing your message. Please try again.");
-            }
-            
-            // Re-enable input
-            userInput.disabled = false;
-            sendButton.disabled = false;
-            userInput.focus();
-        });
-        
-        // Allow sending with Enter key
-        userInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendButton.click();
-            }
-        });
-        
-        // Function to add messages to the chat
-        function appendMessage(sender, message) {
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('message', sender);
-            messageDiv.textContent = message;
-            chatMessages.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-        
-        // Submit story button
-        submitStoryButton.addEventListener('click', async function() {
-            // Show loading state
-            this.disabled = true;
-            this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Submitting...';
-            
-            const musicStyle = musicStyleInput.value;
-            
-            try {
-                // Create a unique ID for this submission
-                const submissionId = `${Date.now()}-${userName.replace(/\s+/g, '-').toLowerCase()}`;
-                
-                // Prepare story data
-                const storyData = {
-                    id: submissionId,
-                    name: userName,
-                    email: userEmail,
-                    conversation: conversationHistory,
-                    musicStyle: musicStyle,
-                    submittedAt: new Date().toISOString(),
-                    status: 'new'
-                };
-                
-                // If there's a photo, upload it to Firebase Storage
-                if (userPhotoFile) {
-                    const storageRef = storage.ref(`user-photos/${submissionId}`);
-                    await storageRef.put(userPhotoFile);
-                    
-                    // Get the download URL
-                    const photoURL = await storageRef.getDownloadURL();
-                    storyData.photoURL = photoURL;
-                }
-                
-                // Save to Firestore
-                await db.collection('submissions').doc(submissionId).set(storyData);
-                
-                // Redirect to thank you page
-                window.location.href = "thanks.html?submitted=true";
-                
-            } catch (error) {
-                console.error("Error submitting story:", error);
-                alert("There was an error submitting your story. Please try again.");
-                
-                // Reset button
-                this.disabled = false;
-                this.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Submit My Story';
-            }
-        });
-    </script>
-</body>
-</html>
+        photoUpload.addEventListener('ch
