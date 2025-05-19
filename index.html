@@ -51,27 +51,6 @@ transition: all 0.3s ease;
 .layer-card:hover {
 transform: translateY(-5px);
 }
-
-.pulse-animation {
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(134, 57, 232, 0.7);
-  }
-  
-  70% {
-    transform: scale(1.05);
-    box-shadow: 0 0 0 10px rgba(134, 57, 232, 0);
-  }
-  
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(134, 57, 232, 0);
-  }
-}
 </style>
 </head>
 <body class="bg-gray-50">
@@ -83,7 +62,7 @@ transform: translateY(-5px);
 <a href="#how-it-works" class="hover:text-purple-600 transition">How It Works</a>
 <a href="#examples" class="hover:text-purple-600 transition">Examples</a>
 <a href="#team" class="hover:text-purple-600 transition">Team</a>
-<a href="#try-beta" class="btn-primary pulse-animation">Try Beta Now</a>
+<a href="#try-beta" class="btn-primary">Try Beta Now</a>
 </div>
 <button class="md:hidden">
 <i class="fas fa-bars text-2xl"></i>
@@ -100,10 +79,10 @@ Your Life as a Netflix Series or Spotify Hit
 </h1>
 <p class="text-xl mb-10 leading-relaxed max-w-3xl mx-auto">
                     Sentimental uses AI to transform your personal moments into cinematic stories, music, and meaningful content with therapeutic insights that help you understand your life's journey.
-                    Everyone has a story — but few have a place to truly tell it. Sentimental uses AI to transform your personal moments into cinematic stories, music, and meaningful content with therapeutic insights that help you understand your life's journey.
+                    Everyone has a story — but few have a place to truly tell it.
 </p>
 <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-<a href="#try-beta" class="btn-primary pulse-animation">
+<a href="#try-beta" class="btn-primary">
 Try Our Beta Product
 </a>
 <a href="#how-it-works" class="bg-white text-purple-600 px-6 py-3 rounded-full font-medium hover:bg-purple-50 transition">
@@ -354,24 +333,10 @@ Digital innovation veteran who's built scalable solutions for SEB, Swedbank, and
 </p>
 
 <div class="bg-white bg-opacity-10 backdrop-filter backdrop-blur-md p-8 rounded-xl max-w-xl mx-auto">
-<a href="https://chat.sentimentalapp.com" class="block w-full bg-white text-purple-600 font-bold py-4 rounded-lg hover:bg-gray-100 transition text-center text-xl pulse-animation">
+<a href="https://chat.sentimentalapp.com" class="block w-full bg-white text-purple-600 font-bold py-4 rounded-lg hover:bg-gray-100 transition text-center text-xl">
     Start Creating Now
 </a>
-<p class="text-sm mt-4 text-white opacity-80">Free to try. Get therapeutic insights and viral-ready content in minutes.</p>
-</div>
-
-<div class="mt-12 flex flex-col md:flex-row justify-center space-y-6 md:space-y-0 md:space-x-10">
-    <!-- Stat 1 -->
-    <div class="text-center">
-        <div class="text-5xl font-bold mb-2">5+</div>
-        <p class="opacity-80">Media Formats</p>
-    </div>
-    
-    <!-- Stat 2 -->
-    <div class="text-center">
-        <div class="text-5xl font-bold mb-2">100%</div>
-        <p class="opacity-80">Free to Try</p>
-    </div>
+<p class="text-sm mt-4 text-white opacity-80">Free to try. Get therapeutic insights and viral-ready content.</p>
 </div>
 </div>
 </div>
