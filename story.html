@@ -329,8 +329,10 @@
             
             try {
                 // Call Firebase Function using the callable approach
-                const result = await chatCompletionFunction({
-                    messages: conversationHistory
+               const result = await chatCompletionFunction({
+  messages: conversationHistory,
+  userId: userEmail || "anonymous", // kui olemas
+  timestamp: new Date().toISOString()
                 });
                 
                 // Remove typing indicator
