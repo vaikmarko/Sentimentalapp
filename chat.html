@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sentimental - Share Your Story</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f7f7f8;
+      color: #343541;
+    }
+
+    .chat-container {
+      height: calc(100vh - 180px);
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #8639E8 #f1f1f1;
+    }
+
+    .chat-container::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .chat-container::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+
+    .chat-container::-webkit-scrollbar-thumb {
+      background: #8639E8;
+      border-radius: 10px;
+    }
+
+    .message-row {
+      padding: 20px 15px;
+      display: flex;
+      align-items: flex-start;
+    }
+
+    .message-row.bot {
+      background-color: #f7f7f8;
+      border-bottom: 1px solid #e5e5e6;
+    }
+
+    .message-row.user {
+      background-color: #ffffff;
+      border-bottom: 1px solid #e5e5e6;
+    }
+
+    .avatar {
+      width: 30px;
+      height: 30px;
+      min-width: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 15px;
+      margin-top: 3px;
+    }
+
+    .bot-avatar {
+      background: linear-gradient(135deg, #8639E8 0%, #FF6B6B 100%);
+      color: white;
+      font-weight: bold;
+    }
+
+    .user-avatar {
+      background-color: #5f5f6e;
+      color: white;
+      font-weight: bold;
+    }
+
+    .message-content {
+      line-height: 1.6;
+      max-width: calc(100% - 50px);
+    }
+
+    .input-area {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: #ffffff;
+      padding: 15px 20px;
+      border-top: 1px solid #e5e5e6;
+    }
+
+    .chat-input {
+      width: 100%;
+      border: 1px solid #e5e5e6;
+      border-radius: 8px;
+      padding: 12px 45px 12px 15px;
+      resize: none;
+      outline: none;
+      line-height: 1.5;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .chat-input:focus {
+      border-color: #8639E8;
+      box-shadow: 0 0 0 2px rgba(134, 57, 232, 0.2);
+    }
+
+    .send-btn {
+      position: absolute;
+      right: 30px;
+      bottom: 24px;
+      background-color: #8639E8;
+      color: white;
+      border-radius: 6px;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .send-btn:hover {
+      background-color: #7529D8;
+    }
+
+    .send-btn.disabled {
+      background-color: #e5e5e6;
+      cursor: not-allowed;
+    }
+
+    .finish-btn {
+      display: inline-flex;
+      align-items: center;
+      background-color: #10a37f;
+      color: white;
+      border-radius: 4px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: absolute;
+      right: 80px;
+      bottom: 24px;
+    }
+
+    .finish-btn:hover {
+      background-color: #0d8c6e;
+    }
+
+    /* Format selection styles */
+    .format-selection, .email-collection, .success-view {
+      display: none;
+      max-width: 600px;
+      margin: 30px auto;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      padding: 30px;
+    }
+
+    .format-card {
+      border: 1px solid #e5e5e6;
+      border-radius: 10px;
+      padding: 15px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .format-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border-color: #8639E8;
+    }
+
+    .format-card.selected {
+      border-color: #8639E8;
+      background-color: rgba(134, 57, 232, 0.05);
+    }
+
+    .format-card.selected .check-icon {
+      display: flex;
+    }
+
+    .check-icon {
+      display: none;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #8639E8;
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      justify-content: center;
+      align-items: center;
+      font-size: 12px;
+    }
+
+    .format-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background-color: rgba(134, 57, 232, 0.1);
+      color: #8639E8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      font-size: 18px;
+    }
+
+    .primary-button {
+      background-color: #8639E8;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-block;
+    }
+
+    .primary-button:hover {
+      background-color: #7529D8;
+    }
+
+    .success-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background-color: rgba(16, 163, 127, 0.1);
+      color: #10a37f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 24px;
+    }
+
+    /* Mobile-specific styles */
+    @media (max-width: 640px) {
+      .chat-container {
+        height: calc(100vh - 160px);
+      }
+      
+      .message-row {
+        padding: 15px 10px;
+      }
+      
+      .avatar {
+        width: 25px;
+        height: 25px;
+        min-width: 25px;
+      }
+      
+      .input-area {
+        padding: 10px 15px;
+      }
+      
+      .finish-btn {
+        right: 65px;
+        bottom: 22px;
+        padding: 6px 10px;
+        font-size: 12px;
+      }
+      
+      .send-btn {
+        right: 20px;
+        bottom: 20px;
+        width: 30px;
+        height: 30px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Chat Interface -->
+  <div id="chat-view">
+    <div class="chat-container">
+      <!-- Messages will be inserted here -->
+    </div>
+    
+    <div class="input-area">
+      <textarea id="message-input" class="chat-input" placeholder="Share your story..." rows="1"></textarea>
+      <button id="finish-btn" class="finish-btn" style="display: none;">
+        <i class="fas fa-check mr-2"></i> I'm finished sharing
+      </button>
+      <button id="send-btn" class="send-btn">
+        <i class="fas fa-paper-plane"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Format Selection -->
+  <div id="format-selection" class="format-selection">
+    <h2 class="text-2xl font-bold mb-2 text-center">Transform Your Story</h2>
+    <p class="text-gray-600 text-center mb-6">Choose the formats you'd like us to create for you</p>
+    
+    <div class="grid grid-cols-2 gap-4 mb-6">
+      <div class="format-card" data-format="therapeutic-insight">
+        <div class="check-icon"><i class="fas fa-check"></i></div>
+        <div class="format-icon"><i class="fas fa-brain"></i></div>
+        <h3 class="font-semibold text-sm">Therapeutic Insight</h3>
+        <p class="text-xs text-gray-500 mt-1">Understand patterns & meaning</p>
+      </div>
+      
+      <div class="format-card" data-format="song">
+        <div class="check-icon"><i class="fas fa-check"></i></div>
+        <div class="format-icon"><i class="fas fa-music"></i></div>
+        <h3 class="font-semibold text-sm">Song</h3>
+        <p class="text-xs text-gray-500 mt-1">Lyrics & melody inspired by you</p>
+      </div>
+      
+      <div class="format-card" data-format="video">
+        <div class="check-icon"><i class="fas fa-check"></i></div>
+        <div class="format-icon"><i class="fas fa-film"></i></div>
+        <h3 class="font-semibold text-sm">Video Story</h3>
+        <p class="text-xs text-gray-500 mt-1">Cinematic visual narrative</p>
+      </div>
+      
+      <div class="format-card" data-format="blog">
+        <div class="check-icon"><i class="fas fa-check"></i></div>
+        <div class="format-icon"><i class="fas fa-pen-fancy"></i></div>
+        <h3 class="font-semibold text-sm">Blog Post</h3>
+        <p class="text-xs text-gray-500 mt-1">Reflective article format</p>
+      </div>
+      
+      <div class="format-card" data-format="poem">
+        <div class="check-icon"><i class="fas fa-check"></i></div>
+        <div class="format-icon"><i class="fas fa-feather"></i></div>
+        <h3 class="font-semibold text-sm">Poem</h3>
+        <p class="text-xs text-gray-500 mt-1">Artistic poetic expression</p>
+      </div>
+      
+      <div class="format-card" data-format="news">
+        <div class="check-icon"><i class="fas fa-check"></i></div>
+        <div class="format-icon"><i class="fas fa-newspaper"></i></div>
+        <h3 class="font-semibold text-sm">News Article</h3>
+        <p class="text-xs text-gray-500 mt-1">Journalistic perspective</p>
+      </div>
+      
+      <div class="format-card" data-format="book">
+        <div class="check-icon"><i class="fas fa-check"></i></div>
+        <div class="format-icon"><i class="fas fa-book"></i></div>
+        <h3 class="font-semibold text-sm">Book Chapter</h3>
+        <p class="text-xs text-gray-500 mt-1">Literary narrative style</p>
+      </div>
+      
+      <div class="format-card" data-format="diary">
+        <div class="check-icon"><i class="fas fa-check"></i></div>
+        <div class="format-icon"><i class="fas fa-book-open"></i></div>
+        <h3 class="font-semibold text-sm">Diary Entry</h3>
+        <p class="text-xs text-gray-500 mt-1">Personal journal format</p>
+      </div>
+      
+      <div class="format-card" data-format="comedy">
+        <div class="check-icon"><i class="fas fa-check"></i></div>
+        <div class="format-icon"><i class="fas fa-theater-masks"></i></div>
+        <h3 class="font-semibold text-sm">Comedy</h3>
+        <p class="text-xs text-gray-500 mt-1">Humorous interpretation</p>
+      </div>
+    </div>
+    
+    <p class="text-sm text-gray-500 mb-4">Your story has been saved. Select at least one format to continue.</p>
+    
+    <div class="text-center">
+      <button id="continue-to-email" class="primary-button">Continue</button>
+    </div>
+  </div>
+
+  <!-- Email Collection -->
+  <div id="email-collection" class="email-collection">
+    <h2 class="text-2xl font-bold mb-2 text-center">Last Step</h2>
+    <p class="text-gray-600 text-center mb-6">Where should we send your transformed story?</p>
+    
+    <div class="mb-4">
+      <input type="email" id="email-input" class="w-full border border-gray-300 rounded-md p-3" placeholder="Your email address">
+    </div>
+    
+    <p class="text-sm text-gray-500 mb-6">We'll send your therapeutic insights and creative transformations to this email after they've been thoughtfully crafted by our team and reviewed by licensed counselors.</p>
+    
+    <div class="text-center">
+      <button id="submit-email" class="primary-button">Submit</button>
+    </div>
+  </div>
+
+  <!-- Success View -->
+  <div id="success-view" class="success-view">
+    <div class="success-icon">
+      <i class="fas fa-check"></i>
+    </div>
+    
+    <h2 class="text-2xl font-bold mb-2 text-center">Thank You!</h2>
+    <p class="text-gray-600 text-center mb-6">We've received your story and will be creating your selected transformations. Our licensed counselors will review everything before sending it to your email.</p>
+    
+    <div class="text-center">
+      <a href="/" class="primary-button">Back to Home</a>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Elements
+      const chatView = document.getElementById('chat-view');
+      const formatSelection = document.getElementById('format-selection');
+      const emailCollection = document.getElementById('email-collection');
+      const successView = document.getElementById('success-view');
+      const chatContainer = document.querySelector('.chat-container');
+      const messageInput = document.getElementById('message-input');
+      const sendBtn = document.getElementById('send-btn');
+      const finishBtn = document.getElementById('finish-btn');
+      const formatCards = document.querySelectorAll('.format-card');
+      const continueToEmailBtn = document.getElementById('continue-to-email');
+      const submitEmailBtn = document.getElementById('submit-email');
+      const emailInput = document.getElementById('email-input');
+      
+      // Initialize
+      let userMessageCount = 0;
+      let fullStory = '';
+      let selectedFormats = [];
+      
+      // Add initial bot message
+      addMessage(`Hey there! I'm here to help you navigate through life events that matter to you. 
+
+Sometimes we all need a space to share our stories – whether it's about a major challenge you've overcome, a current struggle, a relationship that's affecting you, or just something meaningful you've experienced.
+
+Share whatever feels important to you, and I'll listen. When you're done, we'll transform your story into creative formats and provide therapeutic insights after our licensed counselors review it.
+
+So, what would you like to talk about today?`, false);
+      
+      // Bot conversation prompts
+      const botPrompts = [
+        "That sounds like a meaningful experience. Could you tell me more about how it affected you?",
+        "I appreciate you sharing that. What feelings came up for you during this experience?",
+        "That's really interesting. How do you think this experience has shaped who you are today?",
+        "Thanks for opening up. What was the most challenging part of this for you?",
+        "I'm curious – if you could go back to that moment, what would you tell yourself?",
+        "That's profound. Have you noticed any patterns in how you respond to similar situations?",
+        "I hear you. What do you think was the most important lesson from this experience?",
+        "You're sharing something really meaningful. How has this changed your perspective on life?",
+        "Thank you for being so open. What support did you have (or wish you had) during this time?",
+        "That's a lot to process. What has helped you cope with these feelings since then?"
+      ];
+      
+      // Auto-resize textarea
+      function autoResizeTextarea() {
+        messageInput.style.height = 'auto';
+        messageInput.style.height = (messageInput.scrollHeight) + 'px';
+      }
+      
+      messageInput.addEventListener('input', autoResizeTextarea);
+      
+      // Add a message to the chat
+      function addMessage(text, isUser) {
+        const messageRow = document.createElement('div');
+        messageRow.className = isUser ? 'message-row user' : 'message-row bot';
+        
+        const avatar = document.createElement('div');
+        avatar.className = isUser ? 'avatar user-avatar' : 'avatar bot-avatar';
+        avatar.textContent = isUser ? 'U' : 'S';
+        
+        const messageContent = document.createElement('div');
+        messageContent.className = 'message-content';
+        
+        // Convert newlines to <br> tags
+        const formattedText = text.replace(/\n/g, '<br>');
+        messageContent.innerHTML = formattedText;
+        
+        messageRow.appendChild(avatar);
+        messageRow.appendChild(messageContent);
+        chatContainer.appendChild(messageRow);
+        
+        // Scroll to bottom
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+        
+        // Add to full story if it's a user message
+        if (isUser) {
+          fullStory += text + "\n\n";
+          userMessageCount++;
+          
+          // Show finish button after 2 user messages
+          if (userMessageCount >= 2) {
+            finishBtn.style.display = 'flex';
+          }
+        }
+      }
+      
+      // Get a random bot prompt
+      function getRandomPrompt() {
+        return botPrompts[Math.floor(Math.random() * botPrompts.length)];
+      }
+      
+      // Simulate bot response
+      function botResponse() {
+        // Add typing indicator
+        const typingRow = document.createElement('div');
+        typingRow.className = 'message-row bot typing';
+        
+        const avatar = document.createElement('div');
+        avatar.className = 'avatar bot-avatar';
+        avatar.textContent = 'S';
+        
+        const typingIndicator = document.createElement('div');
+        typingIndicator.className = 'typing-indicator';
+        typingIndicator.innerHTML = '<span>•</span><span>•</span><span>•</span>';
+        
+        typingRow.appendChild(avatar);
+        typingRow.appendChild(typingIndicator);
+        chatContainer.appendChild(typingRow);
+        
+        // Scroll to bottom
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+        
+        // Remove typing indicator after delay and add actual message
+        setTimeout(() => {
+          chatContainer.removeChild(typingRow);
+          addMessage(getRandomPrompt(), false);
+        }, 1500);
+      }
+      
+      // Send message
+      function sendMessage() {
+        const message = messageInput.value.trim();
+        if (message) {
+          addMessage(message, true);
+          messageInput.value = '';
+          messageInput.style.height = 'auto';
+          botResponse();
+        }
+      }
+      
+      // Finish sharing story
+      function finishSharing() {
+        // Add final bot message
+        addMessage(`Thank you so much for sharing your story with me. Your experiences and insights are valuable, and I appreciate your openness.
+
+Next, I'll ask you to select which creative formats you'd like us to transform your story into. Our team will also provide therapeutic insights after our licensed counselors review your story.
+
+Let's continue to the next step where you can choose your preferred formats.`, false);
+        
+        // Show format selection after delay
+        setTimeout(() => {
+          chatView.style.display = 'none';
+          formatSelection.style.display = 'block';
+          
+          // Scroll to top
+          window.scrollTo(0, 0);
+        }, 3000);
+      }
+      
+      // Go to email collection
+      function goToEmailCollection() {
+        // Get selected formats
+        selectedFormats = [];
+        document.querySelectorAll('.format-card.selected').forEach(card => {
+          selectedFormats.push(card.getAttribute('data-format'));
+        });
+        
+        // Check if at least one format is selected
+        if (selectedFormats.length === 0) {
+          alert('Please select at least one format.');
+          return;
+        }
+        
+        // Show email collection
+        formatSelection.style.display = 'none';
+        emailCollection.style.display = 'block';
+        
+        // Scroll to top
+        window.scrollTo(0, 0);
+      }
+      
+      // Submit email
+      function submitEmail() {
+        const email = emailInput.value.trim();
+        if (!email) {
+          alert('Please enter your email address.');
+          return;
+        }
+        
+        if (!email.includes('@') || !email.includes('.')) {
+          alert('Please enter a valid email address.');
+          return;
+        }
+        
+        // Here you would normally send the data to your server
+        console.log('Story:', fullStory);
+        console.log('Selected formats:', selectedFormats);
+        console.log('Email:', email);
+        
+        // Show success view
+        emailCollection.style.display = 'none';
+        successView.style.display = 'block';
+        
+        // Scroll to top
+        window.scrollTo(0, 0);
+      }
+      
+      // Event listeners
+      sendBtn.addEventListener('click', sendMessage);
+      
+      messageInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+      
+      finishBtn.addEventListener('click', finishSharing);
+      
+      formatCards.forEach(card => {
+        card.addEventListener('click', function() {
+          this.classList.toggle('selected');
+        });
+      });
+      
+      continueToEmailBtn.addEventListener('click', goToEmailCollection);
+      submitEmailBtn.addEventListener('click', submitEmail);
+    });
+  </script>
+</body>
+</html>
