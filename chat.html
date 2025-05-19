@@ -15,9 +15,10 @@
   <title>Sentimental - Share Your Story</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-functions-compat.js"></script>
 
+  <style>
     body {
       font-family: 'Inter', sans-serif;
       background-color: #f7f7f8;
@@ -26,304 +27,6 @@
       padding: 0;
       min-height: 100vh;
     }
-
-    .chat-container {
-      height: calc(100vh - 180px);
-      overflow-y: auto;
-      scrollbar-width: thin;
-      scrollbar-color: #8639E8 #f1f1f1;
-    }
-
-    .chat-container::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .chat-container::-webkit-scrollbar-track {
-      background: #f1f1f1;
-    }
-
-    .chat-container::-webkit-scrollbar-thumb {
-      background: #8639E8;
-      border-radius: 10px;
-    }
-
-    .message-row {
-      padding: 20px 15px;
-      display: flex;
-      align-items: flex-start;
-    }
-
-    .message-row.bot {
-      background-color: #f7f7f8;
-      border-bottom: 1px solid #e5e5e6;
-    }
-
-    .message-row.user {
-      background-color: #ffffff;
-      border-bottom: 1px solid #e5e5e6;
-    }
-
-    .avatar {
-      width: 30px;
-      height: 30px;
-      min-width: 30px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-right: 15px;
-      margin-top: 3px;
-    }
-
-    .bot-avatar {
-      background: linear-gradient(135deg, #8639E8 0%, #FF6B6B 100%);
-      color: white;
-      font-weight: bold;
-    }
-
-    .user-avatar {
-      background-color: #5f5f6e;
-      color: white;
-      font-weight: bold;
-    }
-
-    .message-content {
-      line-height: 1.6;
-      max-width: calc(100% - 50px);
-    }
-
-    .input-area {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background-color: #ffffff;
-      padding: 15px 20px;
-      border-top: 1px solid #e5e5e6;
-      z-index: 10;
-    }
-
-    .chat-input {
-      width: 100%;
-      border: 1px solid #e5e5e6;
-      border-radius: 8px;
-      padding: 12px 45px 12px 15px;
-      resize: none;
-      outline: none;
-      line-height: 1.5;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-      max-height: 200px;
-      overflow-y: auto;
-    }
-
-    .chat-input:focus {
-      border-color: #8639E8;
-      box-shadow: 0 0 0 2px rgba(134, 57, 232, 0.2);
-    }
-
-    .send-btn {
-      position: absolute;
-      right: 30px;
-      bottom: 24px;
-      background-color: #8639E8;
-      color: white;
-      border-radius: 6px;
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .send-btn:hover {
-      background-color: #7529D8;
-    }
-
-    .send-btn.disabled {
-      background-color: #e5e5e6;
-      cursor: not-allowed;
-    }
-
-    .finish-btn {
-      display: inline-flex;
-      align-items: center;
-      background-color: #10a37f;
-      color: white;
-      border-radius: 4px;
-      padding: 8px 12px;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      position: absolute;
-      right: 80px;
-      bottom: 24px;
-    }
-
-    .finish-btn:hover {
-      background-color: #0d8c6e;
-    }
-
-    /* Format selection styles */
-    .format-selection, .email-collection, .success-view {
-      display: none;
-      max-width: 600px;
-      margin: 30px auto;
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-      padding: 30px;
-    }
-
-    .format-card {
-      border: 1px solid #e5e5e6;
-      border-radius: 10px;
-      padding: 15px;
-      cursor: pointer;
-      transition: all 0.2s;
-      position: relative;
-    }
-
-    .format-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      border-color: #8639E8;
-    }
-
-    .format-card.selected {
-      border-color: #8639E8;
-      background-color: rgba(134, 57, 232, 0.05);
-    }
-
-    .format-card.selected .check-icon {
-      display: flex;
-    }
-
-    .check-icon {
-      display: none;
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: #8639E8;
-      color: white;
-      border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      justify-content: center;
-      align-items: center;
-      font-size: 12px;
-    }
-
-    .format-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 8px;
-      background-color: rgba(134, 57, 232, 0.1);
-      color: #8639E8;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 12px;
-      font-size: 18px;
-    }
-
-    .primary-button {
-      background-color: #8639E8;
-      color: white;
-      padding: 12px 20px;
-      border-radius: 6px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: inline-block;
-    }
-
-    .primary-button:hover {
-      background-color: #7529D8;
-    }
-
-    .success-icon {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background-color: rgba(16, 163, 127, 0.1);
-      color: #10a37f;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 20px;
-      font-size: 24px;
-    }
-
-    /* Typing indicator */
-    .typing-indicator {
-      display: inline-flex;
-      align-items: center;
-    }
-
-    .typing-indicator span {
-      height: 5px;
-      width: 5px;
-      margin: 0 1px;
-      background-color: #8639E8;
-      display: block;
-      border-radius: 50%;
-      opacity: 0.4;
-    }
-
-    .typing-indicator span:nth-of-type(1) {
-      animation: 1s blink infinite 0.3333s;
-    }
-    .typing-indicator span:nth-of-type(2) {
-      animation: 1s blink infinite 0.6666s;
-    }
-    .typing-indicator span:nth-of-type(3) {
-      animation: 1s blink infinite 0.9999s;
-    }
-
-    @keyframes blink {
-      50% {
-        opacity: 1;
-      }
-    }
-
-    /* Mobile-specific styles */
-    @media (max-width: 640px) {
-      .chat-container {
-        height: calc(100vh - 160px);
-      }
-      
-      .message-row {
-        padding: 15px 10px;
-      }
-      
-      .avatar {
-        width: 25px;
-        height: 25px;
-        min-width: 25px;
-      }
-      
-      .input-area {
-        padding: 10px 15px;
-      }
-      
-      .finish-btn {
-        right: 65px;
-        bottom: 22px;
-        padding: 6px 10px;
-        font-size: 12px;
-      }
-      
-      .send-btn {
-        right: 20px;
-        bottom: 20px;
-        width: 30px;
-        height: 30px;
-      }
-    }
-
     .navbar {
       background: white;
       padding: 12px 20px;
@@ -332,440 +35,162 @@
       justify-content: space-between;
       align-items: center;
     }
-
     .logo {
       font-weight: 700;
       font-size: 20px;
       color: #8639E8;
       text-decoration: none;
     }
+    .chat-container {
+      padding: 30px 20px;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .message {
+      padding: 12px 20px;
+      margin-bottom: 12px;
+      border-radius: 12px;
+      max-width: 90%;
+    }
+    .message.bot {
+      background-color: #f3f4f6;
+      color: #1f2937;
+      margin-right: auto;
+    }
+    .message.user {
+      background-color: #8639E8;
+      color: white;
+      margin-left: auto;
+    }
+    .input-area {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .input-area textarea {
+      flex-grow: 1;
+      border-radius: 8px;
+      padding: 12px;
+      border: 1px solid #ccc;
+    }
+    .btn-primary {
+      background-color: #8639E8;
+      color: white;
+      padding: 0 20px;
+      border-radius: 8px;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
-  <!-- Simple Navbar -->
   <div class="navbar">
     <a href="/" class="logo">Sentimental</a>
   </div>
 
-  <!-- Chat Interface -->
-  <div id="chat-view">
-    <div class="chat-container">
-      <!-- Messages will be inserted here by JavaScript -->
+  <div class="chat-container">
+    <div id="chat-messages">
+      <div class="message bot">
+        Welcome! What personal experience would you like to share with me today?
+      </div>
     </div>
-    
     <div class="input-area">
-      <textarea id="message-input" class="chat-input" placeholder="Share your story..." rows="1"></textarea>
-      <button id="finish-btn" class="finish-btn" style="display: none;">
-        <i class="fas fa-check mr-2"></i> I'm finished sharing
-      </button>
-      <button id="send-btn" class="send-btn">
-        <i class="fas fa-paper-plane"></i>
-      </button>
+      <textarea id="user-input" rows="2" placeholder="Type your message..."></textarea>
+      <button id="send-button" class="btn-primary">Send</button>
     </div>
   </div>
 
-  <!-- Format Selection -->
-  <div id="format-selection" class="format-selection">
-    <h2 class="text-2xl font-bold mb-2 text-center">Unleash Your Story's True Potential</h2>
-    <p class="text-gray-600 text-center mb-6">Select the transformations that will amplify your voice and create content that resonates deeply</p>
-    
-    <div class="grid grid-cols-2 gap-4 mb-6">
-      <div class="format-card" data-format="therapeutic-insight">
-        <div class="check-icon"><i class="fas fa-check"></i></div>
-        <div class="format-icon"><i class="fas fa-brain"></i></div>
-        <h3 class="font-semibold text-sm">Therapeutic Insight</h3>
-        <p class="text-xs text-gray-500 mt-1">Uncover the profound wisdom hidden in your experiences</p>
-      </div>
-      
-      <div class="format-card" data-format="song">
-        <div class="check-icon"><i class="fas fa-check"></i></div>
-        <div class="format-icon"><i class="fas fa-music"></i></div>
-        <h3 class="font-semibold text-sm">Song</h3>
-        <p class="text-xs text-gray-500 mt-1">Your emotions transformed into lyrical magic that moves hearts</p>
-      </div>
-      
-      <div class="format-card" data-format="video">
-        <div class="check-icon"><i class="fas fa-check"></i></div>
-        <div class="format-icon"><i class="fas fa-film"></i></div>
-        <h3 class="font-semibold text-sm">Video Story</h3>
-        <p class="text-xs text-gray-500 mt-1">A visual journey that brings your narrative to life with cinematic power</p>
-      </div>
-      
-      <div class="format-card" data-format="blog">
-        <div class="check-icon"><i class="fas fa-check"></i></div>
-        <div class="format-icon"><i class="fas fa-pen-fancy"></i></div>
-        <h3 class="font-semibold text-sm">Blog Post</h3>
-        <p class="text-xs text-gray-500 mt-1">Your perspective crafted into shareable wisdom that inspires action</p>
-      </div>
-      
-      <div class="format-card" data-format="poem">
-        <div class="check-icon"><i class="fas fa-check"></i></div>
-        <div class="format-icon"><i class="fas fa-feather"></i></div>
-        <h3 class="font-semibold text-sm">Poem</h3>
-        <p class="text-xs text-gray-500 mt-1">Your emotions distilled into verses that touch the soul</p>
-      </div>
-      
-      <div class="format-card" data-format="news">
-        <div class="check-icon"><i class="fas fa-check"></i></div>
-        <div class="format-icon"><i class="fas fa-newspaper"></i></div>
-        <h3 class="font-semibold text-sm">News Article</h3>
-        <p class="text-xs text-gray-500 mt-1">Your experience framed with the impact it deserves to be recognized for</p>
-      </div>
-      
-      <div class="format-card" data-format="book">
-        <div class="check-icon"><i class="fas fa-check"></i></div>
-        <div class="format-icon"><i class="fas fa-book"></i></div>
-        <h3 class="font-semibold text-sm">Book Chapter</h3>
-        <p class="text-xs text-gray-500 mt-1">Your story expanded into a literary experience with depth and character</p>
-      </div>
-      
-      <div class="format-card" data-format="diary">
-        <div class="check-icon"><i class="fas fa-check"></i></div>
-        <div class="format-icon"><i class="fas fa-book-open"></i></div>
-        <h3 class="font-semibold text-sm">Diary Entry</h3>
-        <p class="text-xs text-gray-500 mt-1">Your raw emotions preserved in intimate, authentic reflection</p>
-      </div>
-      
-      <div class="format-card" data-format="comedy">
-        <div class="check-icon"><i class="fas fa-check"></i></div>
-        <div class="format-icon"><i class="fas fa-theater-masks"></i></div>
-        <h3 class="font-semibold text-sm">Comedy</h3>
-        <p class="text-xs text-gray-500 mt-1">Your experience reimagined through the healing lens of humor</p>
-      </div>
-    </div>
-    
-    <p class="text-sm text-gray-500 mb-4">Your miraculous journey has been preserved. Choose at least one transformation format to continue.</p>
-    
-    <div class="text-center">
-      <button id="continue-to-email" class="primary-button">Continue</button>
-    </div>
-  </div>
-
-  <!-- Email Collection -->
-  <div id="email-collection" class="email-collection">
-    <h2 class="text-2xl font-bold mb-2 text-center">Your Transformation Awaits</h2>
-    <p class="text-gray-600 text-center mb-6">Where should we deliver your story's miraculous evolution?</p>
-    
-    <div class="mb-4">
-      <input type="email" id="email-input" class="w-full border border-gray-300 rounded-md p-3" placeholder="Your email address">
-    </div>
-    
-    <p class="text-sm text-gray-500 mb-6">We'll carefully craft your selected transformations with the attention they deserve. Our team of creative minds and licensed counselors will ensure your story's essence is preserved while its impact is magnified. Prepare to be moved when you see how your experience transforms into content that could resonate with thousands.</p>
-    
-    <div class="text-center">
-      <button id="submit-email" class="primary-button">Submit</button>
-    </div>
-  </div>
-
-  <!-- Success View -->
-  <div id="success-view" class="success-view">
-    <div class="success-icon">
-      <i class="fas fa-check"></i>
-    </div>
-    
-    <h2 class="text-2xl font-bold mb-2 text-center">The Journey Has Begun!</h2>
-    <p class="text-gray-600 text-center mb-6">Your courage to share has set something beautiful in motion. Our team is now working to transform your story into content that honors its depth while amplifying its potential to inspire others. Soon, you'll witness the miraculous evolution of your experience through the formats you've chosen. Watch your inbox for this special delivery that might just change how you see your own story.</p>
-    
-    <div class="text-center">
-      <a href="/" class="primary-button">Back to Home</a>
-    </div>
+  <div class="chat-container" id="options-section" style="display: none;">
+    <label class="block font-semibold mb-2">Choose a Format:</label>
+    <select id="format-select" class="w-full p-3 border rounded mb-4">
+      <option value="blog">Blog Post</option>
+      <option value="song">Song</option>
+      <option value="poem">Poem</option>
+      <option value="video">Video</option>
+      <option value="insight">Therapeutic Insight</option>
+    </select>
+    <label class="block font-semibold mb-2">Your Email:</label>
+    <input type="email" id="email-input" class="w-full p-3 border rounded mb-4" placeholder="you@example.com" />
+    <button id="submit-button" class="btn-primary w-full">Submit Story</button>
   </div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      // Elements
-      const chatView = document.getElementById('chat-view');
-      const formatSelection = document.getElementById('format-selection');
-      const emailCollection = document.getElementById('email-collection');
-      const successView = document.getElementById('success-view');
-      const chatContainer = document.querySelector('.chat-container');
-      const messageInput = document.getElementById('message-input');
-      const sendBtn = document.getElementById('send-btn');
-      const finishBtn = document.getElementById('finish-btn');
-      const formatCards = document.querySelectorAll('.format-card');
-      const continueToEmailBtn = document.getElementById('continue-to-email');
-      const submitEmailBtn = document.getElementById('submit-email');
-      const emailInput = document.getElementById('email-input');
-      
-      // Initialize
-      let userMessageCount = 0;
-      let fullStory = '';
-      let selectedFormats = [];
-      
-      // Add initial bot message
-      addMessage(`Welcome to your personal sanctuary of transformation! I'm here to witness the miracle that is your unique story.
+    const firebaseConfig = {
+      apiKey: "AIzaSyCSoWmKZRDpXF5MlgWKEV6kWHc5xFMMm_I",
+      authDomain: "sentimental-f95e6.firebaseapp.com",
+      projectId: "sentimental-f95e6",
+      storageBucket: "sentimental-f95e6.appspot.com",
+      messagingSenderId: "319737737925",
+      appId: "1:319737737925:web:1de7aa284a63ad9f9eb6ac",
+      measurementId: "G-9WFK8R9P9T"
+    };
 
-Within you lies an untold narrative waiting to be discovered - one that could inspire thousands, heal hearts, or simply free your own spirit from what's been left unsaid.
+    firebase.initializeApp(firebaseConfig);
+    const functions = firebase.functions();
 
-Every experience you've lived through contains profound wisdom. By sharing your journey, you unlock the door to remarkable self-discovery and create ripples that might touch countless lives.
+    const chatMessages = document.getElementById('chat-messages');
+    const userInput = document.getElementById('user-input');
+    const sendButton = document.getElementById('send-button');
+    const optionsSection = document.getElementById('options-section');
+    const submitButton = document.getElementById('submit-button');
+    const formatSelect = document.getElementById('format-select');
+    const emailInput = document.getElementById('email-input');
 
-Tell me what's in your heart today. When you're ready, we'll transform your raw truth into something extraordinary that resonates far beyond these words.`, false);
-      
-      // Bot conversation prompts
-      const botPrompts = [
-        "That sounds like a meaningful experience. Could you tell me more about how it affected you?",
-        "I appreciate you sharing that. What feelings came up for you during this experience?",
-        "That's really interesting. How do you think this experience has shaped who you are today?",
-        "Thanks for opening up. What was the most challenging part of this for you?",
-        "I'm curious – if you could go back to that moment, what would you tell yourself?",
-        "That's profound. Have you noticed any patterns in how you respond to similar situations?",
-        "I hear you. What do you think was the most important lesson from this experience?",
-        "You're sharing something really meaningful. How has this changed your perspective on life?",
-        "Thank you for being so open. What support did you have (or wish you had) during this time?",
-        "That's a lot to process. What has helped you cope with these feelings since then?"
-      ];
-      
-      // Auto-resize textarea
-      function autoResizeTextarea() {
-        messageInput.style.height = 'auto';
-        messageInput.style.height = (messageInput.scrollHeight) + 'px';
-      }
-      
-      messageInput.addEventListener('input', autoResizeTextarea);
-      
-      // Add a message to the chat
-      function addMessage(text, isUser) {
-        const messageRow = document.createElement('div');
-        messageRow.className = isUser ? 'message-row user' : 'message-row bot';
-        
-        const avatar = document.createElement('div');
-        avatar.className = isUser ? 'avatar user-avatar' : 'avatar bot-avatar';
-        avatar.textContent = isUser ? 'Y' : 'S';
-        
-        const messageContent = document.createElement('div');
-        messageContent.className = 'message-content';
-        
-        // Convert newlines to <br> tags
-        const formattedText = text.replace(/\n/g, '<br>');
-        messageContent.innerHTML = formattedText;
-        
-        messageRow.appendChild(avatar);
-        messageRow.appendChild(messageContent);
-        chatContainer.appendChild(messageRow);
-        
-        // Scroll to bottom
-        chatContainer.scrollTop = chatContainer.scrollHeight;
-        
-        // Add to full story if it's a user message
-        if (isUser) {
-          fullStory += text + "\n\n";
-          userMessageCount++;
-          
-          // Show finish button after 2 user messages
-          if (userMessageCount >= 2) {
-            finishBtn.style.display = 'flex';
-          }
-          
-          // Track in Google Analytics
-          if (typeof gtag === 'function') {
-            gtag('event', 'share_story_part', {
-              'event_category': 'engagement',
-              'event_label': 'User shared part of story'
-            });
-          }
-        }
-      }
-      
-      // Get a random bot prompt
-      function getRandomPrompt() {
-        return botPrompts[Math.floor(Math.random() * botPrompts.length)];
-      }
-      
-      // Simulate bot response with typing indicator
-      function botResponse() {
-        // Add typing indicator
-        const messageRow = document.createElement('div');
-        messageRow.className = 'message-row bot';
-        
-        const avatar = document.createElement('div');
-        avatar.className = 'avatar bot-avatar';
-        avatar.textContent = 'S';
-        
-        const messageContent = document.createElement('div');
-        messageContent.className = 'message-content';
-        
-        const typingIndicator = document.createElement('div');
-        typingIndicator.className = 'typing-indicator';
-        typingIndicator.innerHTML = '<span></span><span></span><span></span>';
-        
-        messageContent.appendChild(typingIndicator);
-        messageRow.appendChild(avatar);
-        messageRow.appendChild(messageContent);
-        
-        chatContainer.appendChild(messageRow);
-        
-        // Scroll to bottom
-        chatContainer.scrollTop = chatContainer.scrollHeight;
-        
-        // Remove typing indicator after delay and add actual message
-        setTimeout(() => {
-          chatContainer.removeChild(messageRow);
-          addMessage(getRandomPrompt(), false);
-        }, 1500 + Math.random() * 1000); // Random delay between 1.5-2.5 seconds
-      }
-      
-      // Send message
-      function sendMessage() {
-        const message = messageInput.value.trim();
-        if (message) {
-          addMessage(message, true);
-          messageInput.value = '';
-          messageInput.style.height = 'auto';
-          botResponse();
-        }
-      }
-      
-      // Finish sharing story
-      function finishSharing() {
-        // Track in Google Analytics
-        if (typeof gtag === 'function') {
-          gtag('event', 'finish_story', {
-            'event_category': 'engagement',
-            'event_label': 'User finished sharing story'
-          });
-        }
-        
-        // Add final bot message
-        addMessage(`What an incredible gift you've just given - both to yourself and to the world! The courage to share your truth is the first step toward a beautiful transformation.
+    let messageCount = 0;
+    let conversation = [
+      { role: "system", content: "You are a helpful assistant who collects meaningful personal stories from users." },
+      { role: "assistant", content: "Welcome! What personal experience would you like to share with me today?" }
+    ];
 
-The story you've revealed contains hidden gems of wisdom and emotion that deserve to be amplified. You've planted the seeds of something potentially extraordinary.
+    sendButton.addEventListener('click', async () => {
+      const message = userInput.value.trim();
+      if (!message) return;
 
-Now, let's unleash the full power of your narrative. Choose how you want your story to resonate with others and watch as it evolves into content that could touch hearts across the digital landscape.`, false);
-        
-        // Show format selection after delay
-        setTimeout(() => {
-          chatView.style.display = 'none';
-          formatSelection.style.display = 'block';
-          
-          // Save story (even if user doesn't continue)
-          saveStory(fullStory, [], "");
-          
-          // Scroll to top
-          window.scrollTo(0, 0);
-        }, 3000);
+      appendMessage('user', message);
+      conversation.push({ role: 'user', content: message });
+      userInput.value = '';
+      messageCount++;
+
+      const chatFn = functions.httpsCallable("chatCompletion");
+      try {
+        const res = await chatFn({ messages: conversation });
+        const reply = res.data.reply;
+        conversation.push({ role: 'assistant', content: reply });
+        appendMessage('bot', reply);
+        if (messageCount >= 4) optionsSection.style.display = 'block';
+      } catch (err) {
+        console.error("Error calling function:", err);
       }
-      
-      // Go to email collection
-      function goToEmailCollection() {
-        // Get selected formats
-        selectedFormats = [];
-        document.querySelectorAll('.format-card.selected').forEach(card => {
-          selectedFormats.push(card.getAttribute('data-format'));
-        });
-        
-        // Check if at least one format is selected
-        if (selectedFormats.length === 0) {
-          alert('Please select at least one format.');
-          return;
-        }
-        
-        // Track in Google Analytics
-        if (typeof gtag === 'function') {
-          gtag('event', 'selected_formats', {
-            'event_category': 'engagement',
-            'event_label': 'User selected formats',
-            'formats': selectedFormats.join(',')
-          });
-        }
-        
-        // Show email collection
-        formatSelection.style.display = 'none';
-        emailCollection.style.display = 'block';
-        
-        // Update database with selected formats
-        saveStory(fullStory, selectedFormats, "");
-        
-        // Scroll to top
-        window.scrollTo(0, 0);
+    });
+
+    function appendMessage(role, content) {
+      const div = document.createElement('div');
+      div.className = `message ${role}`;
+      div.textContent = content;
+      chatMessages.appendChild(div);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    submitButton.addEventListener('click', async () => {
+      const format = formatSelect.value;
+      const email = emailInput.value.trim();
+      if (!email || !format) return alert("Please enter your email and choose a format.");
+
+      const storyData = {
+        email,
+        format,
+        conversation,
+        submittedAt: new Date().toISOString(),
+      };
+
+      try {
+        const saveFn = functions.httpsCallable("saveStory");
+        await saveFn(storyData);
+        alert("Story submitted successfully! Thank you.");
+        window.location.reload();
+      } catch (err) {
+        console.error("Error saving story:", err);
+        alert("Submission failed.");
       }
-      
-      // Submit email
-      function submitEmail() {
-        const email = emailInput.value.trim();
-        if (!email) {
-          alert('Please enter your email address.');
-          return;
-        }
-        
-        if (!email.includes('@') || !email.includes('.')) {
-          alert('Please enter a valid email address.');
-          return;
-        }
-        
-        // Track in Google Analytics
-        if (typeof gtag === 'function') {
-          gtag('event', 'submitted_email', {
-            'event_category': 'conversion',
-            'event_label': 'User submitted email'
-          });
-        }
-        
-        // Save everything to database/endpoint
-        saveStory(fullStory, selectedFormats, email);
-        
-        // Show success view
-        emailCollection.style.display = 'none';
-        successView.style.display = 'block';
-        
-        // Scroll to top
-        window.scrollTo(0, 0);
-      }
-      
-      // Save story to database/endpoint
-      function saveStory(story, formats, email) {
-        console.log('Saving story to database...');
-        console.log('Story:', story);
-        console.log('Selected formats:', formats);
-        console.log('Email:', email);
-        
-        // For now, just log to console. In production, you would send this data to your server
-        // This will help you collect stories even if users don't complete all steps
-        
-        /* 
-        Example of how to implement server-side storage when ready:
-        
-        fetch('/api/save-story', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            story: story,
-            formats: formats,
-            email: email,
-            timestamp: new Date().toISOString()
-          }),
-        })
-        .then(response => response.json())
-        .then(data => {
-          console.log('Success:', data);
-        })
-        .catch((error) => {
-          console.error('Error:', error);
-        });
-        */
-      }
-      
-      // Event listeners
-      sendBtn.addEventListener('click', sendMessage);
-      
-      messageInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          sendMessage();
-        }
-      });
-      
-      finishBtn.addEventListener('click', finishSharing);
-      
-      formatCards.forEach(card => {
-        card.addEventListener('click', function() {
-          this.classList.toggle('selected');
-        });
-      });
-      
-      continueToEmailBtn.addEventListener('click', goToEmailCollection);
-      submitEmailBtn.addEventListener('click', submitEmail);
     });
   </script>
 </body>
