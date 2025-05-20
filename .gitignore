@@ -1,0 +1,9 @@
+# Ignore environment variables
+.env
+
+# Node modules
+node_modules/
+
+# Build cache või logid
+.DS_Store
+npm-debug.log
