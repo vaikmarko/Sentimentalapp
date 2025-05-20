@@ -10,110 +10,14 @@
     gtag('config', 'G-GHR6MC542E');
   </script>
   
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sentimental - Share Your Story</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-functions-compat.js"></script>
-
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #f7f7f8;
-      color: #343541;
-      margin: 0;
-      padding: 0;
-      min-height: 100vh;
-    }
-    .navbar {
-      background: white;
-      padding: 12px 20px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .logo {
-      font-weight: 700;
-      font-size: 20px;
-      color: #8639E8;
-      text-decoration: none;
-    }
-    .chat-container {
-      padding: 30px 20px;
-      max-width: 700px;
-      margin: 0 auto;
-    }
-    .message {
-      padding: 12px 20px;
-      margin-bottom: 12px;
-      border-radius: 12px;
-      max-width: 90%;
-    }
-    .message.bot {
-      background-color: #f3f4f6;
-      color: #1f2937;
-      margin-right: auto;
-    }
-    .message.user {
-      background-color: #8639E8;
-      color: white;
-      margin-left: auto;
-    }
-    .input-area {
-      display: flex;
-      gap: 10px;
-      margin-top: 20px;
-    }
-    .input-area textarea {
-      flex-grow: 1;
-      border-radius: 8px;
-      padding: 12px;
-      border: 1px solid #ccc;
-    }
-    .btn-primary {
-      background-color: #8639E8;
-      color: white;
-      padding: 0 20px;
-      border-radius: 8px;
-      font-weight: 600;
-    }
-  </style>
-</head>
-<body>
-  <div class="navbar">
-    <a href="/" class="logo">Sentimental</a>
-  </div>
-
-  <div class="chat-container">
-    <div id="chat-messages">
-      <div class="message bot">
-        Welcome! What personal experience would you like to share with me today?
-      </div>
-    </div>
-    <div class="input-area">
-      <textarea id="user-input" rows="2" placeholder="Type your message..."></textarea>
-      <button id="send-button" class="btn-primary">Send</button>
-    </div>
-  </div>
-
-  <div class="chat-container" id="options-section" style="display: none;">
-    <label class="block font-semibold mb-2">Choose a Format:</label>
-    <select id="format-select" class="w-full p-3 border rounded mb-4">
-      <option value="blog">Blog Post</option>
-      <option value="song">Song</option>
-      <option value="poem">Poem</option>
-      <option value="video">Video</option>
-      <option value="insight">Therapeutic Insight</option>
-    </select>
-    <label class="block font-semibold mb-2">Your Email:</label>
-    <input type="email" id="email-input" class="w-full p-3 border rounded mb-4" placeholder="you@example.com" />
-    <button id="submit-button" class="btn-primary w-full">Submit Story</button>
-  </div>
-
+  <meta charset="UTF-8" />
+  <!-- Firebase App (the core Firebase SDK) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <!-- Add Firebase products that you want to use -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-functions-compat.js"></script>
+  
   <script>
+    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyCSoWmKZRDpXF5MlgWKEV6kWHc5xFMMm_I",
       authDomain: "sentimental-f95e6.firebaseapp.com",
@@ -124,74 +28,751 @@
       measurementId: "G-9WFK8R9P9T"
     };
 
+    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
-    const functions = firebase.functions();
+  </script>
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sentimental - Your Reflection Companion</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f9f9fb;
+      color: #343541;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .navbar {
+      background: white;
+      padding: 16px 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .logo {
+      font-weight: 700;
+      font-size: 24px;
+      color: #8639E8;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .logo-icon {
+      width: 28px;
+      height: 28px;
+      background-color: #8639E8;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+    }
+    
+    .chat-container {
+      flex: 1;
+      padding: 24px 0;
+      max-width: 800px;
+      margin: 0 auto;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    
+    .messages-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 20px;
+      margin-bottom: 20px;
+      scroll-behavior: smooth;
+    }
+    
+    .chat-day-divider {
+      text-align: center;
+      margin: 24px 0;
+      font-size: 14px;
+      color: #71717a;
+      position: relative;
+    }
+    
+    .chat-day-divider::before,
+    .chat-day-divider::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      width: 40%;
+      height: 1px;
+      background-color: #e4e4e7;
+    }
+    
+    .chat-day-divider::before {
+      left: 0;
+    }
+    
+    .chat-day-divider::after {
+      right: 0;
+    }
+    
+    .message-group {
+      margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .message-bubble {
+      padding: 14px 18px;
+      border-radius: 18px;
+      max-width: 85%;
+      position: relative;
+      margin-bottom: 2px;
+      line-height: 1.5;
+      animation: fadeIn 0.3s ease-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .message-bubble p {
+      margin: 0 0 12px 0;
+    }
+    
+    .message-bubble p:last-child {
+      margin-bottom: 0;
+    }
+    
+    .message-bubble ul {
+      margin: 8px 0;
+      padding-left: 24px;
+    }
+    
+    .message-bubble ul li {
+      margin-bottom: 8px;
+    }
+    
+    .message-group.bot {
+      align-items: flex-start;
+    }
+    
+    .message-group.user {
+      align-items: flex-end;
+    }
+    
+    .message-bubble.bot {
+      background-color: white;
+      color: #1f2937;
+      border: 1px solid #e9e9ef;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+      border-bottom-left-radius: 4px;
+    }
+    
+    .message-bubble.user {
+      background-color: #8639E8;
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+    
+    .bot-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      margin-right: 12px;
+      background-color: #f3f3f7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #e9e9ef;
+    }
+    
+    .bot-info {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    
+    .bot-name {
+      font-weight: 600;
+      font-size: 15px;
+      color: #424250;
+    }
+    
+    .message-time {
+      font-size: 12px;
+      color: #71717a;
+      margin-top: 6px;
+      padding: 0 12px;
+    }
+    
+    .input-container {
+      position: relative;
+      background-color: white;
+      border-top: 1px solid #e9e9ef;
+      padding: 16px 20px;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.03);
+    }
+    
+    .input-wrapper {
+      position: relative;
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      align-items: flex-end;
+    }
+    
+    .user-input {
+      flex-grow: 1;
+      border-radius: 24px;
+      padding: 14px 60px 14px 20px;
+      border: 1px solid #e4e4e7;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+      resize: none;
+      max-height: 150px;
+      min-height: 50px;
+      overflow-y: auto;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    
+    .user-input:focus {
+      outline: none;
+      border-color: #a677e9;
+      box-shadow: 0 2px 8px rgba(134, 57, 232, 0.1);
+    }
+    
+    .send-button {
+      position: absolute;
+      right: 10px;
+      bottom: 10px;
+      background-color: #8639E8;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      transition: transform 0.2s, background-color 0.2s;
+    }
+    
+    .send-button:hover {
+      background-color: #7331d3;
+      transform: scale(1.05);
+    }
+    
+    .send-button:active {
+      transform: scale(0.95);
+    }
+    
+    .send-button:disabled {
+      background-color: #c4c4cc;
+      cursor: not-allowed;
+    }
+    
+    .typing-indicator {
+      display: flex;
+      padding: 14px 18px;
+      background-color: white;
+      border-radius: 18px;
+      border-bottom-left-radius: 4px;
+      border: 1px solid #e9e9ef;
+      margin-top: 16px;
+      width: fit-content;
+      align-items: center;
+    }
+    
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #8639E8;
+      border-radius: 50%;
+      margin: 0 2px;
+      animation: typingBounce 1.4s infinite ease-in-out both;
+    }
+    
+    .typing-dot:nth-child(1) {
+      animation-delay: -0.32s;
+    }
+    
+    .typing-dot:nth-child(2) {
+      animation-delay: -0.16s;
+    }
+    
+    @keyframes typingBounce {
+      0%, 80%, 100% { transform: scale(0.6); }
+      40% { transform: scale(1); }
+    }
+    
+    .welcome-message {
+      max-width: 600px;
+    }
+    
+    .highlight {
+      color: #8639E8;
+      font-weight: 500;
+    }
+    
+    .prompt-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    
+    .prompt-chip {
+      background-color: #f3f0ff;
+      border: 1px solid #e5dbff;
+      color: #8639E8;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .prompt-chip:hover {
+      background-color: #ebe5ff;
+      transform: translateY(-2px);
+    }
+    
+    @media (max-width: 640px) {
+      .message-bubble {
+        max-width: 90%;
+      }
+      
+      .prompt-chips {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .prompt-chip {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <a href="/" class="logo">
+      <div class="logo-icon">S</div>
+      Sentimental
+    </a>
+  </div>
+  
+  <div class="chat-container">
+    <div id="messages-container" class="messages-container"></div>
+    
+    <div class="input-container">
+      <div class="input-wrapper">
+        <textarea id="user-input" class="user-input" placeholder="Share what's on your mind..." rows="1"></textarea>
+        <button id="send-button" class="send-button">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
 
-    const chatMessages = document.getElementById('chat-messages');
+  <script>
+    // DOM elements
     const userInput = document.getElementById('user-input');
     const sendButton = document.getElementById('send-button');
-    const optionsSection = document.getElementById('options-section');
-    const submitButton = document.getElementById('submit-button');
-    const formatSelect = document.getElementById('format-select');
-    const emailInput = document.getElementById('email-input');
+    const messagesContainer = document.getElementById('messages-container');
 
-    let messageCount = 0;
-    let conversation = [
-      { role: "system", content: "You are a helpful assistant who collects meaningful personal stories from users." },
-      { role: "assistant", content: "Welcome! What personal experience would you like to share with me today?" }
-    ];
+    // Initialize conversation array for chat history
+    let conversation = [];
+    let responseSuccessful = false;
+    
+    // Add the system message at initialization
+    function initializeConversation() {
+      conversation = [{
+        role: 'system',
+        content: 'You are a thoughtful reflection guide, helping users explore their thoughts and feelings. Be empathetic, curious, and supportive. Ask thoughtful questions to help users gain deeper insights. Keep your responses relatively brief (2-3 paragraphs max) and always end with a gentle question to encourage further reflection.'
+      }];
+    }
+    
+    // Auto-resize textarea as user types
+    userInput.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = (this.scrollHeight < 150) ? this.scrollHeight + 'px' : '150px';
+    });
 
+    userInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendButton.click();
+      }
+    });
+
+    // Format the time for message timestamps
+    function formatTime() {
+      const now = new Date();
+      let hours = now.getHours();
+      let minutes = now.getMinutes();
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      
+      hours = hours % 12;
+      hours = hours ? hours : 12;
+      minutes = minutes < 10 ? '0' + minutes : minutes;
+      
+      return `${hours}:${minutes} ${ampm}`;
+    }
+
+    // Create a new message group (user or bot)
+    function createMessageGroup(sender) {
+      const group = document.createElement('div');
+      group.className = `message-group ${sender}`;
+      
+      if (sender === 'bot') {
+        const botInfo = document.createElement('div');
+        botInfo.className = 'bot-info';
+        
+        const avatar = document.createElement('div');
+        avatar.className = 'bot-avatar';
+        avatar.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8639E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>';
+        
+        const name = document.createElement('div');
+        name.className = 'bot-name';
+        name.textContent = 'Reflection Guide';
+        
+        botInfo.appendChild(avatar);
+        botInfo.appendChild(name);
+        group.appendChild(botInfo);
+      }
+      
+      return group;
+    }
+
+    // Add a message to the chat
+    function appendMessage(sender, text) {
+      // Check if the last message group is from the same sender
+      const lastGroup = messagesContainer.lastElementChild;
+      let messageGroup;
+      
+      if (lastGroup && lastGroup.classList.contains(sender)) {
+        messageGroup = lastGroup;
+      } else {
+        messageGroup = createMessageGroup(sender);
+        messagesContainer.appendChild(messageGroup);
+      }
+      
+      // Create the message bubble
+      const messageBubble = document.createElement('div');
+      messageBubble.className = `message-bubble ${sender}`;
+      
+      // Format message text with paragraphs and lists
+      let formattedText = '';
+      const paragraphs = text.split('\n');
+      
+      // Check if there are bullet points
+      const hasBulletPoints = paragraphs.some(para => para.trim().startsWith('•'));
+      
+      if (hasBulletPoints) {
+        let inList = false;
+        
+        paragraphs.forEach(para => {
+          const trimmedPara = para.trim();
+          
+          if (trimmedPara === '') {
+            if (inList) {
+              formattedText += '</ul>';
+              inList = false;
+            }
+            return;
+          }
+          
+          if (trimmedPara.startsWith('•')) {
+            if (!inList) {
+              formattedText += '<ul>';
+              inList = true;
+            }
+            formattedText += `<li>${trimmedPara.substring(1).trim()}</li>`;
+          } else {
+            if (inList) {
+              formattedText += '</ul>';
+              inList = false;
+            }
+            formattedText += `<p>${trimmedPara}</p>`;
+          }
+        });
+        
+        if (inList) {
+          formattedText += '</ul>';
+        }
+      } else {
+        // Simple paragraph formatting if no bullet points
+        formattedText = paragraphs
+          .filter(para => para.trim() !== '')
+          .map(para => `<p>${para}</p>`)
+          .join('');
+      }
+      
+      messageBubble.innerHTML = formattedText;
+      messageGroup.appendChild(messageBubble);
+      
+      // Add timestamp
+      const timeElement = document.createElement('div');
+      timeElement.className = 'message-time';
+      timeElement.textContent = formatTime();
+      messageGroup.appendChild(timeElement);
+      
+      // Scroll to the bottom
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    // Display typing indicator
+    function showTypingIndicator() {
+      const typingGroup = createMessageGroup('bot');
+      typingGroup.id = 'typing-indicator-group';
+      
+      const typingIndicator = document.createElement('div');
+      typingIndicator.className = 'typing-indicator';
+      
+      for (let i = 0; i < 3; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'typing-dot';
+        typingIndicator.appendChild(dot);
+      }
+      
+      typingGroup.appendChild(typingIndicator);
+      messagesContainer.appendChild(typingGroup);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      
+      return typingGroup;
+    }
+
+    // Generate a response based on patterns (fallback if API fails)
+    function generateFallbackResponse(userMessage) {
+      const lowerMessage = userMessage.toLowerCase();
+      
+      // Some pattern matches for common topics
+      if (lowerMessage.includes('overwhelm') || lowerMessage.includes('stress') || lowerMessage.includes('anxious')) {
+        return "It sounds like you're experiencing some overwhelm right now. That can be really challenging to navigate. Often when we feel this way, our thoughts can get jumbled and our emotions intensified. What specific aspects of your situation are feeling the most overwhelming to you right now?";
+      }
+      
+      if (lowerMessage.includes('decision') || lowerMessage.includes('choose') || lowerMessage.includes('decide')) {
+        return "Making decisions can be such a complex process. We often weigh not just the practical aspects, but also our emotions, values, and sometimes the expectations of others. What factors feel most important to you when considering this decision?";
+      }
+      
+      if (lowerMessage.includes('relationship') || lowerMessage.includes('friend') || lowerMessage.includes('partner')) {
+        return "Relationships are such a central part of our lives, and they can bring both profound joy and complex challenges. The dynamics between people often reveal a lot about our own needs and patterns. What qualities in this relationship are you finding most meaningful or challenging right now?";
+      }
+      
+      if (lowerMessage.includes('work') || lowerMessage.includes('job') || lowerMessage.includes('career')) {
+        return "Our work lives can take up so much of our time and energy, and often become intertwined with our sense of identity and purpose. It sounds like you're reflecting on this area of your life. What aspects of your work situation feel most significant to you right now?";
+      }
+      
+      if (lowerMessage.includes('sad') || lowerMessage.includes('depress') || lowerMessage.includes('down')) {
+        return "I hear that you're experiencing some difficult emotions right now. Feelings of sadness can be really heavy to carry, and they often have layers to them that unfold as we explore them. Would you feel comfortable sharing a bit more about what might be contributing to these feelings?";
+      }
+      
+      // Default response if no patterns match
+      return "Thank you for sharing that with me. I'm interested in understanding more about your experience. Could you tell me a bit more about what led you to reflect on this particular aspect of your life?";
+    }
+
+    // Handle sending a message
     sendButton.addEventListener('click', async () => {
       const message = userInput.value.trim();
       if (!message) return;
 
       appendMessage('user', message);
+      
+      // Add user message to conversation array
       conversation.push({ role: 'user', content: message });
-      userInput.value = '';
-      messageCount++;
 
-      const chatFn = functions.httpsCallable("chatCompletion");
+      let typingIndicator;
       try {
-        console.log("Conversation to be sent:", conversation);
-        const res = await chatFn({ messages: conversation });
-        const reply = res.data.reply;
-        conversation.push({ role: 'assistant', content: reply });
-        appendMessage('bot', reply);
-        if (messageCount >= 4) optionsSection.style.display = 'block';
-      } catch (err) {
-        console.error("Error calling function:", err);
+        typingIndicator = showTypingIndicator();
+
+        userInput.value = '';
+        userInput.style.height = 'auto';
+        userInput.disabled = true;
+        sendButton.disabled = true;
+
+        // Try Firebase function first
+        try {
+          if (firebase && firebase.functions) {
+            const chatCompletion = firebase.functions().httpsCallable('chatCompletion');
+            const result = await chatCompletion({ messages: conversation });
+            
+            if (result && result.data && result.data.reply) {
+              // Remove typing indicator
+              if (typingIndicator && typingIndicator.parentNode) {
+                messagesContainer.removeChild(typingIndicator);
+              }
+              
+              const reply = result.data.reply;
+              appendMessage('bot', reply);
+              
+              // Add bot reply to conversation array
+              conversation.push({ role: 'assistant', content: reply });
+              responseSuccessful = true;
+              return;
+            }
+          }
+        } catch (firebaseError) {
+          console.error("Firebase function error:", firebaseError);
+        }
+        
+        // If we get here, Firebase failed. Try server-side API
+        try {
+          const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ message, conversation })
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            
+            // Remove typing indicator
+            if (typingIndicator && typingIndicator.parentNode) {
+              messagesContainer.removeChild(typingIndicator);
+            }
+            
+            appendMessage('bot', data.reply);
+            conversation.push({ role: 'assistant', content: data.reply });
+            responseSuccessful = true;
+            return;
+          }
+        } catch (apiError) {
+          console.error("API error:", apiError);
+        }
+        
+        // If both failed, use the pattern-based response as final fallback
+        const fallbackReply = generateFallbackResponse(message);
+        
+        // Remove typing indicator
+        if (typingIndicator && typingIndicator.parentNode) {
+          messagesContainer.removeChild(typingIndicator);
+        }
+        
+        appendMessage('bot', fallbackReply);
+        conversation.push({ role: 'assistant', content: fallbackReply });
+        
+      } catch (error) {
+        console.error("Chat error:", error);
+        
+        // Remove typing indicator
+        if (typingIndicator && typingIndicator.parentNode) {
+          messagesContainer.removeChild(typingIndicator);
+        }
+        
+        // Use fallback
+        const fallbackReply = "I'm having trouble connecting right now. Let me ask you this instead: What's been on your mind lately that you'd like to reflect on?";
+        appendMessage('bot', fallbackReply);
+        conversation.push({ role: 'assistant', content: fallbackReply });
+      } finally {
+        userInput.disabled = false;
+        sendButton.disabled = false;
+        userInput.focus();
       }
     });
 
-    function appendMessage(role, content) {
-      const div = document.createElement('div');
-      div.className = `message ${role}`;
-      div.textContent = content;
-      chatMessages.appendChild(div);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
+    // Handle clicking on prompt chips
+    function handlePromptClick(text) {
+      userInput.value = text;
+      userInput.focus();
+      // Trigger the input event to resize the textarea
+      const event = new Event('input', { bubbles: true });
+      userInput.dispatchEvent(event);
     }
 
-    submitButton.addEventListener('click', async () => {
-      const format = formatSelect.value;
-      const email = emailInput.value.trim();
-      if (!email || !format) return alert("Please enter your email and choose a format.");
+    // Show welcome message with prompt chips
+    function showWelcomeMessage() {
+      const welcomeText = `Hi there, I'm your <span class="highlight">Reflection Guide</span>. 🌱
 
-      const storyData = {
-        email,
-        format,
-        conversation,
-        submittedAt: new Date().toISOString(),
-      };
+I'm here to help you explore your thoughts and feelings, turning moments of reflection into meaningful insights.
 
-      try {
-        const saveFn = functions.httpsCallable("saveStory");
-        await saveFn(storyData);
-        alert("Story submitted successfully! Thank you.");
-        window.location.reload();
-      } catch (err) {
-        console.error("Error saving story:", err);
-        alert("Submission failed.");
-      }
+Sometimes the hardest part is knowing where to begin. You can start by sharing:
+
+• A feeling that's been present for you today
+• A situation you're trying to make sense of
+• A decision you're facing
+• A pattern you've noticed in your life
+• Something you're grateful for
+
+There's no right or wrong way to reflect - just begin wherever feels natural.`;
+
+      const messageGroup = createMessageGroup('bot');
+      messagesContainer.appendChild(messageGroup);
+      
+      const messageBubble = document.createElement('div');
+      messageBubble.className = 'message-bubble bot welcome-message';
+      messageBubble.innerHTML = welcomeText;
+      messageGroup.appendChild(messageBubble);
+      
+      // Add prompt chips
+      const promptChips = document.createElement('div');
+      promptChips.className = 'prompt-chips';
+      
+      const prompts = [
+        "I've been feeling overwhelmed lately...",
+        "I'm trying to decide whether to...",
+        "Something happened today that made me feel...",
+        "I've noticed a pattern in my life where I...",
+        "I'm struggling with a relationship with..."
+      ];
+      
+      prompts.forEach(prompt => {
+        const chip = document.createElement('div');
+        chip.className = 'prompt-chip';
+        chip.textContent = prompt;
+        chip.addEventListener('click', () => handlePromptClick(prompt));
+        promptChips.appendChild(chip);
+      });
+      
+      messageBubble.appendChild(promptChips);
+      
+      // Add timestamp
+      const timeElement = document.createElement('div');
+      timeElement.className = 'message-time';
+      timeElement.textContent = formatTime();
+      messageGroup.appendChild(timeElement);
+      
+      // Add welcome message to conversation array (without HTML tags)
+      conversation.push({ 
+        role: 'assistant', 
+        content: welcomeText
+          .replace(/<span class="highlight">|<\/span>/g, '')
+          .replace(/<[^>]*>/g, '')
+      });
+      
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    // Initialize chat
+    window.addEventListener('load', () => {
+      initializeConversation(); // Initialize with system message
+      setTimeout(showWelcomeMessage, 500);
+      userInput.focus();
     });
   </script>
 </body>
