@@ -152,6 +152,7 @@
 
       const chatFn = functions.httpsCallable("chatCompletion");
       try {
+        console.log("Conversation to be sent:", conversation);
         const res = await chatFn({ messages: conversation });
         const reply = res.data.reply;
         conversation.push({ role: 'assistant', content: reply });
