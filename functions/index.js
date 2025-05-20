@@ -2,12 +2,14 @@ require('dotenv').config();
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const { OpenAI } = require("openai");
+const { onCall } = require("firebase-functions/v2/https");
 
 admin.initializeApp();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-exports.chatCompletion = functions.https.onCall(async (data, context) => {
-  const { messages } = data;
+exports.chatCompletion = onCall(async (request) => {
+  const { messages } = request.data;
+  console.log("Received messages:", messages);
 
   if (!messages || !Array.isArray(messages)) {
     throw new functions.https.HttpsError("invalid-argument", "messages must be an array");
