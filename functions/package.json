@@ -15,8 +15,8 @@
   "dependencies": {
     "cors": "^2.8.5",
     "firebase-admin": "^11.11.0",
-    "firebase-functions": "^4.5.0",
-    "openai": "^4.14.0"
+    "firebase-functions": "^4.9.0",
+    "openai": "^4.102.0"
   },
   "devDependencies": {
     "firebase-functions-test": "^3.1.0"

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Story</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-functions-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #story-title {
+      margin-bottom: 10px;
+    }
+    #story-content {
+      white-space: pre-wrap;
+      background: #f9f9f9;
+      padding: 15px;
+      border-radius: 5px;
+      min-height: 150px;
+      margin-bottom: 20px;
+    }
+    button {
+      margin: 5px 5px 15px 0;
+      padding: 10px 15px;
+      font-size: 1rem;
+      cursor: pointer;
+      border: none;
+      border-radius: 4px;
+      background-color: #007bff;
+      color: white;
+      transition: background-color 0.3s ease;
+    }
+    button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+    button:hover:not(:disabled) {
+      background-color: #0056b3;
+    }
+    #formats {
+      margin-top: 30px;
+    }
+    #format-output > div {
+      background: #eef3f7;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 15px;
+    }
+    #format-output h3 {
+      margin-top: 0;
+      margin-bottom: 8px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1 id="story-title">Loading...</h1>
+  <div id="story-content">Please wait while your story loads.</div>
+
+  <button id="generate-story-btn">Generate My Story</button>
+
+  <div id="formats" style="display:none;">
+    <h2>Formats</h2>
+    <button class="format-btn" data-format="tweet">Generate Tweet</button>
+    <button class="format-btn" data-format="poem">Generate Poem</button>
+    <button class="format-btn" data-format="videoScript">Generate Script</button>
+    <button class="format-btn" data-format="therapeutic">Generate Insight</button>
+    <div id="format-output"></div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCSoWmKZRDpXF5MlgWKEV6kWHc5xFMMm_I",
+      authDomain: "sentimental-f95e6.firebaseapp.com",
+      projectId: "sentimental-f95e6",
+      storageBucket: "sentimental-f95e6.appspot.com",
+      messagingSenderId: "319737737925",
+      appId: "1:319737737925:web:1de7aa284a63ad9f9eb6ac",
+      measurementId: "G-9WFK8R9P9T"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    const storyId = new URLSearchParams(window.location.search).get("storyId");
+    const generateBtn = document.getElementById("generate-story-btn");
+    const formatsDiv = document.getElementById("formats");
+    const formatOutput = document.getElementById("format-output");
+    const storyTitleEl = document.getElementById("story-title");
+    const storyContentEl = document.getElementById("story-content");
+
+    function setLoadingState(isLoading) {
+      generateBtn.disabled = isLoading;
+      const formatButtons = document.querySelectorAll(".format-btn");
+      formatButtons.forEach(btn => btn.disabled = isLoading);
+      if (isLoading) {
+        generateBtn.textContent = "Processing...";
+      } else {
+        generateBtn.textContent = "Generate My Story";
+      }
+    }
+
+    function callGenerateStory() {
+      if (!storyId) {
+        alert("Missing story ID in URL.");
+        return;
+      }
+      setLoadingState(true);
+      const generate = firebase.functions().httpsCallable("generateFullStory");
+      generate({ storyId })
+        .then(res => {
+          // Wait a moment to ensure Firestore update is available
+          setTimeout(() => {
+            loadStory(); // Reload story content after generation
+            setLoadingState(false);
+          }, 2500);
+        })
+        .catch(err => {
+          console.error("Error generating story:", err);
+          alert("Failed to generate story. Please try again.");
+          setLoadingState(false);
+        });
+    }
+
+    function generateFormat(formatType) {
+      if (!storyId) {
+        alert("Missing story ID in URL.");
+        return;
+      }
+      setLoadingState(true);
+      const generate = firebase.functions().httpsCallable("generateFormat");
+      generate({ storyId, format: formatType })
+        .then(res => {
+          const output = res.data.result;
+          // Remove existing block for this format if any
+          const existingBlock = formatOutput.querySelector(`div[data-format="${formatType}"]`);
+          if (existingBlock) {
+            existingBlock.remove();
+          }
+          const block = document.createElement("div");
+          block.setAttribute("data-format", formatType);
+          block.innerHTML = `<h3>${formatType.charAt(0).toUpperCase() + formatType.slice(1)}</h3><p>${output}</p>`;
+          formatOutput.appendChild(block);
+          setLoadingState(false);
+        })
+        .catch(err => {
+          console.error("Format generation failed:", err);
+          alert("Format generation failed. Please try again.");
+          setLoadingState(false);
+        });
+    }
+
+    function loadStory() {
+      if (!storyId) {
+        storyTitleEl.innerText = "Story ID missing";
+        storyContentEl.innerText = "No story ID was provided in the URL. Please provide a valid story ID.";
+        generateBtn.disabled = true;
+        return;
+      }
+      setLoadingState(true);
+      firebase.firestore().collection("stories").doc(storyId).get()
+        .then(doc => {
+          if (!doc.exists) {
+            storyTitleEl.innerText = "Story not found";
+            storyContentEl.innerText = "The story with the provided ID does not exist.";
+            generateBtn.disabled = false;
+            formatsDiv.style.display = "none";
+            setLoadingState(false);
+            return;
+          }
+
+          const data = doc.data();
+          const title = data.gptGeneratedTitle;
+          const content = data.gptGeneratedText;
+
+          if (title && content) {
+            storyTitleEl.innerText = title;
+            storyContentEl.innerText = content;
+            generateBtn.disabled = false;
+            formatsDiv.style.display = "block";
+
+            // Clear previous format outputs
+            formatOutput.innerHTML = "";
+
+            if (data.formatsGenerated && typeof data.formatsGenerated === "object") {
+              for (const [key, value] of Object.entries(data.formatsGenerated)) {
+                if (value && value.trim() !== "") {
+                  const block = document.createElement("div");
+                  block.setAttribute("data-format", key);
+                  block.innerHTML = `<h3>${key.charAt(0).toUpperCase() + key.slice(1)}</h3><p>${value}</p>`;
+                  formatOutput.appendChild(block);
+                }
+              }
+            }
+          } else {
+            storyTitleEl.innerText = "Story not yet generated";
+            storyContentEl.innerText = "Click 'Generate My Story' to create your story based on the conversation.";
+            generateBtn.disabled = false;
+            formatsDiv.style.display = "none";
+            formatOutput.innerHTML = "";
+          }
+          setLoadingState(false);
+        })
+        .catch(error => {
+          storyTitleEl.innerText = "Error loading story";
+          storyContentEl.innerText = error.message || "An unknown error occurred while loading the story.";
+          console.error("Error loading story:", error);
+          generateBtn.disabled = true;
+          formatsDiv.style.display = "none";
+          setLoadingState(false);
+        });
+    }
+
+    generateBtn.addEventListener("click", callGenerateStory);
+
+    document.querySelectorAll(".format-btn").forEach(button => {
+      button.addEventListener("click", () => {
+        const formatType = button.getAttribute("data-format");
+        generateFormat(formatType);
+      });
+    });
+
+    document.addEventListener("DOMContentLoaded", loadStory);
+  </script>
+</body>
+</html>

@@ -1,128 +1,204 @@
-// functions/index.js
-const functions = require("firebase-functions");
+const functions = require('firebase-functions');
+const admin = require('firebase-admin');
+const OpenAI = require("openai");
 
-// Enable CORS for both domains
-const cors = require('cors')({
-  origin: [
-    'https://sentimental-f95e6.web.app', 
-    'https://sentimentalapp.com',
-    'https://www.sentimentalapp.com',
-    'https://sentimental-f95e6.firebaseapp.com'
-  ],
-  optionsSuccessStatus: 200
+admin.initializeApp();
+
+const openai = new OpenAI({
+  apiKey: functions.config().openai.key,
 });
 
-/**
- * Firebase Cloud Function to handle chat completions
- */
+// Generate assistant response (chat-style)
 exports.chatCompletion = functions.https.onCall(async (data, context) => {
+  const { messages, model } = data;
+
   try {
-    // Import OpenAI inside the function to avoid initialization errors during deployment
-    const { OpenAI } = require("openai");
-    
-    // Initialize OpenAI with the API key from environment variables
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
-    });
-    
-    // Validate input
-    if (!data.messages || !Array.isArray(data.messages)) {
-      throw new Error("Invalid messages format");
-    }
-
-    // Format messages for OpenAI API
-    const messages = data.messages.map(msg => ({
-      role: msg.role,
-      content: msg.content
-    }));
-
-    // Ensure there's a system message if not provided
-    if (!messages.some(msg => msg.role === 'system')) {
-      messages.unshift({
-        role: 'system',
-        content: 'You are a thoughtful reflection guide, helping users explore their thoughts and feelings. Be empathetic, curious, and supportive. Ask thoughtful questions to help users gain deeper insights. Keep your responses relatively brief (2-3 paragraphs max) and always end with a gentle question to encourage further reflection.'
-      });
-    }
-
-    // Call OpenAI API
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: model || 'gpt-4',
       messages: messages,
-      max_tokens: 1000,
-      temperature: 0.7,
     });
 
-    // Extract and return the reply
-    const reply = completion.choices[0].message.content;
-    return { reply };
+    return { reply: completion.choices[0].message.content };
   } catch (error) {
-    console.error("Error in chatCompletion:", error);
-    
-    // Return error information
-    return {
-      error: true,
-      message: error.message,
-      reply: "I apologize, but I'm having trouble processing your message. Please try again in a moment."
-    };
+    console.error("chatCompletion error:", error);
+    throw new functions.https.HttpsError('internal', error.message);
   }
 });
 
-// Alternative REST API endpoint if you prefer to use fetch
-exports.chatApi = functions.https.onRequest((request, response) => {
-  return cors(request, response, async () => {
-    try {
-      // Import OpenAI inside the function to avoid initialization errors during deployment
-      const { OpenAI } = require("openai");
-      
-      // Initialize OpenAI with the API key from environment variables
-      const openai = new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY
-      });
-      
-      // Only allow POST requests
-      if (request.method !== 'POST') {
-        return response.status(405).send({ error: 'Method not allowed' });
-      }
+// Analyze story progress
+exports.analyzeProgress = functions.https.onCall(async (data, context) => {
+  const { storyId } = data;
 
-      const { messages } = request.body;
-      
-      // Validate input
-      if (!messages || !Array.isArray(messages)) {
-        return response.status(400).send({ error: 'Invalid messages format' });
-      }
+  try {
+    const storyDoc = await admin.firestore().collection('stories').doc(storyId).get();
 
-      // Format messages for OpenAI API
-      const formattedMessages = messages.map(msg => ({
-        role: msg.role,
-        content: msg.content
-      }));
-
-      // Ensure there's a system message if not provided
-      if (!formattedMessages.some(msg => msg.role === 'system')) {
-        formattedMessages.unshift({
-          role: 'system',
-          content: 'You are a thoughtful reflection guide, helping users explore their thoughts and feelings. Be empathetic, curious, and supportive. Ask thoughtful questions to help users gain deeper insights. Keep your responses relatively brief (2-3 paragraphs max) and always end with a gentle question to encourage further reflection.'
-        });
-      }
-
-      // Call OpenAI API
-      const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: formattedMessages,
-        max_tokens: 1000,
-        temperature: 0.7,
-      });
-
-      // Extract and return the reply
-      const reply = completion.choices[0].message.content;
-      return response.status(200).send({ reply });
-    } catch (error) {
-      console.error("Error in chatApi:", error);
-      return response.status(500).send({ 
-        error: true, 
-        message: error.message,
-        reply: "I apologize, but I'm having trouble processing your message. Please try again in a moment."
-      });
+    if (!storyDoc.exists) {
+      throw new functions.https.HttpsError('not-found', 'Story not found');
     }
-  });
+
+    const storyData = storyDoc.data();
+    const conversation = storyData.conversation;
+
+    if (!Array.isArray(conversation)) {
+      throw new functions.https.HttpsError('invalid-argument', 'Conversation missing or invalid');
+    }
+
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4',
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a calm and thoughtful conversational partner who helps people uncover meaningful personal stories. Your role is to evaluate how emotionally whole and narratively complete the story feels based on the conversation so far. Focus on emotional flow, vulnerability, insight, and coherence. Return only a JSON object like: { \"percent\": 75 }.",
+        },
+        ...conversation,
+        {
+          role: "system",
+          content:
+            "Provide a JSON object with a single key 'percent' indicating the story completeness as an integer percentage (0-100).",
+        },
+      ],
+    });
+
+    const result = completion.choices[0].message.content;
+    let percent = 0;
+
+    try {
+      const json = JSON.parse(result);
+      if (typeof json.percent === 'number') {
+        percent = json.percent;
+      }
+    } catch (e) {
+      console.error("Failed to parse analyzeProgress result:", result);
+    }
+
+    return { percent };
+  } catch (error) {
+    console.error("analyzeProgress error:", error);
+    throw new functions.https.HttpsError('internal', error.message);
+  }
+});
+
+// Generate formatted version of story (tweet, poem, etc.)
+exports.generateFormat = functions.https.onCall(async (data, context) => {
+  const { storyId, formatType } = data;
+
+  try {
+    const storyDoc = await admin.firestore().collection('stories').doc(storyId).get();
+
+    if (!storyDoc.exists) {
+      throw new functions.https.HttpsError('not-found', 'Story not found');
+    }
+
+    const storyData = storyDoc.data();
+    const base = storyData.gptGeneratedText || storyData.text || '';
+
+    let prompt = '';
+    if (formatType === 'tweet') {
+      prompt = `Summarize the following story as a viral, deeply personal and insightful tweet (max 240 characters, no hashtags):\n\n${base}`;
+    } else if (formatType === 'poem') {
+      prompt = `Write a brief, free verse poem (max 5 lines) summarizing the inner journey of this story:\n\n${base}`;
+    } else if (formatType === 'script') {
+      prompt = `Turn the story into a short script or dialogue (max 5 exchanges), focusing on the emotional core and life insight:\n\n${base}`;
+    } else if (formatType === 'therapeutic' || formatType === 'insight') {
+      prompt = `Give a therapeutic summary of this story: What is the main lesson, what inner dynamic or emotion is being worked through? Give advice for self-reflection or growth. (max 3 sentences)\n\n${base}`;
+    } else {
+      prompt = `Rewrite this story in the format of a ${formatType}:\n\n${base}`;
+    }
+
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4',
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    return { result: completion.choices[0].message.content };
+  } catch (error) {
+    console.error("generateFormat error:", error);
+    throw new functions.https.HttpsError('internal', error.message);
+  }
+});
+
+// Generate full story and save it
+exports.generateFullStory = functions.https.onCall(async (data, context) => {
+  const { storyId } = data;
+
+  try {
+    const storyRef = admin.firestore().collection('stories').doc(storyId);
+    const storySnap = await storyRef.get();
+
+    if (!storySnap.exists) {
+      throw new functions.https.HttpsError('not-found', 'Story not found');
+    }
+
+    const storyData = storySnap.data();
+    const conversation = storyData.conversation;
+
+    if (!Array.isArray(conversation)) {
+      throw new functions.https.HttpsError('invalid-argument', 'Conversation is missing');
+    }
+
+    // --- Lisa keele tuvastus ---
+    const userText = conversation
+      .filter(msg => msg.role === "user")
+      .map(msg => msg.content)
+      .join(" ");
+
+    let detectedLang = "en";
+    try {
+      const langResult = await openai.chat.completions.create({
+        model: 'gpt-4',
+        messages: [
+          {
+            role: "system",
+            content: "You are a language identifier. Detect the language of the following text. Reply only with the 2-letter ISO code (e.g., 'et' for Estonian, 'en' for English, 'ru' for Russian)."
+          },
+          {
+            role: "user",
+            content: userText
+          }
+        ],
+        max_tokens: 10,
+      });
+      detectedLang = langResult.choices[0].message.content.trim().replace(/[^a-z]/gi, '').slice(0,2).toLowerCase();
+    } catch (err) {
+      console.error("Language detection failed, fallback to EN.", err);
+    }
+
+    // --- Loo prompt, mis annab korralduse kirjutada pealkiri ja tekst õiges keeles ---
+    const promptObj = {
+      role: "system",
+      content:
+        `You are a masterful, empathetic personal storyteller. Based on the following authentic conversation, write a compelling, emotionally intelligent real-life story. The result must sound like a genuine reflection, never fantasy or fairy tale. Use only the user's actual themes, metaphors, and vocabulary. Structure the output as valid JSON: { "title": "A deep, emotional, authentic title", "text": "A concise but emotionally rich story (max 2 paragraphs), focusing on inner growth, insight, and self-reflection. Make it meaningful for the reader." } Write both title and text in the following language: ${detectedLang}.`
+    };
+
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4',
+      messages: [
+        promptObj,
+        ...conversation,
+      ],
+      max_tokens: 1500,
+    });
+
+    const raw = completion.choices[0].message.content;
+    console.log("generateFullStory raw output:", raw);
+
+    let result = { title: "Untitled", text: "" };
+    try {
+      result = JSON.parse(raw);
+    } catch (err) {
+      console.error("Failed to parse story completion", raw);
+      result.text = raw;
+    }
+
+    await storyRef.update({
+      gptGeneratedTitle: result.title,
+      gptGeneratedText: result.text,
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("generateFullStory error:", error);
+    throw new functions.https.HttpsError('internal', error.message);
+  }
 });
