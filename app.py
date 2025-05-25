@@ -155,6 +155,9 @@ def index():
 
 @app.route('/app')
 def app_view():
+    # Only allow app access in demo and test environments
+    if ENVIRONMENT == 'production':
+        return render_template('index.html', environment=ENVIRONMENT)
     return render_template('app.html', environment=ENVIRONMENT)
 
 @app.route('/landing')
@@ -167,18 +170,30 @@ def manifest():
 
 @app.route('/cosmos')
 def cosmos():
+    # Only allow cosmos access in demo and test environments
+    if ENVIRONMENT == 'production':
+        return render_template('index.html', environment=ENVIRONMENT)
     return render_template('cosmos.html', environment=ENVIRONMENT)
 
 @app.route('/chat')
 def chat():
+    # Only allow chat access in demo and test environments
+    if ENVIRONMENT == 'production':
+        return render_template('index.html', environment=ENVIRONMENT)
     return render_template('chat.html', environment=ENVIRONMENT)
 
 @app.route('/deck')
 def deck():
+    # Only allow deck access in demo and test environments
+    if ENVIRONMENT == 'production':
+        return render_template('index.html', environment=ENVIRONMENT)
     return render_template('deck.html', environment=ENVIRONMENT)
 
 @app.route('/story')
 def story():
+    # Only allow story access in demo and test environments
+    if ENVIRONMENT == 'production':
+        return render_template('index.html', environment=ENVIRONMENT)
     return render_template('story.html', environment=ENVIRONMENT)
 
 @app.route('/api/stories', methods=['GET'])
