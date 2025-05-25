@@ -154,7 +154,7 @@ def index():
     return render_template('index.html', environment=ENVIRONMENT)
 
 @app.route('/app')
-def app():
+def app_view():
     return render_template('app.html', environment=ENVIRONMENT)
 
 @app.route('/landing')
