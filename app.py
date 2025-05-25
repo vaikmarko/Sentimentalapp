@@ -233,6 +233,23 @@ def add_story():
             'message': 'This is a demo version. Use the full version to add new stories.'
         }), 403
     
+    # In test environment, require authentication
+    if IS_TEST:
+        user_id = request.headers.get('X-User-ID')
+        if not user_id:
+            return jsonify({
+                'error': 'Authentication required',
+                'message': 'Please register or login to create stories in test environment.'
+            }), 401
+        
+        # Verify user exists
+        try:
+            user_doc = db.collection('test_users').document(user_id).get()
+            if not user_doc.exists:
+                return jsonify({'error': 'Invalid user'}), 401
+        except Exception as e:
+            return jsonify({'error': 'Authentication failed'}), 401
+    
     if db is None:
         return jsonify({'error': 'Database not available'}), 500
         
@@ -252,6 +269,14 @@ def add_story():
     
     # Salvesta andmebaasi
     db.collection('stories').document(story['id']).set(story)
+    
+    # Update user statistics in test environment
+    if IS_TEST and 'user_id' in locals():
+        try:
+            user_ref = db.collection('test_users').document(user_id)
+            user_ref.update({'stories_created': firestore.Increment(1)})
+        except Exception as e:
+            logger.warning(f"Failed to update user statistics: {str(e)}")
     
     # Loo seosed teiste lugudega
     connections = find_connections(story['id'])
@@ -297,6 +322,23 @@ def get_insights(story_id):
 @app.route('/api/stories/<string:story_id>/formats', methods=['POST'])
 def generate_story_format(story_id):
     """Generate a new format for an existing story"""
+    # In test environment, require authentication
+    if IS_TEST:
+        user_id = request.headers.get('X-User-ID')
+        if not user_id:
+            return jsonify({
+                'error': 'Authentication required',
+                'message': 'Please register or login to generate formats in test environment.'
+            }), 401
+        
+        # Verify user exists
+        try:
+            user_doc = db.collection('test_users').document(user_id).get()
+            if not user_doc.exists:
+                return jsonify({'error': 'Invalid user'}), 401
+        except Exception as e:
+            return jsonify({'error': 'Authentication failed'}), 401
+    
     data = request.json
     format_type = data.get('format_type', 'article')
     
@@ -319,6 +361,14 @@ def generate_story_format(story_id):
     if format_type not in story_data['createdFormats']:
         story_data['createdFormats'].append(format_type)
         story_ref.update({'createdFormats': story_data['createdFormats']})
+    
+    # Update user statistics in test environment
+    if IS_TEST and 'user_id' in locals():
+        try:
+            user_ref = db.collection('test_users').document(user_id)
+            user_ref.update({'formats_generated': firestore.Increment(1)})
+        except Exception as e:
+            logger.warning(f"Failed to update user statistics: {str(e)}")
     
     return jsonify({
         'format_type': format_type,
@@ -485,6 +535,96 @@ def generate_chapter_number():
     """Generate a random chapter number for book format"""
     import random
     return random.randint(1, 20)
+
+@app.route('/api/auth/register', methods=['POST'])
+def register_user():
+    """Register a new user in test environment"""
+    if not IS_TEST:
+        return jsonify({'error': 'Registration only available in test environment'}), 403
+    
+    try:
+        data = request.json
+        email = data.get('email', '').strip().lower()
+        name = data.get('name', '').strip()
+        
+        if not email or not name:
+            return jsonify({'error': 'Email and name are required'}), 400
+        
+        # Basic email validation
+        import re
+        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if not re.match(email_pattern, email):
+            return jsonify({'error': 'Invalid email format'}), 400
+        
+        if db is None:
+            return jsonify({'error': 'Database not available'}), 500
+        
+        # Check if user already exists
+        existing = db.collection('test_users').where('email', '==', email).limit(1).get()
+        if len(list(existing)) > 0:
+            return jsonify({'error': 'User already exists'}), 409
+        
+        # Create user
+        user_data = {
+            'email': email,
+            'name': name,
+            'created_at': firestore.SERVER_TIMESTAMP,
+            'stories_created': 0,
+            'formats_generated': 0
+        }
+        
+        user_ref = db.collection('test_users').add(user_data)
+        user_id = user_ref[1].id
+        
+        logger.info(f"Test user registered: {email}")
+        
+        return jsonify({
+            'message': 'User registered successfully',
+            'user_id': user_id,
+            'email': email,
+            'name': name
+        }), 201
+        
+    except Exception as e:
+        logger.error(f"Error in user registration: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/api/auth/login', methods=['POST'])
+def login_user():
+    """Login user in test environment"""
+    if not IS_TEST:
+        return jsonify({'error': 'Login only available in test environment'}), 403
+    
+    try:
+        data = request.json
+        email = data.get('email', '').strip().lower()
+        
+        if not email:
+            return jsonify({'error': 'Email is required'}), 400
+        
+        if db is None:
+            return jsonify({'error': 'Database not available'}), 500
+        
+        # Find user
+        users = db.collection('test_users').where('email', '==', email).limit(1).get()
+        if len(list(users)) == 0:
+            return jsonify({'error': 'User not found'}), 404
+        
+        user_doc = list(users)[0]
+        user_data = user_doc.to_dict()
+        
+        return jsonify({
+            'message': 'Login successful',
+            'user_id': user_doc.id,
+            'email': user_data['email'],
+            'name': user_data['name'],
+            'stories_created': user_data.get('stories_created', 0),
+            'formats_generated': user_data.get('formats_generated', 0)
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error in user login: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500
 
 @app.route('/api/waitlist', methods=['POST'])
 def join_waitlist():
