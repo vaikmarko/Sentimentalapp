@@ -1,0 +1,60 @@
+{
+  "component": "Performance",
+  "description": "Bug tracking for performance issues - load times, response times, and system efficiency",
+  "lastTested": null,
+  "performanceTargets": {
+    "pageLoadTime": "< 3 seconds",
+    "apiResponseTime": "< 500ms",
+    "databaseQueryTime": "< 500ms",
+    "conversationProcessing": "< 2 seconds",
+    "storyGeneration": "< 5 seconds"
+  },
+  "testCoverage": {
+    "pageLoadTimes": false,
+    "apiResponseTimes": false,
+    "databasePerformance": false,
+    "conversationProcessing": false,
+    "storyGeneration": false
+  },
+  "knownIssues": [],
+  "criticalMetrics": [
+    {
+      "name": "Landing Page Load Time",
+      "target": "< 3000ms",
+      "current": null,
+      "status": "untested"
+    },
+    {
+      "name": "App Page Load Time",
+      "target": "< 3000ms",
+      "current": null,
+      "status": "untested"
+    },
+    {
+      "name": "Stories API Response",
+      "target": "< 500ms",
+      "current": null,
+      "status": "untested"
+    },
+    {
+      "name": "Chat Message Processing",
+      "target": "< 2000ms",
+      "current": null,
+      "status": "untested"
+    },
+    {
+      "name": "Knowledge Analysis",
+      "target": "< 1000ms",
+      "current": null,
+      "status": "untested"
+    }
+  ],
+  "bugs": [],
+  "fixedBugs": [],
+  "testResults": {
+    "lastRun": null,
+    "passed": 0,
+    "failed": 0,
+    "details": []
+  }
+} 

@@ -1,0 +1,57 @@
+{
+  "component": "Space (Inner Cosmos)",
+  "description": "Bug tracking for Space functionality - self-questioning, data sufficiency checking, curated conversations, and knowledge base building",
+  "lastTested": null,
+  "testCoverage": {
+    "questionAsking": false,
+    "dataSufficiencyCheck": false,
+    "curatedConversationStart": false,
+    "knowledgeBaseFeedback": false,
+    "patternRecognition": false
+  },
+  "knownIssues": [],
+  "criticalFlows": [
+    {
+      "name": "Question with Sufficient Data Flow",
+      "steps": [
+        "User asks question about themselves",
+        "System checks existing data",
+        "Sufficient data exists",
+        "System provides meaningful analysis",
+        "Answer includes insights and patterns"
+      ],
+      "status": "untested"
+    },
+    {
+      "name": "Question with Insufficient Data Flow",
+      "steps": [
+        "User asks question about themselves",
+        "System checks existing data",
+        "Insufficient data detected",
+        "System starts curated conversation",
+        "Conversation collects relevant data",
+        "Data feeds back into knowledge base"
+      ],
+      "status": "untested"
+    },
+    {
+      "name": "Pattern Recognition Flow",
+      "steps": [
+        "System analyzes user's collected data",
+        "Patterns and connections identified",
+        "Insights generated from patterns",
+        "User can explore discovered patterns",
+        "Patterns inform future questions"
+      ],
+      "status": "untested"
+    }
+  ],
+  "bugs": [],
+  "fixedBugs": [],
+  "testResults": {
+    "lastRun": null,
+    "passed": 0,
+    "failed": 0,
+    "details": []
+  }
+} 

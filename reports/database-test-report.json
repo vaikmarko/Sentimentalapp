@@ -1,0 +1,129 @@
+{
+  "timestamp": "2025-05-28T16:00:56.939Z",
+  "summary": {
+    "Connectivity": {
+      "passed": 1,
+      "total": 1
+    },
+    "CRUD": {
+      "passed": 7,
+      "total": 8
+    },
+    "Relationships": {
+      "passed": 2,
+      "total": 3
+    },
+    "Data Integrity": {
+      "passed": 3,
+      "total": 3
+    },
+    "Performance": {
+      "passed": 2,
+      "total": 2
+    }
+  },
+  "details": [
+    {
+      "category": "Connectivity",
+      "test": "Basic Connection",
+      "status": "PASS",
+      "details": "Successfully connected to database"
+    },
+    {
+      "category": "CRUD",
+      "test": "CREATE - Create Story",
+      "status": "PASS",
+      "details": "Status: 201"
+    },
+    {
+      "category": "CRUD",
+      "test": "CREATE - Create Chat Message",
+      "status": "PASS",
+      "details": "Status: 200"
+    },
+    {
+      "category": "CRUD",
+      "test": "CREATE - Register User",
+      "status": "PASS",
+      "details": "Status: 201"
+    },
+    {
+      "category": "CRUD",
+      "test": "READ - Read All Stories",
+      "status": "PASS",
+      "details": "Returned 50 items"
+    },
+    {
+      "category": "CRUD",
+      "test": "READ - Read User Stories",
+      "status": "PASS",
+      "details": "Returned 1 items"
+    },
+    {
+      "category": "CRUD",
+      "test": "READ - Read Inner Space Data",
+      "status": "PASS",
+      "details": "Returned object items"
+    },
+    {
+      "category": "CRUD",
+      "test": "UPDATE - Story Visibility",
+      "status": "PASS",
+      "details": "Status: 200"
+    },
+    {
+      "category": "CRUD",
+      "test": "DELETE Operations",
+      "status": "SKIP",
+      "details": "DELETE operations not yet implemented"
+    },
+    {
+      "category": "Relationships",
+      "test": "Conversation → Story",
+      "status": "PASS",
+      "details": "Story created from conversation"
+    },
+    {
+      "category": "Relationships",
+      "test": "Story → Insights",
+      "status": "FAIL",
+      "error": "Insights not generated from story"
+    },
+    {
+      "category": "Relationships",
+      "test": "User → Data",
+      "status": "PASS",
+      "details": "User data retrieved successfully"
+    },
+    {
+      "category": "Data Integrity",
+      "test": "Validation - Empty Story Content",
+      "status": "PASS",
+      "details": "Invalid data correctly rejected"
+    },
+    {
+      "category": "Data Integrity",
+      "test": "Validation - Invalid User Registration",
+      "status": "PASS",
+      "details": "Invalid data correctly rejected"
+    },
+    {
+      "category": "Data Integrity",
+      "test": "Data Consistency",
+      "status": "PASS",
+      "details": "Checked 50 stories"
+    },
+    {
+      "category": "Performance",
+      "test": "Stories query",
+      "status": "PASS",
+      "details": "355ms (target: 500ms)"
+    },
+    {
+      "category": "Performance",
+      "test": "Inner space data query",
+      "status": "PASS",
+      "details": "331ms (target: 1000ms)"
+    }
+  ]
+}

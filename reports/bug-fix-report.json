@@ -1,0 +1,204 @@
+{
+  "timestamp": "2025-05-28T14:15:09.169Z",
+  "summary": {
+    "totalBugs": 11,
+    "bySeverity": {
+      "high": 2,
+      "medium": 9
+    },
+    "byStatus": {
+      "in-progress": 7,
+      "open": 4
+    },
+    "estimatedTotalTime": "5 hours 30 minutes"
+  },
+  "bugs": [
+    {
+      "id": "bug-1748441644121-fcn7zn823",
+      "description": "GET /api/user/stories failed: undefined",
+      "severity": "high",
+      "status": "in-progress",
+      "age": "Less than 1 hour ago",
+      "strategy": null
+    },
+    {
+      "id": "bug-1748441663548-jbjn0x53p",
+      "description": "New User Journey failed: Space should indicate insufficient data for new user",
+      "severity": "high",
+      "status": "in-progress",
+      "age": "Less than 1 hour ago",
+      "strategy": {
+        "priority": 1,
+        "autoFixable": false,
+        "steps": [
+          "Map complete user journey",
+          "Identify broken step in flow",
+          "Check data persistence between steps",
+          "Verify state management",
+          "Test error recovery mechanisms"
+        ],
+        "estimatedTime": "40 minutes"
+      }
+    },
+    {
+      "id": "bug-1748440720899-6iuvp9xze",
+      "description": "Discovery flow failed: ",
+      "severity": "medium",
+      "status": "in-progress",
+      "age": "Less than 1 hour ago",
+      "strategy": {
+        "priority": 1,
+        "autoFixable": false,
+        "steps": [
+          "Map complete user journey",
+          "Identify broken step in flow",
+          "Check data persistence between steps",
+          "Verify state management",
+          "Test error recovery mechanisms"
+        ],
+        "estimatedTime": "40 minutes"
+      }
+    },
+    {
+      "id": "bug-1748440948693-1aathorz0",
+      "description": "Data Building Process failed: Request failed with status code 403",
+      "severity": "medium",
+      "status": "in-progress",
+      "age": "Less than 1 hour ago",
+      "strategy": {
+        "priority": 1,
+        "autoFixable": false,
+        "steps": [
+          "Map complete user journey",
+          "Identify broken step in flow",
+          "Check data persistence between steps",
+          "Verify state management",
+          "Test error recovery mechanisms"
+        ],
+        "estimatedTime": "40 minutes"
+      }
+    },
+    {
+      "id": "bug-1748441216361-ull9glv58",
+      "description": "Stories query slow: 627ms",
+      "severity": "medium",
+      "status": "in-progress",
+      "age": "Less than 1 hour ago",
+      "strategy": {
+        "priority": 3,
+        "autoFixable": true,
+        "steps": [
+          "Add database query optimization",
+          "Implement response caching",
+          "Optimize large data transfers",
+          "Add pagination for large datasets",
+          "Review and optimize slow algorithms"
+        ],
+        "estimatedTime": "30 minutes"
+      }
+    },
+    {
+      "id": "bug-1748441217472-k12fbpzr0",
+      "description": "Inner space data query slow: 1111ms",
+      "severity": "medium",
+      "status": "in-progress",
+      "age": "Less than 1 hour ago",
+      "strategy": {
+        "priority": 3,
+        "autoFixable": true,
+        "steps": [
+          "Add database query optimization",
+          "Implement response caching",
+          "Optimize large data transfers",
+          "Add pagination for large datasets",
+          "Review and optimize slow algorithms"
+        ],
+        "estimatedTime": "30 minutes"
+      }
+    },
+    {
+      "id": "bug-1748441270498-6p8id4x2t",
+      "description": "Data Building Process failed: Request failed with status code 500",
+      "severity": "medium",
+      "status": "in-progress",
+      "age": "Less than 1 hour ago",
+      "strategy": {
+        "priority": 1,
+        "autoFixable": false,
+        "steps": [
+          "Map complete user journey",
+          "Identify broken step in flow",
+          "Check data persistence between steps",
+          "Verify state management",
+          "Test error recovery mechanisms"
+        ],
+        "estimatedTime": "40 minutes"
+      }
+    },
+    {
+      "id": "bug-1748441613608-r1jmfwucr",
+      "description": "Story to Insights relationship broken",
+      "severity": "medium",
+      "status": "open",
+      "age": "Less than 1 hour ago",
+      "strategy": null
+    },
+    {
+      "id": "bug-1748441617785-78vaduhk2",
+      "description": "Stories query slow: 563ms",
+      "severity": "medium",
+      "status": "open",
+      "age": "Less than 1 hour ago",
+      "strategy": {
+        "priority": 3,
+        "autoFixable": true,
+        "steps": [
+          "Add database query optimization",
+          "Implement response caching",
+          "Optimize large data transfers",
+          "Add pagination for large datasets",
+          "Review and optimize slow algorithms"
+        ],
+        "estimatedTime": "30 minutes"
+      }
+    },
+    {
+      "id": "bug-1748441655938-wo7js5qst",
+      "description": "Space question flow response format issue",
+      "severity": "medium",
+      "status": "open",
+      "age": "Less than 1 hour ago",
+      "strategy": {
+        "priority": 1,
+        "autoFixable": false,
+        "steps": [
+          "Map complete user journey",
+          "Identify broken step in flow",
+          "Check data persistence between steps",
+          "Verify state management",
+          "Test error recovery mechanisms"
+        ],
+        "estimatedTime": "40 minutes"
+      }
+    },
+    {
+      "id": "bug-1748441705614-m3bdxknmi",
+      "description": "Data Building Process failed: No knowledge domains created from content",
+      "severity": "medium",
+      "status": "open",
+      "age": "Less than 1 hour ago",
+      "strategy": {
+        "priority": 1,
+        "autoFixable": false,
+        "steps": [
+          "Map complete user journey",
+          "Identify broken step in flow",
+          "Check data persistence between steps",
+          "Verify state management",
+          "Test error recovery mechanisms"
+        ],
+        "estimatedTime": "40 minutes"
+      }
+    }
+  ]
+}

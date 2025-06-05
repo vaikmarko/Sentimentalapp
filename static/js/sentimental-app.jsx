@@ -714,93 +714,134 @@ const SentimentalApp = () => {
 
   // Discover Page with beautiful story cards
   const renderDiscover = () => (
-    <div className="p-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Discover Stories</h1>
-        <p className="text-lg text-gray-600">Beautiful stories from real people around the world</p>
-      </div>
-
-      {loadingFormat ? (
-        <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-        </div>
-      ) : (
-        <div className="grid gap-6">
-          {stories.map(story => (
-            <div key={story.id} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-200">
-              {/* Story Header */}
-              <div className="p-6 pb-4">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                    <span className="text-white font-semibold text-sm">
-                      {story.author?.[0]?.toUpperCase() || 'U'}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900">{story.author || 'Anonymous'}</p>
-                    <p className="text-sm text-gray-500">
-                      {story.timestamp ? new Date(story.timestamp).toLocaleDateString() : '1 day ago'}
-                    </p>
-                  </div>
-                </div>
-
-                <h2 className="text-xl font-bold text-gray-900 mb-3 leading-tight">{story.title}</h2>
-                
-                <div className="bg-gray-50 rounded-xl p-4 mb-4">
-                  <p className="text-gray-700 leading-relaxed">
-                    {story.content?.substring(0, 200)}
-                    {story.content?.length > 200 && '...'}
-                  </p>
-                </div>
-
-                {/* Format Tags */}
-                {story.createdFormats && story.createdFormats.length > 0 && (
-                  <div className="mb-4 p-3 bg-purple-50 rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Sparkles />
-                      <span className="text-sm font-medium text-purple-700">Available formats:</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {story.createdFormats.map(format => (
-                        <span key={format} className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 rounded-md text-xs font-medium">
-                          {getFormatIcon(format)} {getFormatDisplayName(format)}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex items-center justify-end pt-4 border-t border-gray-100">
-                  <button 
-                    onClick={() => {
-                      setSelectedStory(story);
-                      setPreviousView('discover');
-                      setCurrentView('story-detail');
-                    }}
-                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
-                  >
-                    Read Story
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
+    <div className="h-full flex flex-col">
+      {/* Welcome Section */}
+      <div className="bg-gradient-to-br from-purple-50 to-indigo-50 border-b border-gray-100 p-6">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-3xl font-bold text-gray-900 mb-3">
+            Discover Your True Self ✨
+          </h1>
+          <p className="text-lg text-gray-600 mb-6">
+            A space for deep conversations about life, emotions, relationships, and everything that matters to you. 
+            Reflect, understand, and express your authentic self.
+          </p>
           
-          {stories.length === 0 && (
-            <div className="text-center py-12 bg-white rounded-2xl border border-gray-200">
-              <div className="text-6xl mb-4">📚</div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">No stories to discover yet</h3>
-              <p className="text-gray-600 mb-6">Be the first to share your story!</p>
-              <button 
-                onClick={() => setCurrentView('share')}
-                className="px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-all font-medium"
+          {!user ? (
+            <div className="bg-white/70 backdrop-blur-sm rounded-xl p-6 mb-6 border border-white/20">
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">Start Your Journey</h3>
+              <p className="text-gray-600 mb-4">
+                Join a community where your thoughts matter and your story becomes something beautiful.
+              </p>
+              <button
+                onClick={() => setShowLogin(true)}
+                className="bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors"
               >
-                Share Your Story
+                Begin Discovering Yourself
               </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
+              {[
+                { type: 'reflection', icon: '🌟', label: 'Reflection', desc: 'Deep thoughts' },
+                { type: 'song', icon: '🎵', label: 'Song', desc: 'Your story in music' },
+                { type: 'poem', icon: '📝', label: 'Poem', desc: 'Poetic expression' },
+                { type: 'script', icon: '🎬', label: 'Story', desc: 'Life moments' }
+              ].map((format) => (
+                <div key={format.type} className="bg-white/70 backdrop-blur-sm rounded-lg p-4 text-center border border-white/20">
+                  <div className="text-2xl mb-2">{format.icon}</div>
+                  <div className="font-medium text-gray-800">{format.label}</div>
+                  <div className="text-xs text-gray-600">{format.desc}</div>
+                </div>
+              ))}
             </div>
           )}
         </div>
-      )}
+      </div>
+
+      {/* Story Cards */}
+      <div className="flex-1 overflow-y-auto p-6">
+        {loadingFormat ? (
+          <div className="flex justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+          </div>
+        ) : (
+          <div className="grid gap-6">
+            {stories.map(story => (
+              <div key={story.id} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-200">
+                {/* Story Header */}
+                <div className="p-6 pb-4">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                      <span className="text-white font-semibold text-sm">
+                        {story.author?.[0]?.toUpperCase() || 'U'}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900">{story.author || 'Anonymous'}</p>
+                      <p className="text-sm text-gray-500">
+                        {story.timestamp ? new Date(story.timestamp).toLocaleDateString() : '1 day ago'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <h2 className="text-xl font-bold text-gray-900 mb-3 leading-tight">{story.title}</h2>
+                  
+                  <div className="bg-gray-50 rounded-xl p-4 mb-4">
+                    <p className="text-gray-700 leading-relaxed">
+                      {story.content?.substring(0, 200)}
+                      {story.content?.length > 200 && '...'}
+                    </p>
+                  </div>
+
+                  {/* Format Tags */}
+                  {story.createdFormats && story.createdFormats.length > 0 && (
+                    <div className="mb-4 p-3 bg-purple-50 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Sparkles />
+                        <span className="text-sm font-medium text-purple-700">Available formats:</span>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {story.createdFormats.map(format => (
+                          <span key={format} className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 rounded-md text-xs font-medium">
+                            {getFormatIcon(format)} {getFormatDisplayName(format)}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-end pt-4 border-t border-gray-100">
+                    <button 
+                      onClick={() => {
+                        setSelectedStory(story);
+                        setPreviousView('discover');
+                        setCurrentView('story-detail');
+                      }}
+                      className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                    >
+                      Read Story
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+            
+            {stories.length === 0 && (
+              <div className="text-center py-12 bg-white rounded-2xl border border-gray-200">
+                <div className="text-6xl mb-4">📚</div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">No stories to discover yet</h3>
+                <p className="text-gray-600 mb-6">Be the first to share your story!</p>
+                <button 
+                  onClick={() => setCurrentView('share')}
+                  className="px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-all font-medium"
+                >
+                  Share Your Story
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 
@@ -811,8 +852,8 @@ const SentimentalApp = () => {
       <div className="bg-white border-b border-gray-200 p-4 flex-shrink-0">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Create Viral Content</h1>
-            <p className="text-sm text-gray-600">Turn your conversations into songs, movies & more</p>
+            <h1 className="text-xl font-bold text-gray-900">Express Your True Self</h1>
+            <p className="text-sm text-gray-600">Deep conversations that become beautiful stories, songs & more</p>
           </div>
           
           {messages.length > 0 && (
@@ -874,18 +915,22 @@ const SentimentalApp = () => {
                   <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-6">
                     <MessageCircle />
                   </div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-4">Turn Your Life Into Viral Content! 🎵🎬</h2>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4">Share What's Really On Your Mind ✨</h2>
+                  <p className="text-gray-600 mb-4 max-w-lg mx-auto">
+                    Have a real conversation about what matters to you. Your AI companion will listen deeply 
+                    and help you express your thoughts in ways that feel authentic and beautiful.
+                  </p>
                   <p className="text-gray-600 mb-4 max-w-lg mx-auto">
                     Share your dreams, achievements, or wild moments with me and I'll help you turn them into:
                   </p>
                   <div className="flex flex-wrap justify-center gap-3 mb-6">
-                    <span className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-medium">🎵 Songs</span>
-                    <span className="bg-pink-100 text-pink-700 px-3 py-1 rounded-full text-sm font-medium">🎬 Movie Scripts</span>
+                    <span className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-medium">🌟 Reflections</span>
+                    <span className="bg-pink-100 text-pink-700 px-3 py-1 rounded-full text-sm font-medium">🎵 Songs</span>
                     <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">📖 Stories</span>
-                    <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium">🎪 Poems</span>
+                    <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium">✨ Poems</span>
                   </div>
                   <p className="text-gray-600 mb-6 max-w-lg mx-auto text-sm">
-                    Tell me about your startup idea, that crazy trip, your grind story, or literally anything that excites you!
+                    Share what's on your mind - your dreams, challenges, relationships, or anything that matters to you.
                   </p>
                 </>
               )}

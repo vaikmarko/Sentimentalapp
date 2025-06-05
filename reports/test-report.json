@@ -1,0 +1,225 @@
+{
+  "timestamp": "2025-05-29T08:25:38.480Z",
+  "summary": {
+    "api": {
+      "passed": 11,
+      "total": 11
+    },
+    "database": {
+      "passed": 1,
+      "total": 1
+    },
+    "components": {
+      "passed": 6,
+      "total": 6
+    },
+    "userFlows": {
+      "passed": 3,
+      "total": 3
+    },
+    "performance": {
+      "passed": 3,
+      "total": 4
+    }
+  },
+  "details": {
+    "api": [
+      {
+        "endpoint": "GET /api/stories",
+        "status": "PASS",
+        "expectedStatus": [
+          200
+        ],
+        "actualStatus": 200,
+        "responseTime": 558,
+        "withinTimeLimit": true
+      },
+      {
+        "endpoint": "POST /api/stories",
+        "status": "PASS",
+        "expectedStatus": [
+          201,
+          401
+        ],
+        "actualStatus": 401,
+        "responseTime": 5895,
+        "withinTimeLimit": false
+      },
+      {
+        "endpoint": "GET /api/user/stories",
+        "status": "PASS",
+        "expectedStatus": [
+          200,
+          401
+        ],
+        "actualStatus": 200,
+        "responseTime": 1643,
+        "withinTimeLimit": true
+      },
+      {
+        "endpoint": "POST /api/chat/message",
+        "status": "PASS",
+        "expectedStatus": [
+          200,
+          201,
+          401
+        ],
+        "actualStatus": 200,
+        "responseTime": 6022,
+        "withinTimeLimit": false
+      },
+      {
+        "endpoint": "GET /api/inner-space-data",
+        "status": "PASS",
+        "expectedStatus": [
+          200,
+          401
+        ],
+        "actualStatus": 200,
+        "responseTime": 1381,
+        "withinTimeLimit": true
+      },
+      {
+        "endpoint": "POST /api/knowledge/ask",
+        "status": "PASS",
+        "expectedStatus": [
+          200,
+          401
+        ],
+        "actualStatus": 200,
+        "responseTime": 1111,
+        "withinTimeLimit": true
+      },
+      {
+        "endpoint": "POST /api/knowledge/analyze",
+        "status": "PASS",
+        "expectedStatus": [
+          200,
+          401
+        ],
+        "actualStatus": 200,
+        "responseTime": 804,
+        "withinTimeLimit": true
+      },
+      {
+        "endpoint": "POST /api/knowledge/start-conversation",
+        "status": "PASS",
+        "expectedStatus": [
+          200,
+          400,
+          401
+        ],
+        "actualStatus": 400,
+        "responseTime": 4,
+        "withinTimeLimit": true
+      },
+      {
+        "endpoint": "POST /api/auth/register",
+        "status": "PASS",
+        "expectedStatus": [
+          201,
+          400,
+          409
+        ],
+        "actualStatus": 409,
+        "responseTime": 544,
+        "withinTimeLimit": true
+      },
+      {
+        "endpoint": "POST /api/auth/login",
+        "status": "PASS",
+        "expectedStatus": [
+          200,
+          400,
+          401
+        ],
+        "actualStatus": 200,
+        "responseTime": 293,
+        "withinTimeLimit": true
+      },
+      {
+        "endpoint": "POST /api/waitlist",
+        "status": "PASS",
+        "expectedStatus": [
+          200,
+          201
+        ],
+        "actualStatus": 200,
+        "responseTime": 847,
+        "withinTimeLimit": true
+      }
+    ],
+    "database": [
+      {
+        "test": "Database Connectivity",
+        "status": "PASS"
+      }
+    ],
+    "components": [
+      {
+        "component": "Landing Page",
+        "status": "PASS"
+      },
+      {
+        "component": "Main App",
+        "status": "PASS"
+      },
+      {
+        "component": "Chat Interface",
+        "status": "PASS"
+      },
+      {
+        "component": "Inner Space",
+        "status": "PASS"
+      },
+      {
+        "component": "Story Deck",
+        "status": "PASS"
+      },
+      {
+        "component": "Story View",
+        "status": "PASS"
+      }
+    ],
+    "userFlows": [
+      {
+        "flow": "Share to Story",
+        "status": "PASS"
+      },
+      {
+        "flow": "Space Question to Conversation",
+        "status": "PASS"
+      },
+      {
+        "flow": "Discovery Stories Load",
+        "status": "PASS"
+      }
+    ],
+    "performance": [
+      {
+        "test": "Stories load time",
+        "status": "SLOW",
+        "time": 643,
+        "target": 500
+      },
+      {
+        "test": "Inner space data load time",
+        "status": "PASS",
+        "time": 851,
+        "target": 1000
+      },
+      {
+        "test": "Landing page load time",
+        "status": "PASS",
+        "time": 2,
+        "target": 3000
+      },
+      {
+        "test": "App page load time",
+        "status": "PASS",
+        "time": 13,
+        "target": 3000
+      }
+    ]
+  }
+}

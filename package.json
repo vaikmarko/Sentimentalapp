@@ -1,0 +1,75 @@
+{
+  "name": "sentimental-app-testing",
+  "version": "1.0.0",
+  "description": "Comprehensive testing and bug fixing suite for Sentimental App",
+  "main": "scripts/run-all-tests.js",
+  "scripts": {
+    "test:all": "node scripts/run-all-tests.js",
+    "test:database": "node tests/database-tests.js",
+    "test:api": "node tests/api-tests.js",
+    "test:automated": "node tests/automated-test-suite.js",
+    "test:user-flows": "node tests/user-flow-tests.js",
+    "test:share": "node tests/component-tests/share-tests.js",
+    "test:stories": "node tests/component-tests/stories-tests.js",
+    "test:space": "node tests/component-tests/space-tests.js",
+    "test:discover": "node tests/component-tests/discover-tests.js",
+    "test:performance": "node tests/performance-tests.js",
+    "fix:bugs": "node scripts/fix-priority-bugs.js",
+    "fix:critical": "node scripts/fix-critical-bugs.js",
+    "fix:high-priority": "node scripts/fix-high-priority-bugs.js",
+    "health:check": "node scripts/system-health-check.js",
+    "health:component": "node tests/component-health.js",
+    "validate:logic": "node tests/logic-flow-validator.js",
+    "validate:requirements": "node tests/requirements-checker.js",
+    "validate:data-flow": "node tests/data-flow-tests.js",
+    "continuous:test": "node scripts/continuous-testing.js",
+    "setup:test-env": "node scripts/setup-test-environment.js",
+    "clean:test-data": "node scripts/clean-test-data.js",
+    "report:generate": "node scripts/generate-reports.js",
+    "report:bugs": "node scripts/bug-report-generator.js",
+    "install:deps": "npm install",
+    "start:server": "python app.py",
+    "dev": "npm run start:server & npm run continuous:test"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "fs-extra": "^11.1.1",
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "inquirer": "^8.2.6",
+    "lodash": "^4.17.21",
+    "moment": "^2.29.4",
+    "node-cron": "^3.0.3",
+    "ora": "^5.4.1",
+    "table": "^6.8.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3",
+    "nodemon": "^3.0.1",
+    "eslint": "^8.52.0",
+    "prettier": "^3.0.3"
+  },
+  "keywords": [
+    "testing",
+    "automation",
+    "bug-fixing",
+    "sentimental-app",
+    "quality-assurance",
+    "continuous-integration"
+  ],
+  "author": "Sentimental App Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/sentimental-app.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-org/sentimental-app/issues"
+  },
+  "homepage": "https://github.com/your-org/sentimental-app#readme"
+} 

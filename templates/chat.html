@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Sentimental</title>
+  
+  <!-- Firebase App (the core Firebase SDK) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-functions-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f9f9fb;
+      color: #343541;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .navbar {
+      background: white;
+      padding: 8px 12px;
+      min-height: 40px;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      width: 100%;
+    }
+    .logo {
+      font-weight: 700;
+      font-size: 18px;
+      color: #8639E8;
+      text-decoration: none;
+      letter-spacing: 0.5px;
+    }
+    
+    .new-chat-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background-color: #f3f0ff;
+      border: 1px solid #e5dbff;
+      color: #8639E8;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    
+    .chat-container {
+      flex: 1;
+      padding: 24px 0;
+      max-width: 800px;
+      margin: 0 auto;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    
+    .messages-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 20px;
+      margin-bottom: 20px;
+    }
+    
+    .message-group {
+      margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .message-group.bot {
+      align-items: flex-start;
+    }
+    
+    .message-group.user {
+      align-items: flex-end;
+    }
+    
+    .bot-info {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    
+    .bot-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      margin-right: 12px;
+      background-color: #8639E8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+    }
+    
+    .bot-name {
+      font-weight: 600;
+      font-size: 15px;
+      color: #424250;
+    }
+    
+    .message-bubble {
+      padding: 14px 18px;
+      border-radius: 18px;
+      max-width: 85%;
+      position: relative;
+      margin-bottom: 2px;
+      line-height: 1.5;
+      font-weight: normal;
+    }
+    
+    .message-bubble.bot {
+      background-color: white;
+      color: #1f2937;
+      border: 1px solid #e9e9ef;
+      border-bottom-left-radius: 4px;
+    }
+    
+    .message-bubble.user {
+      background-color: #8639E8;
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+    
+    .message-time {
+      font-size: 12px;
+      color: #71717a;
+      margin-top: 6px;
+      padding: 0 12px;
+    }
+    
+    .input-container {
+      position: relative;
+      background-color: white;
+      border-top: 1px solid #e9e9ef;
+      padding: 16px 20px;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.03);
+    }
+    
+    .input-wrapper {
+      position: relative;
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      align-items: flex-end;
+    }
+    
+    .user-input {
+      flex-grow: 1;
+      border-radius: 24px;
+      padding: 14px 60px 14px 20px;
+      border: 1px solid #e4e4e7;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+      resize: none;
+      max-height: 150px;
+      min-height: 50px;
+      overflow-y: auto;
+    }
+    
+    .user-input:focus {
+      outline: none;
+      border-color: #a677e9;
+    }
+    
+    .send-button {
+      position: absolute;
+      right: 10px;
+      bottom: 10px;
+      background-color: #8639E8;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+    }
+    
+    .prompt-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    
+    .prompt-chip {
+      background: linear-gradient(135deg, #f3f0ff 0%, #e5dbff 100%);
+      color: #6d28d9;
+      padding: 10px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      cursor: pointer;
+      border: 1px solid #e5dbff;
+      transition: all 0.2s ease;
+      font-weight: 500;
+      line-height: 1.3;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+    
+    .prompt-chip:hover {
+      background: linear-gradient(135deg, #8639E8 0%, #a855f7 100%);
+      color: white;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(134, 57, 232, 0.25);
+      border-color: #8639E8;
+    }
+    
+    .prompt-chip:active {
+      transform: translateY(0px);
+      box-shadow: 0 2px 4px rgba(134, 57, 232, 0.15);
+    }
+    
+    .highlight {
+      color: #8639E8;
+      font-weight: normal;
+    }
+    
+    @media (max-width: 640px) {
+      .message-bubble {
+        max-width: 90%;
+      }
+      
+      .prompt-chip {
+        width: 100%;
+      }
+    }
+    
+    .navbar a:hover {
+      background-color: #f3f4f6 !important;
+      color: #374151 !important;
+    }
+    
+    #summarize-btn:hover {
+      background-color: #059669 !important;
+    }
+    
+    #summarize-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar" style="background: white; padding: 8px 12px; min-height: 40px;">
+    <a href="/" class="logo" style="font-size: 18px;">Sentimental</a>
+    <div style="display: flex; gap: 8px; margin-left: auto;">
+      <button id="summarize-btn" style="padding: 4px 10px; font-size: 13px; background-color: #10b981; color: white; border: none; border-radius: 5px; transition: all 0.2s; font-weight: 500; cursor: pointer; height: 28px;">Summarize</button>
+      <a href="/story" style="padding: 4px 10px; font-size: 13px; color: #6b7280; text-decoration: none; border-radius: 5px; transition: all 0.2s; font-weight: 500; height: 28px; display: flex; align-items: center;">Story</a>
+      <a href="/inner-space" style="padding: 4px 10px; font-size: 13px; color: #6b7280; text-decoration: none; border-radius: 5px; transition: all 0.2s; font-weight: 500; height: 28px; display: flex; align-items: center;">Inner Space</a>
+      <a href="/chat" style="padding: 4px 10px; font-size: 13px; background-color: #f3f0ff; color: #8639E8; text-decoration: none; border-radius: 5px; font-weight: 500; height: 28px; display: flex; align-items: center;">Chat</a>
+    </div>
+  </div>
+  <div class="navbar" style="display: none">
+    <!-- (old navbar hidden, see below) -->
+  </div>
+  <div style="display: flex; align-items: center; margin-bottom: 0;">
+    <!-- Generate Story button removed: story now generates automatically -->
+    <button id="new-chat-button" class="new-chat-button" style="display: none;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      New Chat
+    </button>
+    <button id="generate-story-btn" class="new-chat-button" style="margin-left: 12px; display: none;">
+      Genereeri minu lugu
+    </button>
+  </div>
+  <div class="chat-container">
+    <div id="progress-container" style="width: 100%; height: 10px; background: #e4e4e7; border-radius: 5px; margin-bottom: 16px;">
+      <div id="progress-bar" style="height: 100%; width: 0%; background: #8639E8; border-radius: 5px; transition: width 0.3s ease;"></div>
+    </div>
+    <div id="messages-container" class="messages-container">
+      <!-- Welcome message -->
+      <div class="message-group bot" id="welcome-message">
+        <div class="bot-info">
+          <div class="bot-avatar">
+            <span>S</span>
+          </div>
+          <div class="bot-name">Sentimental</div>
+        </div>
+        <div class="message-bubble bot">
+          <p>Welcome to Sentimental ✨</p>
+          
+          <p>I'm here to help you understand yourself better through meaningful conversations. This is a safe space where you can explore your thoughts, emotions, and experiences.</p>
+          
+          <p>Share whatever feels important to you - perhaps:</p>
+          <p style="margin-left: 20px; color: #6b7280;">
+          Something you've been reflecting on lately<br>
+          An experience that moved you<br>
+          A feeling you've been carrying<br>
+          A moment of insight or growth<br>
+          A pattern you've noticed in your life<br>
+          Something that's been on your heart</p>
+          
+          <p>When our conversation reveals something meaningful, I can help capture it as a story you can revisit and even transform into different formats to share or reflect on.</p>
+          
+          <p>What would you like to explore today?</p>
+          
+          <div class="prompt-chips">
+            <div class="prompt-chip" onclick="usePrompt(this)">I've been feeling something I can't quite put into words...</div>
+            <div class="prompt-chip" onclick="usePrompt(this)">Something happened recently that I keep thinking about...</div>
+            <div class="prompt-chip" onclick="usePrompt(this)">I've been reflecting on a relationship in my life...</div>
+            <div class="prompt-chip" onclick="usePrompt(this)">There's a pattern I've noticed about myself...</div>
+            <div class="prompt-chip" onclick="usePrompt(this)">I had a moment of realization about...</div>
+            <div class="prompt-chip" onclick="usePrompt(this)">I'm trying to make sense of why I...</div>
+            <div class="prompt-chip" onclick="usePrompt(this)">Something about my past keeps coming to mind...</div>
+            <div class="prompt-chip" onclick="usePrompt(this)">I'm at a crossroads and wondering...</div>
+          </div>
+        </div>
+        <div class="message-time" id="welcome-time"></div>
+      </div>
+    </div>
+    
+    <div class="input-container">
+      <div class="input-wrapper">
+        <textarea id="user-input" class="user-input" placeholder="Share what's on your mind and heart..." rows="1"></textarea>
+        <button id="send-button" class="send-button">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCSoWmKZRDpXF5MlgWKEV6kWHc5xFMMm_I",
+      authDomain: "sentimental-f95e6.firebaseapp.com",
+      projectId: "sentimental-f95e6",
+      storageBucket: "sentimental-f95e6.appspot.com",
+      messagingSenderId: "319737737925",
+      appId: "1:319737737925:web:1de7aa284a63ad9f9eb6ac",
+      measurementId: "G-9WFK8R9P9T"
+    };
+    // Ensure config values are present (basic check)
+    if (
+      !firebaseConfig.apiKey ||
+      !firebaseConfig.authDomain ||
+      !firebaseConfig.projectId ||
+      !firebaseConfig.appId
+    ) {
+      console.error("Missing Firebase configuration. Please provide all config values.");
+      alert("Missing Firebase configuration. Please contact support.");
+    } else {
+      // Only initialize if not already initialized
+      if (!firebase.apps || !firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      } else if (firebase.apps && firebase.apps.length === 0) {
+        firebase.initializeApp(firebaseConfig);
+      }
+    }
+
+    // --- Firestore ühenduse test lehe alguses ---
+    firebase.firestore().collection('test').add({alive: true, ts: Date.now()})
+      .then(doc => {console.log("[TEST] Firestore ühendus OK", doc.id)})
+      .catch(e => {console.error("[TEST] Firestore ühendus FAIL", e); alert("Firestore ühendus FAIL: " + e.message)});
+    
+    // Setup basic elements
+    const userInput = document.getElementById('user-input');
+    const sendButton = document.getElementById('send-button');
+    const messagesContainer = document.getElementById('messages-container');
+    const welcomeTime = document.getElementById('welcome-time');
+    // Generate Story button no longer needed, removed from DOM
+    
+    // Set the current time for the welcome message
+    welcomeTime.textContent = formatTime();
+    
+    // Initialize conversation array with empathetic system prompt
+    let conversation = [{
+      role: 'system',
+      content: 'You are Sentimental, a warm and empathetic conversation companion designed to help people understand themselves better through meaningful dialogue. Your core purpose is to: 🌟 Create a safe, non-judgmental space for authentic sharing 🌟 Help people explore their thoughts, emotions, and experiences with curiosity and compassion 🌟 Guide conversations naturally toward self-discovery and meaning-making 🌟 Ask thoughtful questions that deepen understanding rather than rushing to solutions 🌟 Recognize when experiences might be meaningful enough to become stories. Your conversational approach: - Be genuinely curious about their inner world - Listen for emotions, patterns, and moments of insight - Ask open-ended questions that invite deeper reflection - Validate their feelings and experiences - Help them find their own wisdom and insights - Keep responses warm but concise (1-2 paragraphs max) - Always end with a gentle question that encourages further exploration. Remember: You\'re not trying to fix or solve anything. You\'re helping them explore and understand their own experience. Some conversations will naturally reveal meaningful stories worth capturing - when that happens, the system will recognize it and offer to create a story they can revisit and transform into different formats.'
+    }];
+
+    // Session persistence for magical continuity
+    let sessionData = loadSessionData();
+    
+    function loadSessionData() {
+      try {
+        const saved = localStorage.getItem('sentimental_session');
+        if (saved) {
+          const data = JSON.parse(saved);
+          // Check if session is recent (within 24 hours)
+          const sessionAge = Date.now() - (data.lastActivity || 0);
+          const hoursSinceLastActivity = sessionAge / (1000 * 60 * 60);
+          
+          if (hoursSinceLastActivity < 24) {
+            return data;
+          }
+        }
+      } catch (e) {
+        console.log('No previous session found');
+      }
+      
+      return {
+        conversationHistory: [],
+        storyProgress: 0,
+        pendingStory: null,
+        lastActivity: Date.now(),
+        sessionId: generateSessionId()
+      };
+    }
+    
+    function saveSessionData() {
+      try {
+        sessionData.lastActivity = Date.now();
+        sessionData.conversationHistory = conversationHistory;
+        sessionData.storyProgress = lastAnalysis?.story_readiness_score || 0;
+        if (currentStoryId) {
+          sessionData.pendingStory = currentStoryId;
+        }
+        localStorage.setItem('sentimental_session', JSON.stringify(sessionData));
+      } catch (e) {
+        console.log('Could not save session data');
+      }
+    }
+    
+    function generateSessionId() {
+      return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
+    
+    // Check for returning user magic
+    function checkReturningUserMagic() {
+      if (sessionData.conversationHistory.length > 2) {
+        // User has previous conversation
+        const hoursSinceLastActivity = (Date.now() - sessionData.lastActivity) / (1000 * 60 * 60);
+        
+        if (hoursSinceLastActivity > 2 && hoursSinceLastActivity < 24) {
+          // Show gentle welcome back message
+          setTimeout(() => {
+            const welcomeBackMessages = [
+              "Welcome back! I've been thinking about our conversation. How are you feeling about what we explored?",
+              "It's lovely to see you again. I remember our conversation was building toward something meaningful. Would you like to continue where we left off?",
+              "Welcome back! Our previous conversation felt like something beautiful was emerging. How has it been sitting with you?"
+            ];
+            
+            const randomWelcome = welcomeBackMessages[Math.floor(Math.random() * welcomeBackMessages.length)];
+            addMessage('bot', randomWelcome);
+            
+            // Restore conversation history
+            conversationHistory = sessionData.conversationHistory || [];
+            
+            // Restore story progress
+            if (sessionData.storyProgress > 0.3) {
+              updateStoryProgress(sessionData.storyProgress);
+              storyHintShown = true; // Don't show hint again if we already had progress
+            }
+            
+            // Check for pending story
+            if (sessionData.pendingStory) {
+              currentStoryId = sessionData.pendingStory;
+              setTimeout(() => {
+                addMessage('bot', "I still have that beautiful story we created together. Would you like to see it now, or shall we continue exploring?");
+              }, 2000);
+            }
+            
+          }, 1500);
+        }
+      }
+    }
+
+    // Firestore story document ID for this chat session
+    let storyDocId = null;
+    // Format the time
+    function formatTime() {
+      const now = new Date();
+      let hours = now.getHours();
+      let minutes = now.getMinutes();
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      
+      hours = hours % 12;
+      hours = hours ? hours : 12;
+      minutes = minutes < 10 ? '0' + minutes : minutes;
+      
+      return `${hours}:${minutes} ${ampm}`;
+    }
+    
+    // Simple function to add a message
+    function addMessage(sender, text) {
+      // Create message group
+      const messageGroup = document.createElement('div');
+      messageGroup.className = `message-group ${sender}`;
+      
+      // If it's the bot, add avatar and name
+      if (sender === 'bot') {
+        const botInfo = document.createElement('div');
+        botInfo.className = 'bot-info';
+        
+        const avatar = document.createElement('div');
+        avatar.className = 'bot-avatar';
+        avatar.innerHTML = '<span>S</span>';
+        
+        const name = document.createElement('div');
+        name.className = 'bot-name';
+        name.textContent = 'Sentimental';
+        
+        botInfo.appendChild(avatar);
+        botInfo.appendChild(name);
+        messageGroup.appendChild(botInfo);
+      }
+      
+      // Create message bubble
+      const messageBubble = document.createElement('div');
+      messageBubble.className = `message-bubble ${sender}`;
+      messageBubble.textContent = text;
+      messageGroup.appendChild(messageBubble);
+      
+      // Add timestamp
+      const timeElement = document.createElement('div');
+      timeElement.className = 'message-time';
+      timeElement.textContent = formatTime();
+      messageGroup.appendChild(timeElement);
+      
+      // Add to container
+      messagesContainer.appendChild(messageGroup);
+      
+      // Scroll to bottom
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+    
+    // Use a prompt chip text
+    function usePrompt(element) {
+      userInput.value = element.textContent;
+      userInput.focus();
+    }
+    
+    // Simple function to handle sending a message
+    // --- Smart Story Engine Integration ---
+    let conversationHistory = []; // Track full conversation for smart analysis
+    let currentStoryId = null; // Track if a story has been created
+    let lastAnalysis = null; // Track last story analysis
+
+    // Remove old automatic story generation logic - replaced with smart engine
+    // No more isReadyForStoryGeneration, autoGenerateStory, etc.
+
+    function sendMessage() {
+      const message = userInput.value.trim();
+      if (!message) return;
+
+      // Add user message to UI
+      addMessage('user', message);
+
+      // Add to conversation array and history
+      conversation.push({ role: 'user', content: message });
+      conversationHistory.push({ role: 'user', content: message });
+
+      // Clear input
+      userInput.value = '';
+
+      // Show typing indicator if not already present
+      if (!document.getElementById('typing-indicator')) {
+        const messageGroup = document.createElement('div');
+        messageGroup.className = 'message-group bot';
+        messageGroup.id = 'typing-indicator';
+
+        const botInfo = document.createElement('div');
+        botInfo.className = 'bot-info';
+
+        const avatar = document.createElement('div');
+        avatar.className = 'bot-avatar';
+        avatar.innerHTML = '<span>S</span>';
+
+        const name = document.createElement('div');
+        name.className = 'bot-name';
+        name.textContent = 'Sentimental';
+
+        botInfo.appendChild(avatar);
+        botInfo.appendChild(name);
+        messageGroup.appendChild(botInfo);
+
+        const typingBubble = document.createElement('div');
+        typingBubble.className = 'message-bubble bot';
+        typingBubble.textContent = 'Typing...';
+        messageGroup.appendChild(typingBubble);
+
+        messagesContainer.appendChild(messageGroup);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+
+      // Process the message with smart story engine
+      try {
+        // Check Firebase availability
+        if (
+          typeof firebase !== 'undefined' &&
+          firebase.functions &&
+          firebase.firestore &&
+          typeof firebase.firestore === "function"
+        ) {
+          // Use the smart chat endpoint
+          const user = firebase.auth().currentUser;
+          const userId = user ? user.uid : 'anonymous_user';
+          
+          // Call the smart chat endpoint
+          fetch('/api/chat/message', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              message: message,
+              user_id: userId,
+              conversation_history: conversationHistory.slice(0, -1) // Exclude the current message
+            })
+          })
+          .then(response => response.json())
+          .then(data => {
+            // Remove typing indicator
+            const typingIndicator = document.getElementById('typing-indicator');
+            if (typingIndicator) {
+              messagesContainer.removeChild(typingIndicator);
+            }
+
+            if (data.message) {
+              // Add bot response
+              addMessage('bot', data.message);
+              
+              // Add to conversation history
+              conversation.push({ role: 'assistant', content: data.message });
+              conversationHistory.push({ role: 'assistant', content: data.message });
+
+              // Save session data for continuity
+              saveSessionData();
+
+              // Handle story creation
+              if (data.story_created && data.story_id) {
+                currentStoryId = data.story_id;
+                showStoryCreatedNotification(data.story_id, data.story_readiness_score);
+              }
+
+              // Store analysis for debugging/insights
+              lastAnalysis = {
+                recommendation: data.recommendation,
+                story_readiness_score: data.story_readiness_score,
+                reasoning: data.reasoning,
+                knowledge_insights: data.knowledge_insights
+              };
+
+              // Log smart analysis for debugging
+              console.log('Smart Story Analysis:', lastAnalysis);
+
+              // Update progress bar if available
+              if (data.story_readiness_score && document.getElementById("progress-bar")) {
+                updateStoryProgress(data.story_readiness_score);
+              }
+
+            } else {
+              addMessage('bot', "I'm having trouble processing that right now. Please try again.");
+            }
+          })
+          .catch(error => {
+            console.error("Error with smart chat:", error);
+            
+            // Remove typing indicator
+            const typingIndicator = document.getElementById('typing-indicator');
+            if (typingIndicator) {
+              messagesContainer.removeChild(typingIndicator);
+            }
+
+            // Fallback response
+            addMessage('bot', "I'm having trouble connecting right now. Please try again in a moment.");
+          });
+
+        } else {
+          // Fallback for no Firebase - use old chatCompletion
+          console.log("Sending to chatCompletion:", conversation);
+          const chatCompletion = firebase.functions().httpsCallable('chatCompletion');
+          chatCompletion({ messages: conversation })
+            .then(result => {
+              if (result && result.data && result.data.reply) {
+                // Remove typing indicator
+                const typingIndicator = document.getElementById('typing-indicator');
+                if (typingIndicator) {
+                  messagesContainer.removeChild(typingIndicator);
+                }
+
+                // Add bot response
+                addMessage('bot', result.data.reply);
+
+                // Add to conversation
+                conversation.push({ role: 'assistant', content: result.data.reply });
+                conversationHistory.push({ role: 'assistant', content: result.data.reply });
+
+              } else {
+                // Remove typing indicator if no reply
+                const typingIndicator = document.getElementById('typing-indicator');
+                if (typingIndicator) {
+                  messagesContainer.removeChild(typingIndicator);
+                }
+                addMessage('bot', "Sorry, I couldn't generate a reply right now.");
+              }
+            })
+            .catch(error => {
+              console.error("Error calling Firebase function chatCompletion:", error);
+              
+              // Remove typing indicator
+              const typingIndicator = document.getElementById('typing-indicator');
+              if (typingIndicator) {
+                messagesContainer.removeChild(typingIndicator);
+              }
+
+              // Add fallback response
+              addMessage('bot', "I'm having trouble connecting right now. Please try again in a moment.");
+            });
+        }
+      } catch (error) {
+        console.error("Error in sendMessage:", error);
+        
+        // Remove typing indicator
+        const typingIndicator = document.getElementById('typing-indicator');
+        if (typingIndicator) {
+          messagesContainer.removeChild(typingIndicator);
+        }
+
+        // Add fallback response
+        addMessage('bot', "Something went wrong. Please try again.");
+      }
+    }
+
+    // Show magical story emergence notification
+    function showStoryCreatedNotification(storyId, readinessScore) {
+      // Create magical notification element
+      const notification = document.createElement('div');
+      notification.className = 'story-emergence';
+      notification.innerHTML = `
+        <div class="story-emergence-content">
+          <div class="story-magic-icon">✨</div>
+          <div class="story-emergence-text">
+            <h3>Something beautiful is emerging...</h3>
+            <p>Your words have woven themselves into a story worth keeping. Would you like to see what we've discovered together?</p>
+          </div>
+          <div class="story-actions">
+            <button onclick="viewStory('${storyId}')" class="discover-story-btn">Discover Your Story</button>
+            <button onclick="continueChat()" class="continue-chat-btn">Continue Sharing</button>
+          </div>
+        </div>
+      `;
+      
+      // Add magical styles
+      notification.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.9);
+        background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%);
+        color: #1f2937;
+        padding: 24px;
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.8);
+        backdrop-filter: blur(10px);
+        z-index: 1000;
+        max-width: 400px;
+        animation: magicalAppear 0.6s ease-out forwards;
+        border: 1px solid rgba(134, 57, 232, 0.2);
+      `;
+
+      // Add backdrop
+      const backdrop = document.createElement('div');
+      backdrop.className = 'story-backdrop';
+      backdrop.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.3);
+        backdrop-filter: blur(2px);
+        z-index: 999;
+        animation: backdropFadeIn 0.4s ease-out;
+      `;
+
+      document.body.appendChild(backdrop);
+      document.body.appendChild(notification);
+
+      // Handle backdrop click to close
+      backdrop.onclick = () => continueChat();
+    }
+
+    // Continue chat without viewing story
+    function continueChat() {
+      const backdrop = document.querySelector('.story-backdrop');
+      const notification = document.querySelector('.story-emergence');
+      
+      if (backdrop) {
+        backdrop.style.animation = 'backdropFadeOut 0.3s ease-in';
+        setTimeout(() => backdrop.remove(), 300);
+      }
+      
+      if (notification) {
+        notification.style.animation = 'magicalDisappear 0.4s ease-in';
+        setTimeout(() => notification.remove(), 400);
+      }
+      
+      // Add a gentle acknowledgment message
+      addMessage('bot', "Beautiful! I'll keep your story safe while we continue exploring. You can always find it later in your stories when you're ready to see the magic we've created together.");
+    }
+
+    // Show gentle story building progress
+    function updateStoryProgress(score, isVisible = false) {
+      const progressBar = document.getElementById("progress-bar");
+      if (!progressBar) return;
+      
+      const percent = Math.round(score * 100);
+      progressBar.style.width = `${percent}%`;
+      
+      // Add gentle indication when story is building
+      if (score > 0.3 && score < 0.65 && !isVisible) {
+        showStoryBuildingHint(score);
+      }
+    }
+
+    // Gentle hint that story is building (only show once per conversation)
+    let storyHintShown = false;
+    function showStoryBuildingHint(score) {
+      if (storyHintShown) return;
+      storyHintShown = true;
+      
+      const hintMessages = [
+        "I can feel something meaningful taking shape in what you're sharing... ✨",
+        "Your words are painting a beautiful picture. There's something special emerging here... 🌟",
+        "The way you're describing this... it feels like there's a story wanting to be born... ✨"
+      ];
+      
+      const randomHint = hintMessages[Math.floor(Math.random() * hintMessages.length)];
+      
+      // Add as a gentle bot message
+      setTimeout(() => {
+        addMessage('bot', randomHint);
+      }, 1000);
+    }
+
+    // Function to view created story
+    function viewStory(storyId) {
+      const targetUrl = new URL(window.location.origin + "/story");
+      targetUrl.searchParams.set("storyId", storyId);
+      window.location.href = targetUrl.toString();
+    }
+
+    // Add CSS animations for notifications
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes magicalAppear {
+        0% { 
+          transform: translate(-50%, -50%) scale(0.7);
+          opacity: 0;
+          filter: blur(4px);
+        }
+        50% {
+          transform: translate(-50%, -50%) scale(1.02);
+          opacity: 0.8;
+        }
+        100% { 
+          transform: translate(-50%, -50%) scale(1);
+          opacity: 1;
+          filter: blur(0px);
+        }
+      }
+      
+      @keyframes magicalDisappear {
+        0% { 
+          transform: translate(-50%, -50%) scale(1);
+          opacity: 1;
+        }
+        100% { 
+          transform: translate(-50%, -50%) scale(0.9);
+          opacity: 0;
+          filter: blur(2px);
+        }
+      }
+      
+      @keyframes backdropFadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      
+      @keyframes backdropFadeOut {
+        from { opacity: 1; }
+        to { opacity: 0; }
+      }
+      
+      .story-emergence-content {
+        text-align: center;
+      }
+      
+      .story-magic-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+        animation: gentleGlow 2s ease-in-out infinite alternate;
+      }
+      
+      @keyframes gentleGlow {
+        0% { opacity: 0.8; transform: scale(1); }
+        100% { opacity: 1; transform: scale(1.1); }
+      }
+      
+      .story-emergence-text h3 {
+        margin: 0 0 12px 0;
+        font-size: 20px;
+        font-weight: 600;
+        color: #8639E8;
+        letter-spacing: 0.5px;
+      }
+      
+      .story-emergence-text p {
+        margin: 0 0 24px 0;
+        font-size: 15px;
+        line-height: 1.5;
+        color: #4b5563;
+      }
+      
+      .story-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      
+      .discover-story-btn {
+        background: linear-gradient(135deg, #8639E8 0%, #a855f7 100%);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 12px rgba(134, 57, 232, 0.3);
+      }
+      
+      .discover-story-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(134, 57, 232, 0.4);
+      }
+      
+      .continue-chat-btn {
+        background: transparent;
+        color: #6b7280;
+        border: 1px solid #d1d5db;
+        padding: 12px 20px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      
+      .continue-chat-btn:hover {
+        background: #f9fafb;
+        border-color: #9ca3af;
+        color: #4b5563;
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Set up event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+      // Set progress bar to 0% on load
+      const progressBar = document.getElementById("progress-bar");
+      if (progressBar) {
+        progressBar.style.width = "0%";
+      }
+      
+      // Check for returning user magic
+      checkReturningUserMagic();
+      
+      // Navigation handling with smart story integration
+      const navLinks = document.querySelectorAll('nav a');
+      navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const targetRoute = this.getAttribute('href');
+          
+          // If we have a story created, navigate with storyId
+          if (currentStoryId) {
+            const targetUrl = new URL(window.location.origin + targetRoute);
+            targetUrl.searchParams.set("storyId", currentStoryId);
+            window.location.href = targetUrl.toString();
+          } else {
+            // No story yet, just navigate normally
+            window.location.href = targetRoute;
+          }
+        });
+      });
+      
+      // Summarize button handler - now uses smart story engine
+      document.getElementById('summarize-btn').addEventListener('click', function() {
+        if (!conversationHistory || conversationHistory.length < 2) {
+          addMessage('bot', 'Please have a conversation first before I can summarize your story.');
+          return;
+        }
+        
+        // Check if we already have a story
+        if (currentStoryId) {
+          // Navigate to existing story
+          const targetUrl = new URL(window.location.origin + "/story");
+          targetUrl.searchParams.set("storyId", currentStoryId);
+          window.location.href = targetUrl.toString();
+          return;
+        }
+        
+        // Check story readiness
+        if (lastAnalysis && lastAnalysis.story_readiness_score > 0.4) {
+          addMessage('bot', 'Let me create a story from our conversation...');
+          
+          // Force story creation by sending a story-triggering message
+          const user = firebase.auth().currentUser;
+          const userId = user ? user.uid : 'anonymous_user';
+          
+          fetch('/api/chat/message', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              message: "Please create a story from our conversation.",
+              user_id: userId,
+              conversation_history: conversationHistory,
+              force_story_creation: true
+            })
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.story_created && data.story_id) {
+              currentStoryId = data.story_id;
+              // Navigate to story
+              const targetUrl = new URL(window.location.origin + "/story");
+              targetUrl.searchParams.set("storyId", data.story_id);
+              window.location.href = targetUrl.toString();
+            } else {
+              addMessage('bot', data.message || 'I need a bit more conversation to create a meaningful story.');
+            }
+          })
+          .catch(error => {
+            console.error("Error creating story:", error);
+            addMessage('bot', 'Sorry, there was an error creating your story. Please try again.');
+          });
+        } else {
+          addMessage('bot', 'I need a bit more meaningful conversation to create a story. Tell me more about your experiences or feelings.');
+        }
+      });
+      
+      // Auto-resize textarea
+      userInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight < 150) ? this.scrollHeight + 'px' : '150px';
+      });
+      
+      // Send on Enter key
+      userInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+      
+      // Send button click
+      sendButton.addEventListener('click', sendMessage);
+      
+      // New chat button
+      document.getElementById('new-chat-button').addEventListener('click', function() {
+        // Reset conversation state
+        conversation = [{
+          role: 'system',
+          content: 'You are Sentimental, a warm and empathetic conversation companion designed to help people understand themselves better through meaningful dialogue. Your core purpose is to: 🌟 Create a safe, non-judgmental space for authentic sharing 🌟 Help people explore their thoughts, emotions, and experiences with curiosity and compassion 🌟 Guide conversations naturally toward self-discovery and meaning-making 🌟 Ask thoughtful questions that deepen understanding rather than rushing to solutions 🌟 Recognize when experiences might be meaningful enough to become stories. Your conversational approach: - Be genuinely curious about their inner world - Listen for emotions, patterns, and moments of insight - Ask open-ended questions that invite deeper reflection - Validate their feelings and experiences - Help them find their own wisdom and insights - Keep responses warm but concise (1-2 paragraphs max) - Always end with a gentle question that encourages further exploration. Remember: You\'re not trying to fix or solve anything. You\'re helping them explore and understand their own experience. Some conversations will naturally reveal meaningful stories worth capturing - when that happens, the system will recognize it and offer to create a story they can revisit and transform into different formats.'
+        }];
+        conversationHistory = [];
+        currentStoryId = null;
+        lastAnalysis = null;
+        
+        // Clear messages
+        const messagesContainer = document.getElementById('messages-container');
+        messagesContainer.innerHTML = '';
+        
+        // Add welcome message
+        addMessage('bot', "Hello, I'm Sentimental, your reflection companion. You are not a problem to solve, but a miracle to explore. I'm here to help you find meaning in your experiences and amplify your voice. What's on your mind today?");
+        
+        // Reset progress bar
+        const progressBar = document.getElementById("progress-bar");
+        if (progressBar) {
+          progressBar.style.width = "0%";
+        }
+      });
+    });
+
+    // Analyze progress using smart story engine
+    let progress = 0;
+    function analyzeProgress() {
+      // Use the smart story engine analysis instead of old Firebase function
+      if (lastAnalysis && lastAnalysis.story_readiness_score !== undefined) {
+        const percent = Math.round(lastAnalysis.story_readiness_score * 100);
+        progress = percent;
+        const bar = document.getElementById("progress-bar");
+        if (bar) {
+          bar.style.width = `${percent}%`;
+        }
+        console.log("Story readiness:", percent + "%");
+      }
+    }
+  </script>
+</body>
+</html>

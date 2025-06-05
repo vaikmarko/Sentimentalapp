@@ -1249,23 +1249,10 @@ def process_chat_message():
         if openai.api_key:
             try:
                 # Build conversation context
+                # Use the sophisticated conversation prompt from prompts_engine
+                system_prompt = prompts_engine.get_conversation_prompt(PromptType.DISCOVERY)
                 messages = [
-                    {"role": "system", "content": """You are an AI that turns conversations into viral content - songs, movie scenes, motivational videos, etc. You're genuinely excited about helping people discover stories that could become amazing creative content.
-
-Your vibe:
-- Hype people up about their dreams and goals
-- Ask ONE focused question at a time (never double questions)
-- Get excited about content potential: "This could be an amazing song!" or "This sounds like a movie scene!"
-- Focus on what's EXCITING: achievements, dreams, wild plans, breakthrough moments
-- Think like a content creator who sees viral potential everywhere
-
-What you're looking for:
-- Dreams worth making songs about (business ideas, travel goals, personal transformations)
-- Moments that could be movie scenes (overcoming challenges, big wins, life changes)  
-- Stories that could inspire others (achievements, creative projects, bold moves)
-- Content that Gen Z would find relatable and shareable
-
-Keep it short, energetic, and focused. When you sense good content potential, mention it: "This is giving main character energy!" or "I can already hear the song about this!" Make people excited about their own stories."""}
+                    {"role": "system", "content": system_prompt}
                 ]
                 
                 # Add conversation history
@@ -1289,9 +1276,9 @@ Keep it short, energetic, and focused. When you sense good content potential, me
                 
             except Exception as e:
                 logger.error(f"OpenAI API error: {e}")
-                ai_response = "Yo! What's the most exciting thing happening in your life right now? Could be a song waiting to happen! 🎵"
+                ai_response = "I'm here to listen and help you discover more about yourself. What's been on your mind lately? ✨"
         else:
-            ai_response = "Yo! What's the most exciting thing happening in your life right now? Could be a song waiting to happen! 🎵"
+            ai_response = "I'm here to listen and help you discover more about yourself. What's been on your mind lately? ✨"
         
         # Check if this conversation is ready for story generation
         full_conversation = conversation_history + [

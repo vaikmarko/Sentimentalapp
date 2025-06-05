@@ -1,0 +1,21 @@
+{
+  "issue": "Missing Firestore Composite Index",
+  "severity": "CRITICAL",
+  "impact": "Blocking all user story queries",
+  "solution": {
+    "steps": [
+      "Go to Firebase Console",
+      "Navigate to Firestore Indexes",
+      "Create composite index for stories collection",
+      "Configure fields: user_id (Asc), timestamp (Desc), __name__ (Asc)",
+      "Wait for index to build",
+      "Re-run tests"
+    ],
+    "estimatedTime": "5 minutes",
+    "expectedImprovement": "15+ additional tests passing"
+  },
+  "links": {
+    "firebaseConsole": "https://console.firebase.google.com/project/sentimental-f95e6/firestore/indexes",
+    "documentation": "https://firebase.google.com/docs/firestore/query-data/indexing"
+  }
+}

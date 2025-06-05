@@ -1,0 +1,45 @@
+{
+  "timestamp": "2025-05-29T05:36:24.133Z",
+  "summary": {
+    "totalTests": 6,
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0
+  },
+  "details": [
+    {
+      "category": "User Journey",
+      "test": "New User Journey",
+      "status": "PASS",
+      "details": "Complete new user flow from landing to first story and space question"
+    },
+    {
+      "category": "User Journey",
+      "test": "Returning User Journey",
+      "status": "PASS",
+      "details": "Returning user with existing data can access stories and get insights"
+    },
+    {
+      "flow": "Share to Story",
+      "status": "PASS",
+      "details": "Story created from chat message"
+    },
+    {
+      "test": "Space Question Flow",
+      "status": "PASS",
+      "details": "Complete flow successful"
+    },
+    {
+      "category": "User Journey",
+      "test": "Data Building Process",
+      "status": "PASS",
+      "details": "Data successfully built from multiple content types and improves question responses"
+    },
+    {
+      "category": "User Journey",
+      "test": "Discovery Flow",
+      "status": "PASS",
+      "details": "Public stories load correctly for discovery"
+    }
+  ]
+}
