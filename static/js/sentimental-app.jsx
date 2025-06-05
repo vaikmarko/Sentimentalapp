@@ -306,10 +306,20 @@ const SentimentalApp = () => {
     }
     
     setIsLoading(true);
+    
+    // Add progress feedback
+    setMessages(prev => [...prev, {
+      role: 'system',
+      content: '✨ Creating your story... This may take a moment.'
+    }]);
+    
     try {
       const response = await fetch('/api/stories/generate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-User-ID': user.id // Add authentication header
+        },
         body: JSON.stringify({
           conversation: messages,
           user_id: user.id,
@@ -324,10 +334,13 @@ const SentimentalApp = () => {
         alert(data.message || 'Please sign in to create stories.');
         setShowLogin(true);
       } else if (data.success) {
+        // Show success feedback with progress
+        setMessages(prev => [...prev, {
+          role: 'system',
+          content: '✨ Your story has been created successfully! You can find it in your Stories tab.'
+        }]);
         await fetchStories();
-        setMessages([]);
         setCurrentView('stories');
-        alert('Story created successfully!');
       } else {
         alert('Failed to create story. Please try again.');
       }
@@ -410,7 +423,7 @@ const SentimentalApp = () => {
   // Format viewing functions
   const viewFormat = async (story, formatType) => {
     setLoadingFormat(true);
-          setCurrentFormat({ story, formatType, title: null });
+    setCurrentFormat({ story, formatType, title: null });
     setCurrentView('format-detail');
     
     try {
@@ -446,7 +459,10 @@ const SentimentalApp = () => {
         // Format doesn't exist, try to generate it
         const generateResponse = await fetch(`/api/stories/${story.id}/generate-format`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'X-User-ID': user.id // Add authentication header
+          },
           body: JSON.stringify({ format_type: formatType })
         });
         
