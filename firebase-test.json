@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "sentimentalapp-test",
     "public": "public",
     "ignore": [
       "firebase.json",
@@ -13,7 +14,7 @@
       {
         "source": "**",
         "run": {
-          "serviceId": "sentimentalapp",
+          "serviceId": "sentimentalapp-test",
           "region": "europe-west1"
         }
       }
@@ -25,4 +26,4 @@
   "firestore": {
     "rules": "firestore.rules"
   }
-}
+} 

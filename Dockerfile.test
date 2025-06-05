@@ -1,0 +1,19 @@
+FROM python:3.9-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Download NLTK data
+RUN python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords'); nltk.download('vader_lexicon')"
+
+COPY . .
+
+# Test environment setup
+ENV ENVIRONMENT=test
+ENV PORT=8080
+
+EXPOSE 8080
+
+CMD ["python", "app.py"] 

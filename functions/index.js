@@ -183,12 +183,32 @@ exports.generateFullStory = functions.https.onCall(async (data, context) => {
     const raw = completion.choices[0].message.content;
     console.log("generateFullStory raw output:", raw);
 
+    // Logi OpenAI vastus Firestore'sse debugimiseks
+    await storyRef.update({ gptRawStory: raw });
+
     let result = { title: "Untitled", text: "" };
     try {
       result = JSON.parse(raw);
+      if (!result.title || !result.text) throw new Error("Missing fields");
     } catch (err) {
       console.error("Failed to parse story completion", raw);
-      result.text = raw;
+      // Fallback: proovi regexiga leida pealkiri ja tekst
+      const match = raw.match(/\{\s*"?title"?\s*:\s*"([^"]+)"\s*,\s*"?text"?\s*:\s*"([\s\S]+)"\s*\}/i);
+      if (match) {
+        result.title = match[1];
+        result.text = match[2];
+      } else {
+        // Fallback: proovi "Title: ...\nText: ..." formaati
+        const titleMatch = raw.match(/title\s*[:\-]\s*(.+)/i);
+        const textMatch = raw.match(/text\s*[:\-]\s*([\s\S]+)/i);
+        if (titleMatch && textMatch) {
+          result.title = titleMatch[1].trim();
+          result.text = textMatch[1].trim();
+        } else {
+          // Kui ikka ei õnnestu, salvesta kogu tekst story'ks
+          result.text = raw;
+        }
+      }
     }
 
     await storyRef.update({

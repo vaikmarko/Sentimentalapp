@@ -11,13 +11,32 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 import os
 import logging
+import requests
+from typing import List, Dict, Optional, Any
+import openai
+import random
+from werkzeug.utils import secure_filename
+import uuid
+
+# Import our intelligent engines
+from smart_story_engine import SmartStoryEngine
+from personal_context_mapper import PersonalContextMapper
+from knowledge_engine import KnowledgeEngine
+from formats_generation_engine import FormatsGenerationEngine
+from format_types import FormatType
+from prompts_engine import PromptsEngine, PromptType, AIProviderManager
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Configure OpenAI
+openai.api_key = os.getenv('OPENAI_API_KEY')
+if not openai.api_key:
+    logger.warning("OPENAI_API_KEY not found in environment variables")
+
 # Environment detection
-ENVIRONMENT = os.getenv('ENVIRONMENT', 'production')  # production, demo, test
+ENVIRONMENT = os.getenv('ENVIRONMENT', 'test')  # production, demo, test
 IS_DEMO = ENVIRONMENT == 'demo'
 IS_TEST = ENVIRONMENT == 'test'
 
@@ -69,6 +88,18 @@ try:
     nltk.data.find('sentiment/vader_lexicon.zip')
 except LookupError:
     nltk.download('vader_lexicon')
+
+# Add after app configuration
+app.config['UPLOAD_FOLDER'] = 'static/uploads'
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+ALLOWED_EXTENSIONS = {'mp3', 'wav', 'ogg', 'm4a'}
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# Ensure upload directory exists
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 def analyze_text(text):
     """Analyzes text and finds themes, emotions and connections"""
@@ -149,6 +180,152 @@ def find_connections(story_id):
     
     return connections
 
+class IntelligentConversationEngine:
+    """
+    Full ChatGPT-like conversation engine with multi-AI provider support
+    Handles general knowledge, world topics, and personal conversations
+    """
+    
+    def __init__(self):
+        self.client = None
+        try:
+            if os.getenv('OPENAI_API_KEY'):
+                # Use legacy OpenAI API approach for compatibility
+                openai.api_key = os.getenv('OPENAI_API_KEY')
+                self.client = openai  # Use the module directly
+                logger.info("OpenAI client initialized successfully using legacy API")
+            else:
+                logger.warning("OPENAI_API_KEY not found - using fallback responses")
+        except Exception as e:
+            logger.warning(f"Failed to initialize OpenAI client: {e}")
+        
+        self.conversation_history = {}
+    
+    def generate_response(self, message: str, user_id: str, context: Dict = None) -> str:
+        """
+        Generate intelligent response using selected AI provider
+        Full conversational AI mode with story detection in background
+        """
+        try:
+            # Get user's preferred AI provider
+            preferred_provider = ai_provider_manager.get_user_provider(user_id)
+            
+            # Build comprehensive system prompt
+            system_prompt = self._build_system_prompt(preferred_provider, context)
+            
+            # Get conversation history
+            history = self.conversation_history.get(user_id, [])
+            
+            if self.client and os.getenv('OPENAI_API_KEY'):
+                # Use OpenAI for full ChatGPT-like experience
+                response = self._openai_chat_completion(message, user_id, system_prompt, history)
+            else:
+                # Use enhanced fallback with full capabilities
+                response = self._intelligent_fallback(message, context)
+            
+            # Update conversation history
+            self._update_conversation_history(user_id, message, response)
+            
+            return response
+            
+        except Exception as e:
+            logger.error(f"Error in conversation generation: {e}")
+            return prompts_engine.get_fallback_response(message, context)
+    
+    def _build_system_prompt(self, provider: str, context: Dict = None) -> str:
+        """Build comprehensive system prompt for empathetic conversation"""
+        try:
+            # Use the new context-aware prompt building
+            system_prompt = prompts_engine.get_prompt(
+                PromptType.CONVERSATION_SYSTEM,
+                user_context=context,
+                domain_insights=None,  # Will be passed when available
+                story_analysis=None    # Will be passed when available
+            )
+            
+            # Add provider-specific guidance
+            provider_guidance = prompts_engine.get_conversation_prompt(f'openai_{provider}')
+            if provider_guidance and provider_guidance != prompts_engine.get_conversation_prompt('system_base'):
+                system_prompt += f"\n\n{provider_guidance}"
+            
+            # Add story context guidance
+            story_context = prompts_engine.get_conversation_prompt('story_context')
+            system_prompt += f"\n\n{story_context}"
+            
+            return system_prompt
+            
+        except Exception as e:
+            logger.warning(f"Error building system prompt: {e}")
+            return prompts_engine.get_conversation_prompt('system_base')
+    
+    def _openai_chat_completion(self, message: str, user_id: str, system_prompt: str, history: List) -> str:
+        """Generate response using OpenAI with user's selected GPT model"""
+        messages = [{"role": "system", "content": system_prompt}]
+        
+        # Add conversation history (last 10 exchanges to stay within token limits)
+        for exchange in history[-10:]:
+            messages.append({"role": "user", "content": exchange["user"]})
+            messages.append({"role": "assistant", "content": exchange["assistant"]})
+        
+        messages.append({"role": "user", "content": message})
+        
+        # Get user's preferred model
+        user_provider = ai_provider_manager.get_user_provider(user_id)
+        model = ai_provider_manager.get_provider_model(user_provider)
+        
+        response = self.client.ChatCompletion.create(
+            model=model,
+            messages=messages,
+            max_tokens=500,
+            temperature=0.8,  # More creative and natural
+            presence_penalty=0.1,
+            frequency_penalty=0.1
+        )
+        
+        return response.choices[0].message.content.strip()
+    
+    def _intelligent_fallback(self, message: str, context: Dict = None) -> str:
+        """Enhanced fallback that attempts to handle general topics naturally"""
+        # Use the centralized fallback from PromptsEngine
+        return prompts_engine.get_fallback_response(message, context)
+    
+    def _update_conversation_history(self, user_id: str, user_message: str, response: str):
+        """Update conversation history for context continuity"""
+        if user_id not in self.conversation_history:
+            self.conversation_history[user_id] = []
+        
+        self.conversation_history[user_id].append({
+            "user": user_message,
+            "assistant": response,
+            "timestamp": datetime.utcnow().isoformat()
+        })
+        
+        # Keep only last 20 exchanges per user
+        if len(self.conversation_history[user_id]) > 20:
+            self.conversation_history[user_id] = self.conversation_history[user_id][-20:]
+
+# Initialize the intelligent conversation engine
+intelligent_conversation_engine = IntelligentConversationEngine()
+
+# Initialize all intelligent engines with database integration
+prompts_engine = PromptsEngine()
+ai_provider_manager = AIProviderManager()
+personal_context_mapper = PersonalContextMapper(db=db)
+knowledge_engine = KnowledgeEngine(db=db)
+formats_generation_engine = FormatsGenerationEngine(db=db)
+
+# Connect the prompts engine to the formats generation engine
+formats_generation_engine.prompts_engine = prompts_engine
+
+# Initialize smart story engine with all dependencies
+smart_story_engine = SmartStoryEngine(
+    knowledge_engine=knowledge_engine,
+    personal_context_mapper=personal_context_mapper,
+    conversation_planner=None  # Will implement later if needed
+)
+
+logger.info("All intelligent engines initialized successfully")
+
 @app.route('/')
 def index():
     return render_template('index.html', environment=ENVIRONMENT)
@@ -196,6 +373,13 @@ def story():
         return render_template('index.html', environment=ENVIRONMENT)
     return render_template('story.html', environment=ENVIRONMENT)
 
+@app.route('/inner-space')
+def inner_space():
+    # Only allow inner-space access in demo and test environments
+    if ENVIRONMENT == 'production':
+        return render_template('index.html', environment=ENVIRONMENT)
+    return render_template('inner-space.html', environment=ENVIRONMENT)
+
 @app.route('/api/stories', methods=['GET'])
 def get_stories():
     if IS_DEMO:
@@ -211,6 +395,8 @@ def get_stories():
     stories = []
     for story in db.collection('stories').stream():
         story_data = story.to_dict()
+        # Add the Firestore document ID as the story ID
+        story_data['id'] = story.id
         # Ensure compatibility with React component
         story_data['author'] = story_data.get('author', 'Anonymous')
         story_data['content'] = story_data.get('content', story_data.get('text', ''))
@@ -283,6 +469,161 @@ def add_story():
     
     return jsonify(story), 201
 
+@app.route('/api/stories/<string:story_id>', methods=['DELETE'])
+def delete_story(story_id):
+    """Delete a story by ID"""
+    if IS_DEMO:
+        return jsonify({
+            'error': 'Cannot delete stories in demo environment',
+            'message': 'This is a demo version. Use the full version to delete stories.'
+        }), 403
+    
+    # In test environment, require authentication
+    if IS_TEST:
+        user_id = request.headers.get('X-User-ID')
+        if not user_id:
+            return jsonify({
+                'error': 'Authentication required',
+                'message': 'Please register or login to delete stories in test environment.'
+            }), 401
+        
+        # Verify user exists
+        try:
+            user_doc = db.collection('test_users').document(user_id).get()
+            if not user_doc.exists:
+                return jsonify({'error': 'Invalid user'}), 401
+        except Exception as e:
+            return jsonify({'error': 'Authentication failed'}), 401
+    
+    if db is None:
+        return jsonify({'error': 'Database not available'}), 500
+    
+    try:
+        # Get the story to check if it exists and get owner info
+        story_ref = db.collection('stories').document(story_id)
+        story = story_ref.get()
+        
+        if not story.exists:
+            return jsonify({'error': 'Story not found'}), 404
+        
+        story_data = story.to_dict()
+        
+        # In test environment, verify user owns the story (optional security check)
+        if IS_TEST and 'user_id' in locals():
+            story_user_id = story_data.get('user_id')
+            if story_user_id and story_user_id != user_id:
+                return jsonify({
+                    'error': 'Permission denied',
+                    'message': 'You can only delete your own stories.'
+                }), 403
+        
+        # Delete the story
+        story_ref.delete()
+        
+        # Also delete any connections related to this story
+        connections_query = db.collection('connections').where('story_id', '==', story_id)
+        for conn in connections_query.stream():
+            conn.reference.delete()
+        
+        # Update user statistics in test environment
+        if IS_TEST and 'user_id' in locals():
+            try:
+                user_ref = db.collection('test_users').document(user_id)
+                user_ref.update({'stories_deleted': firestore.Increment(1)})
+            except Exception as e:
+                logger.warning(f"Failed to update user statistics: {str(e)}")
+        
+        logger.info(f"Story {story_id} deleted successfully")
+        return jsonify({
+            'message': 'Story deleted successfully',
+            'story_id': story_id
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error deleting story {story_id}: {str(e)}")
+        return jsonify({'error': 'Failed to delete story'}), 500
+
+@app.route('/api/stories/<string:story_id>', methods=['PUT'])
+def update_story(story_id):
+    """Update an existing story"""
+    if IS_DEMO:
+        return jsonify({
+            'error': 'Cannot update stories in demo environment',
+            'message': 'This is a demo version. Use the full version to update stories.'
+        }), 403
+    
+    # In test environment, require authentication
+    if IS_TEST:
+        user_id = request.headers.get('X-User-ID')
+        if not user_id:
+            return jsonify({
+                'error': 'Authentication required',
+                'message': 'Please register or login to update stories in test environment.'
+            }), 401
+        
+        # Verify user exists
+        try:
+            user_doc = db.collection('test_users').document(user_id).get()
+            if not user_doc.exists:
+                return jsonify({'error': 'Invalid user'}), 401
+        except Exception as e:
+            return jsonify({'error': 'Authentication failed'}), 401
+    
+    if db is None:
+        return jsonify({'error': 'Database not available'}), 500
+    
+    try:
+        # Get the story to check if it exists
+        story_ref = db.collection('stories').document(story_id)
+        story = story_ref.get()
+        
+        if not story.exists:
+            return jsonify({'error': 'Story not found'}), 404
+        
+        story_data = story.to_dict()
+        
+        # In test environment, verify user owns the story (optional security check)
+        if IS_TEST and 'user_id' in locals():
+            story_user_id = story_data.get('user_id')
+            if story_user_id and story_user_id != user_id:
+                return jsonify({
+                    'error': 'Permission denied',
+                    'message': 'You can only update your own stories.'
+                }), 403
+        
+        # Get update data from request
+        update_data = request.json
+        if not update_data:
+            return jsonify({'error': 'No update data provided'}), 400
+        
+        # Update allowed fields
+        allowed_fields = ['title', 'content', 'author', 'public', 'format', 'analysis', 'emotional_intensity']
+        for field in allowed_fields:
+            if field in update_data:
+                story_data[field] = update_data[field]
+        
+        # Always update timestamp when story is modified
+        story_data['updated_at'] = datetime.now().isoformat()
+        
+        # If content was updated, re-analyze the story
+        if 'content' in update_data:
+            analysis = analyze_text(story_data['content'])
+            story_data['emotional_intensity'] = abs(analysis['sentiment_score'])
+            story_data['analysis'] = analysis
+        
+        # Update the story in database
+        story_ref.set(story_data)
+        
+        # Add the document ID back to the response
+        story_data['id'] = story_id
+        
+        logger.info(f"Story {story_id} updated successfully")
+        return jsonify(story_data), 200
+        
+    except Exception as e:
+        logger.error(f"Error updating story {story_id}: {str(e)}")
+        return jsonify({'error': 'Failed to update story'}), 500
+
 @app.route('/api/connections/<string:story_id>', methods=['GET'])
 def get_connections(story_id):
     if IS_DEMO:
@@ -319,16 +660,16 @@ def get_insights(story_id):
     }
     return jsonify(insights)
 
-@app.route('/api/stories/<string:story_id>/formats', methods=['POST'])
-def generate_story_format(story_id):
-    """Generate a new format for an existing story"""
+@app.route('/api/stories/<string:story_id>/like', methods=['POST', 'DELETE'])
+def handle_story_likes(story_id):
+    """Handle story likes/reactions"""
     # In test environment, require authentication
     if IS_TEST:
         user_id = request.headers.get('X-User-ID')
         if not user_id:
             return jsonify({
                 'error': 'Authentication required',
-                'message': 'Please register or login to generate formats in test environment.'
+                'message': 'Please register or login to like stories.'
             }), 401
         
         # Verify user exists
@@ -339,10 +680,10 @@ def generate_story_format(story_id):
         except Exception as e:
             return jsonify({'error': 'Authentication failed'}), 401
     
-    data = request.json
-    format_type = data.get('format_type', 'article')
+    if db is None:
+        return jsonify({'error': 'Database not available'}), 500
     
-    # Get the original story
+    # Get the story
     story_ref = db.collection('stories').document(story_id)
     story = story_ref.get()
     
@@ -351,242 +692,1171 @@ def generate_story_format(story_id):
     
     story_data = story.to_dict()
     
-    # Generate format based on type (placeholder - you can enhance this with actual AI)
-    generated_content = generate_format_content(story_data['content'], format_type)
+    # Handle like/unlike
+    if request.method == 'POST':
+        # Check if user already liked this story
+        if IS_TEST and 'user_id' in locals():
+            existing_likes = db.collection('story_likes').where('user_id', '==', user_id).where('story_id', '==', story_id).limit(1).get()
+            if len(list(existing_likes)) > 0:
+                return jsonify({'error': 'You have already liked this story'}), 400
+        
+        # Add like
+        new_reactions = (story_data.get('reactions', 0)) + 1
+        story_ref.update({'reactions': new_reactions})
+        
+        # Track user like
+        if IS_TEST and 'user_id' in locals():
+            try:
+                like_data = {
+                    'user_id': user_id,
+                    'story_id': story_id,
+                    'reaction_type': 'like',
+                    'timestamp': datetime.now().isoformat()
+                }
+                db.collection('story_likes').add(like_data)
+            except Exception as e:
+                logger.warning(f"Failed to track like: {str(e)}")
+        
+        return jsonify({'reactions': new_reactions, 'liked': True})
     
-    # Update story with new format
-    if 'createdFormats' not in story_data:
-        story_data['createdFormats'] = []
-    
-    if format_type not in story_data['createdFormats']:
-        story_data['createdFormats'].append(format_type)
-        story_ref.update({'createdFormats': story_data['createdFormats']})
-    
-    # Update user statistics in test environment
-    if IS_TEST and 'user_id' in locals():
+    else:  # DELETE
+        # Remove like
+        new_reactions = max(0, (story_data.get('reactions', 0)) - 1)
+        story_ref.update({'reactions': new_reactions})
+        
+        # Remove user like tracking
+        if IS_TEST and 'user_id' in locals():
+            try:
+                likes_query = db.collection('story_likes').where('user_id', '==', user_id).where('story_id', '==', story_id)
+                for like_doc in likes_query.stream():
+                    like_doc.reference.delete()
+            except Exception as e:
+                logger.warning(f"Failed to remove like tracking: {str(e)}")
+        
+        return jsonify({'reactions': new_reactions, 'liked': False})
+
+@app.route('/api/stories/<string:story_id>/reactions', methods=['POST', 'DELETE'])
+def handle_story_reactions(story_id):
+    """Handle multiple reaction types (like, love, laugh, fire, handshake, mind_blown)"""
+    # In test environment, require authentication
+    if IS_TEST:
+        user_id = request.headers.get('X-User-ID')
+        if not user_id:
+            return jsonify({
+                'error': 'Authentication required',
+                'message': 'Please register or login to react to stories.'
+            }), 401
+        
+        # Verify user exists
         try:
-            user_ref = db.collection('test_users').document(user_id)
-            user_ref.update({'formats_generated': firestore.Increment(1)})
+            user_doc = db.collection('test_users').document(user_id).get()
+            if not user_doc.exists:
+                return jsonify({'error': 'Invalid user'}), 401
         except Exception as e:
-            logger.warning(f"Failed to update user statistics: {str(e)}")
+            return jsonify({'error': 'Authentication failed'}), 401
     
-    return jsonify({
-        'format_type': format_type,
-        'content': generated_content,
-        'message': f'{format_type.title()} format generated successfully'
-    })
-
-def generate_format_content(original_content, format_type):
-    """Generate content in different formats - enhanced with realistic content"""
-    # Extract key themes from original content
-    words = original_content.lower().split()
-    content_preview = original_content[:100] + "..." if len(original_content) > 100 else original_content
-    title_words = original_content.split()[:6]
-    title_hint = " ".join(title_words) + ("..." if len(title_words) >= 6 else "")
+    if db is None:
+        return jsonify({'error': 'Database not available'}), 500
     
-    formats = {
-        'song': f"""♪ Generated Song: "{title_hint}"
-
-Verse 1:
-{content_preview[:50]}...
-When the world feels heavy on my soul
-I find the strength to make me whole
-
-Chorus:
-Every story has its meaning
-Every moment worth believing
-Through the darkness comes the light
-Everything will be alright
-
-(Generated from your personal experience)""",
-        
-        'video': f"""🎬 VIDEO SCRIPT: "{title_hint}"
-
-[SCENE 1: OPENING]
-*Soft background music*
-*Close-up shot of thoughtful expression*
-
-NARRATOR (V.O.):
-"{content_preview[:80]}..."
-
-[SCENE 2: MAIN STORY]
-*Visual montage matching the emotional tone*
-
-TEXT OVERLAY: Key insights from your experience
-
-[SCENE 3: REFLECTION]
-*Return to narrator*
-
-NARRATOR:
-"Sometimes our most challenging moments become our greatest teachers..."
-
-[END SCREEN]
-*Call to action: "Share your story"*
-
-Duration: 2:30
-Generated from your personal narrative""",
-        
-        'article': f"""📝 ARTICLE: "{title_hint}"
-
-{original_content}
-
-**Reflection & Analysis**
-
-This personal narrative reveals several important themes about human resilience and emotional growth. The experience described offers valuable insights into how we process challenging situations and find meaning in our everyday moments.
-
-**Key Takeaways:**
-• Personal growth often comes through unexpected experiences
-• Emotional awareness leads to better decision-making  
-• Sharing our stories helps others feel less alone
-• Every experience contributes to our personal narrative
-
-*This article was generated from a personal story to help preserve and share meaningful experiences.*""",
-        
-        'tweet': f"""🐦 TWITTER THREAD: "{title_hint}"
-
-1/ {content_preview[:120]}
-
-2/ Sometimes the moments that challenge us most become the ones that teach us the deepest lessons about ourselves 🌱
-
-3/ Sharing our real experiences - the messy, beautiful, complicated ones - helps others feel less alone in their journey ✨
-
-4/ What's one moment that changed your perspective recently? Drop it below 👇
-
-#PersonalGrowth #Storytelling #RealTalk #EmotionalIntelligence""",
-        
-        'linkedin_post': f"""💼 LINKEDIN POST: Professional Reflection
-
-{title_hint}
-
-Recently, I've been reflecting on how personal experiences shape our professional perspectives...
-
-{content_preview[:150]}...
-
-This experience taught me valuable lessons about:
-• Emotional intelligence in decision-making
-• The importance of authentic communication  
-• How personal growth translates to professional development
-• Building resilience in challenging situations
-
-Sometimes our most personal moments offer the greatest professional insights.
-
-What personal experience has most influenced your professional growth?
-
-#PersonalDevelopment #ProfessionalGrowth #Leadership #EmotionalIntelligence #Reflection""",
-        
-        'fb_post': f"""👥 FACEBOOK POST: 
-
-{title_hint} 💭
-
-{content_preview[:180]}...
-
-You know those moments that just stick with you? This was one of them. 
-
-Sometimes I think we don't share enough of the real stuff - the moments that actually shape us, not just the highlight reel. Life is messy and beautiful and complicated, and that's exactly what makes it worth sharing.
-
-Anyone else have one of those experiences that just changed how you see things? Would love to hear your stories in the comments 💕
-
-#RealLife #PersonalGrowth #Storytelling #Community""",
-        
-        'book_chapter': f"""📚 BOOK CHAPTER: "{title_hint}"
-
-Chapter {generate_chapter_number()}: {title_hint}
-
-{original_content}
-
----
-
-**Author's Note:**
-
-Writing this chapter brought back the full weight of that experience. As I sit here now, months later, I can see how this moment fit into the larger tapestry of my personal growth journey. 
-
-What struck me most while revisiting this story was how our perception of events can shift over time. What felt overwhelming in the moment now appears as a crucial turning point - a necessary catalyst for the person I was becoming.
-
-This is the power of storytelling: it allows us to make meaning from chaos, to find patterns in what initially seems random, and to discover the deeper currents that run beneath the surface of our daily lives.
-
-**Reflection Questions:**
-• What experiences in your life felt difficult at the time but now seem necessary?
-• How do you make sense of challenging moments in your personal narrative?
-• What stories from your life are waiting to be told?
-
-*[Chapter continues with deeper analysis and connecting themes...]*""",
-        
-        'diary_entry': f"""📖 PERSONAL DIARY ENTRY
-
-Dear Diary,
-
-{original_content}
-
-Looking back on this as I write, I'm struck by how much this moment taught me about myself. There's something powerful about putting experiences into words - it helps me process emotions I didn't even know I was carrying.
-
-I keep thinking about how these small moments end up shaping who we become. Like, this wasn't some huge life event, but somehow it feels significant. Maybe that's what growing up really is - learning to pay attention to these quiet revelations.
-
-I want to remember this feeling, this insight. Sometimes I think that's why I write - not just to record what happened, but to capture how it felt, what it meant, how it changed me.
-
-Until next time,
-Me
-
-*Personal reflection generated from life experience*"""
-    }
+    # Get the story
+    story_ref = db.collection('stories').document(story_id)
+    story = story_ref.get()
     
-    return formats.get(format_type, f"Generated {format_type}: {original_content}")
+    if not story.exists:
+        return jsonify({'error': 'Story not found'}), 404
+    
+    story_data = story.to_dict()
+    
+    if request.method == 'POST':
+        data = request.json
+        reaction_type = data.get('reaction_type', 'like')
+        
+        # Validate reaction type
+        valid_reactions = ['like', 'love', 'laugh', 'fire', 'handshake', 'mind_blown']
+        if reaction_type not in valid_reactions:
+            return jsonify({'error': f'Invalid reaction type. Must be one of: {valid_reactions}'}), 400
+        
+        # Check if user already reacted to this story
+        if IS_TEST and 'user_id' in locals():
+            existing_reactions = db.collection('story_reactions').where('user_id', '==', user_id).where('story_id', '==', story_id).limit(1).get()
+            existing_reactions_list = list(existing_reactions)
+            
+            if len(existing_reactions_list) > 0:
+                # User already reacted, update their reaction
+                existing_reaction = existing_reactions_list[0]
+                existing_data = existing_reaction.to_dict()
+                old_reaction_type = existing_data.get('reaction_type', 'like')
+                
+                # Update the reaction
+                existing_reaction.reference.update({
+                    'reaction_type': reaction_type,
+                    'timestamp': datetime.now().isoformat()
+                })
+                
+                # Update story reaction counts
+                reactions = story_data.get('reaction_counts', {})
+                reactions[old_reaction_type] = max(0, reactions.get(old_reaction_type, 0) - 1)
+                reactions[reaction_type] = reactions.get(reaction_type, 0) + 1
+                
+                story_ref.update({
+                    'reaction_counts': reactions,
+                    'reactions': sum(reactions.values())  # Total count for compatibility
+                })
+                
+                return jsonify({
+                    'reaction_counts': reactions,
+                    'total_reactions': sum(reactions.values()),
+                    'user_reaction': reaction_type
+                })
+        
+        # Add new reaction
+        reactions = story_data.get('reaction_counts', {})
+        reactions[reaction_type] = reactions.get(reaction_type, 0) + 1
+        
+        story_ref.update({
+            'reaction_counts': reactions,
+            'reactions': sum(reactions.values())  # Total count for compatibility
+        })
+        
+        # Track user reaction
+        if IS_TEST and 'user_id' in locals():
+            try:
+                reaction_data = {
+                    'user_id': user_id,
+                    'story_id': story_id,
+                    'reaction_type': reaction_type,
+                    'timestamp': datetime.now().isoformat()
+                }
+                db.collection('story_reactions').add(reaction_data)
+            except Exception as e:
+                logger.warning(f"Failed to track reaction: {str(e)}")
+        
+        return jsonify({
+            'reaction_counts': reactions,
+            'total_reactions': sum(reactions.values()),
+            'user_reaction': reaction_type
+        })
+    
+    else:  # DELETE
+        # Remove user's reaction
+        if IS_TEST and 'user_id' in locals():
+            try:
+                reactions_query = db.collection('story_reactions').where('user_id', '==', user_id).where('story_id', '==', story_id)
+                user_reactions = list(reactions_query.stream())
+                
+                if len(user_reactions) > 0:
+                    user_reaction = user_reactions[0]
+                    reaction_data = user_reaction.to_dict()
+                    reaction_type = reaction_data.get('reaction_type', 'like')
+                    
+                    # Remove the reaction
+                    user_reaction.reference.delete()
+                    
+                    # Update story reaction counts
+                    reactions = story_data.get('reaction_counts', {})
+                    reactions[reaction_type] = max(0, reactions.get(reaction_type, 0) - 1)
+                    
+                    story_ref.update({
+                        'reaction_counts': reactions,
+                        'reactions': sum(reactions.values())  # Total count for compatibility
+                    })
+                    
+                    return jsonify({
+                        'reaction_counts': reactions,
+                        'total_reactions': sum(reactions.values()),
+                        'user_reaction': None
+                    })
+                else:
+                    return jsonify({'error': 'No reaction found to remove'}), 404
+            except Exception as e:
+                logger.warning(f"Failed to remove reaction: {str(e)}")
+                return jsonify({'error': 'Failed to remove reaction'}), 500
+        
+        return jsonify({'error': 'Authentication required'}), 401
 
-def generate_chapter_number():
-    """Generate a random chapter number for book format"""
-    import random
-    return random.randint(1, 20)
+@app.route('/api/stories/<string:story_id>/comments', methods=['GET', 'POST'])
+def handle_story_comments(story_id):
+    """Get or add comments for a story"""
+    if db is None:
+        return jsonify({'error': 'Database not available'}), 500
+    
+    # Verify story exists
+    story_ref = db.collection('stories').document(story_id)
+    story = story_ref.get()
+    
+    if not story.exists:
+        return jsonify({'error': 'Story not found'}), 404
+    
+    if request.method == 'GET':
+        # Get comments
+        comments = []
+        try:
+            comments_query = db.collection('story_comments').where('story_id', '==', story_id).order_by('timestamp')
+            for comment_doc in comments_query.stream():
+                comment_data = comment_doc.to_dict()
+                comment_data['id'] = comment_doc.id
+                comments.append(comment_data)
+        except Exception as e:
+            logger.error(f"Error fetching comments: {str(e)}")
+        
+        return jsonify({'comments': comments})
+    
+    else:  # POST
+        # Add comment - require authentication
+        if IS_TEST:
+            user_id = request.headers.get('X-User-ID')
+            if not user_id:
+                return jsonify({
+                    'error': 'Authentication required',
+                    'message': 'Please register or login to comment on stories.'
+                }), 401
+            
+            # Verify user exists
+            try:
+                user_doc = db.collection('test_users').document(user_id).get()
+                if not user_doc.exists:
+                    return jsonify({'error': 'Invalid user'}), 401
+            except Exception as e:
+                return jsonify({'error': 'Authentication failed'}), 401
+        
+        data = request.json
+        comment_text = data.get('comment', '').strip()
+        author = data.get('author', 'Anonymous')
+        
+        if not comment_text:
+            return jsonify({'error': 'Comment cannot be empty'}), 400
+        
+        # Create comment
+        comment_data = {
+            'story_id': story_id,
+            'comment': comment_text,
+            'author': author,
+            'timestamp': datetime.now().isoformat()
+        }
+        
+        if IS_TEST and 'user_id' in locals():
+            comment_data['user_id'] = user_id
+        
+        try:
+            comment_ref = db.collection('story_comments').add(comment_data)
+            comment_data['id'] = comment_ref[1].id
+            
+            # Update user statistics in test environment
+            if IS_TEST and 'user_id' in locals():
+                try:
+                    user_ref = db.collection('test_users').document(user_id)
+                    user_ref.update({'comments_posted': firestore.Increment(1)})
+                except Exception as e:
+                    logger.warning(f"Failed to update user statistics: {str(e)}")
+            
+            return jsonify({'comment': comment_data, 'message': 'Comment added successfully'})
+        
+        except Exception as e:
+            logger.error(f"Error adding comment: {str(e)}")
+            return jsonify({'error': 'Failed to add comment'}), 500
 
-@app.route('/api/auth/register', methods=['POST'])
-def register_user():
-    """Register a new user in test environment"""
-    if not IS_TEST:
-        return jsonify({'error': 'Registration only available in test environment'}), 403
+@app.route('/api/comments/<string:comment_id>', methods=['DELETE'])
+def delete_comment(comment_id):
+    """Delete a specific comment by ID"""
+    if db is None:
+        return jsonify({'error': 'Database not available'}), 500
+    
+    # Require authentication
+    if IS_TEST:
+        user_id = request.headers.get('X-User-ID')
+        if not user_id:
+            return jsonify({
+                'error': 'Authentication required',
+                'message': 'Please register or login to delete comments.'
+            }), 401
+        
+        # Verify user exists
+        try:
+            user_doc = db.collection('test_users').document(user_id).get()
+            if not user_doc.exists:
+                return jsonify({'error': 'Invalid user'}), 401
+        except Exception as e:
+            return jsonify({'error': 'Authentication failed'}), 401
+    
+    try:
+        # Get the comment to verify ownership
+        comment_ref = db.collection('story_comments').document(comment_id)
+        comment_doc = comment_ref.get()
+        
+        if not comment_doc.exists:
+            return jsonify({'error': 'Comment not found'}), 404
+        
+        comment_data = comment_doc.to_dict()
+        
+        # In test environment, verify user owns the comment
+        if IS_TEST and 'user_id' in locals():
+            comment_user_id = comment_data.get('user_id')
+            if comment_user_id and comment_user_id != user_id:
+                return jsonify({
+                    'error': 'Permission denied',
+                    'message': 'You can only delete your own comments.'
+                }), 403
+        
+        # Delete the comment
+        comment_ref.delete()
+        
+        # Update user statistics in test environment
+        if IS_TEST and 'user_id' in locals():
+            try:
+                user_ref = db.collection('test_users').document(user_id)
+                user_ref.update({'comments_deleted': firestore.Increment(1)})
+            except Exception as e:
+                logger.warning(f"Failed to update user statistics: {str(e)}")
+        
+        logger.info(f"Comment {comment_id} deleted successfully by user {user_id if 'user_id' in locals() else 'unknown'}")
+        return jsonify({
+            'message': 'Comment deleted successfully',
+            'comment_id': comment_id
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error deleting comment {comment_id}: {str(e)}")
+        return jsonify({'error': 'Failed to delete comment'}), 500
+
+@app.route('/api/stories/<string:story_id>/formats/<string:format_type>', methods=['GET'])
+def get_story_format(story_id, format_type):
+    """Get a specific format for a story"""
+    try:
+        logger.info(f"Getting {format_type} format for story {story_id}")
+        
+        # Get story
+        story_ref = db.collection('stories').document(story_id)
+        story = story_ref.get()
+        
+        if not story.exists:
+            return jsonify({'error': 'Story not found'}), 404
+            
+        story_data = story.to_dict()
+        
+        # Handle numeric format requests (frontend sometimes sends index)
+        if format_type.isdigit():
+            created_formats = story_data.get('createdFormats', [])
+            if isinstance(created_formats, list) and len(created_formats) > int(format_type):
+                format_type = created_formats[int(format_type)]
+            else:
+                return jsonify({'error': f'Format index {format_type} not found'}), 404
+        
+        # Get format
+        formats = story_data.get('formats', {})
+        if format_type not in formats:
+            return jsonify({'error': f'Format {format_type} not found'}), 404
+            
+        format_data = formats[format_type]
+        
+        # Handle both string and dict format storage
+        if isinstance(format_data, str):
+            content = format_data
+            audio_url = None
+            title = None
+        else:
+            content = format_data.get('content', format_data)
+            audio_url = format_data.get('audio_url')
+            title = format_data.get('title')
+        
+        return jsonify({
+            'format_type': format_type,
+            'content': content,
+            'audio_url': audio_url,
+            'title': title,
+            'story_id': story_id,
+            'created_at': story_data.get('updated_at', story_data.get('created_at'))
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error getting format: {e}")
+        return jsonify({'error': 'Failed to get format'}), 500
+
+@app.route('/api/stories/<string:story_id>/generate-format', methods=['POST'])
+def generate_format_for_story(story_id):
+    """Generate a new format for an existing story using the FormatsGenerationEngine"""
+    try:
+        data = request.json
+        format_type_str = data.get('format_type', 'article')
+        user_id = request.headers.get('X-User-ID')
+        
+        # Require authentication for format generation
+        if not user_id or user_id in ['anonymous', 'anonymous_user', '', 'null', 'undefined']:
+            return jsonify({
+                'error': 'Authentication required',
+                'message': 'Please sign in to generate story formats.'
+            }), 401
+        
+        logger.info(f"Generating {format_type_str} format for story {story_id}")
+        
+        # Validate format type
+        try:
+            from format_types import FormatType
+            format_type = FormatType(format_type_str)
+        except ValueError:
+            return jsonify({'error': f'Invalid format type: {format_type_str}'}), 400
+        
+        # Get the original story
+        if db is None:
+            return jsonify({'error': 'Database not available'}), 500
+            
+        story_ref = db.collection('stories').document(story_id)
+        story = story_ref.get()
+        
+        if not story.exists:
+            return jsonify({'error': 'Story not found'}), 404
+        
+        story_data = story.to_dict()
+        story_content = story_data.get('content', '')
+        
+        if not story_content:
+            return jsonify({'error': 'Story has no content to format'}), 400
+        
+        # Get user context for better generation
+        user_context = None
+        domain_insights = None
+        
+        try:
+            # Try to get enhanced context if engines are available
+            if 'personal_context_mapper' in globals():
+                user_context = personal_context_mapper.get_user_context_profile(user_id)
+            if 'knowledge_engine' in globals():
+                domain_insights = knowledge_engine.analyze_story_for_insights(story_content, user_id)
+        except Exception as e:
+            logger.warning(f"Could not get enhanced context: {e}")
+        
+        # Generate the format using the engine
+        result = formats_generation_engine.generate_format(
+            story_content=story_content,
+            format_type=format_type,
+            user_context=user_context,
+            domain_insights=domain_insights
+        )
+        
+        if result.get('success'):
+            # Save the format to the story
+            formats = story_data.get('formats', {})
+            
+            # For song format, preserve existing audio_url if it exists
+            if format_type_str == 'song' and format_type_str in formats:
+                existing_format = formats[format_type_str]
+                if isinstance(existing_format, dict) and 'audio_url' in existing_format:
+                    # Preserve the uploaded audio when regenerating song content
+                    song_title = result.get('title')
+                    if not song_title:
+                        # Generate a fallback title if none was extracted
+                        song_title = "Finding Purpose in Work"  # Better fallback for now
+                    
+                    formats[format_type_str] = {
+                        'content': result['content'],
+                        'audio_url': existing_format['audio_url'],
+                        'created_at': existing_format.get('created_at', datetime.now().isoformat()),
+                        'title': song_title
+                    }
+                else:
+                    # No existing audio, but still add title for song format
+                    song_title = result.get('title', 'Generated Song')
+                    formats[format_type_str] = {
+                        'content': result['content'],
+                        'title': song_title,
+                        'created_at': datetime.now().isoformat()
+                    }
+            else:
+                formats[format_type_str] = result['content']
+            
+            # Update createdFormats list - ensure it's always a list
+            created_formats = story_data.get('createdFormats', [])
+            if isinstance(created_formats, dict):
+                # Convert dict to list if needed
+                created_formats = list(created_formats.keys()) if created_formats else []
+            elif not isinstance(created_formats, list):
+                created_formats = []
+                
+            if format_type_str not in created_formats:
+                # All therapeutic formats go at the very top of the list
+                therapeutic_formats = ['reflection', 'insights', 'growth_summary', 'journal_entry']
+                
+                if format_type_str in therapeutic_formats:
+                    # Find the position where this therapeutic format should be inserted
+                    # We want to maintain order within therapeutic formats but keep them all at the top
+                    insert_position = 0
+                    
+                    # Count existing therapeutic formats to maintain their relative order
+                    for i, existing_format in enumerate(created_formats):
+                        if existing_format in therapeutic_formats:
+                            insert_position = i + 1
+                        else:
+                            # Hit first non-therapeutic format, stop counting
+                            break
+                    
+                    created_formats.insert(insert_position, format_type_str)
+                else:
+                    # Regular formats go after all therapeutic formats
+                    created_formats.append(format_type_str)
+            
+            # Update the story in database
+            story_ref.update({
+                'formats': formats,
+                'createdFormats': created_formats,
+                'updated_at': datetime.now().isoformat()
+            })
+            
+            logger.info(f"Successfully generated {format_type_str} format for story {story_id}")
+            
+            return jsonify({
+                'success': True,
+                'format_type': format_type_str,
+                'content': result['content'],
+                'generation_method': result.get('generation_method', 'unknown'),
+                'word_count': result.get('word_count', 0),
+                'character_count': result.get('character_count', 0),
+                'model_used': result.get('model_used'),
+                'generated_at': result.get('generated_at')
+            }), 200
+        else:
+            logger.error(f"Format generation failed: {result.get('error')}")
+            return jsonify({
+                'success': False,
+                'error': result.get('error', 'Format generation failed'),
+                'format_type': format_type_str
+            }), 500
+            
+    except Exception as e:
+        logger.error(f"Error in format generation endpoint: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/api/chat/message', methods=['POST'])
+def process_chat_message():
+    """Process a chat message and potentially generate stories"""
+    try:
+        data = request.get_json()
+        message = data.get('message', '')
+        user_id = data.get('user_id')
+        conversation_history = data.get('conversation_history', [])
+        
+        if not message or not user_id:
+            return jsonify({'error': 'Message and user_id are required'}), 400
+        
+        # Reject anonymous users - require authentication for chat
+        if not user_id or user_id in ['anonymous', 'anonymous_user', '', 'null', 'undefined']:
+            return jsonify({
+                'error': 'Authentication required',
+                'message': 'Please sign in to start chatting. Create an account to save your conversations and stories.'
+            }), 401
+        
+        logger.info(f"Processing chat message for user {user_id}")
+        
+        # Generate AI response
+        if openai.api_key:
+            try:
+                # Build conversation context
+                messages = [
+                    {"role": "system", "content": """You are an AI that turns conversations into viral content - songs, movie scenes, motivational videos, etc. You're genuinely excited about helping people discover stories that could become amazing creative content.
+
+Your vibe:
+- Hype people up about their dreams and goals
+- Ask ONE focused question at a time (never double questions)
+- Get excited about content potential: "This could be an amazing song!" or "This sounds like a movie scene!"
+- Focus on what's EXCITING: achievements, dreams, wild plans, breakthrough moments
+- Think like a content creator who sees viral potential everywhere
+
+What you're looking for:
+- Dreams worth making songs about (business ideas, travel goals, personal transformations)
+- Moments that could be movie scenes (overcoming challenges, big wins, life changes)  
+- Stories that could inspire others (achievements, creative projects, bold moves)
+- Content that Gen Z would find relatable and shareable
+
+Keep it short, energetic, and focused. When you sense good content potential, mention it: "This is giving main character energy!" or "I can already hear the song about this!" Make people excited about their own stories."""}
+                ]
+                
+                # Add conversation history
+                for msg in conversation_history[-10:]:  # Last 10 messages for context
+                    messages.append({
+                        "role": msg.get('role', 'user'),
+                        "content": msg.get('content', '')
+                    })
+                
+                # Add current message
+                messages.append({"role": "user", "content": message})
+                
+                response = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo",
+                    messages=messages,
+                    max_tokens=300,
+                    temperature=0.7
+                )
+                
+                ai_response = response.choices[0].message.content.strip()
+                
+            except Exception as e:
+                logger.error(f"OpenAI API error: {e}")
+                ai_response = "Yo! What's the most exciting thing happening in your life right now? Could be a song waiting to happen! 🎵"
+        else:
+            ai_response = "Yo! What's the most exciting thing happening in your life right now? Could be a song waiting to happen! 🎵"
+        
+        # Check if this conversation is ready for story generation
+        full_conversation = conversation_history + [
+            {'role': 'user', 'content': message, 'timestamp': datetime.now().isoformat()},
+            {'role': 'assistant', 'content': ai_response, 'timestamp': datetime.now().isoformat()}
+        ]
+        
+        # Detect if story should be generated
+        should_generate_story = False
+        story_indicators = [
+            "turn this into something",
+            "keep and reflect",
+            "story",
+            "remember this",
+            "meaningful",
+            "important conversation"
+        ]
+        
+        if any(indicator in message.lower() for indicator in story_indicators):
+            should_generate_story = True
+        
+        # Or if conversation is substantial (5+ user messages)
+        user_messages = [msg for msg in full_conversation if msg.get('role') == 'user']
+        if len(user_messages) >= 5:
+            should_generate_story = True
+        
+        result = {
+            'success': True,
+            'response': ai_response,
+            'timestamp': datetime.now().isoformat()
+        }
+        
+        # Generate story if appropriate
+        if should_generate_story:
+            try:
+                story_result = generate_story_from_conversation(user_id, full_conversation)
+                if story_result:
+                    result['story_created'] = True
+                    result['story'] = story_result
+                    logger.info(f"Story generated for user {user_id}")
+            except Exception as e:
+                logger.error(f"Story generation error: {e}")
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        logger.error(f"Error processing chat message: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/stories/generate', methods=['POST'])
+def generate_story_endpoint():
+    """Direct endpoint to generate a story from conversation data"""
+    try:
+        data = request.get_json()
+        user_id = data.get('user_id')
+        conversation = data.get('conversation', [])
+        title_suggestion = data.get('title')
+        is_public = data.get('is_public', False)  # Default to private
+        
+        if not user_id or not conversation:
+            return jsonify({'error': 'user_id and conversation are required'}), 400
+        
+        # Reject anonymous users - require authentication for story creation
+        if not user_id or user_id in ['anonymous', 'anonymous_user', '', 'null', 'undefined']:
+            return jsonify({
+                'error': 'Authentication required',
+                'message': 'Please sign in to create stories. Create an account to save your stories and access them later.'
+            }), 401
+        
+        logger.info(f"Generating story from conversation for user {user_id}")
+        
+        story_result = generate_story_from_conversation(user_id, conversation, title_suggestion, is_public)
+        
+        if story_result:
+            return jsonify({
+                'success': True,
+                'story': story_result
+            })
+        else:
+            return jsonify({'error': 'Failed to generate story'}), 500
+            
+    except Exception as e:
+        logger.error(f"Error in story generation endpoint: {e}")
+        return jsonify({'error': str(e)}), 500
+
+def generate_story_from_conversation(user_id, conversation, title_suggestion=None, is_public=False):
+    """Generate a story from conversation data using sophisticated AI prompts"""
+    try:
+        # Extract user messages for story content
+        user_messages = [msg for msg in conversation if msg.get('role') == 'user']
+        if not user_messages:
+            return None
+        
+        # Get user info - FIX: Look in test_users collection for test environment
+        if IS_TEST:
+            user_ref = db.collection('test_users').document(user_id)
+        else:
+            user_ref = db.collection('users').document(user_id)
+            
+        user_doc = user_ref.get()
+        user_data = user_doc.to_dict() if user_doc.exists else {}
+        
+        # If user not found, use basic fallback
+        if not user_data:
+            logger.warning(f"User {user_id} not found in database, using fallback")
+            user_data = {'name': 'Anonymous User', 'email': 'unknown@example.com'}
+        
+        # Prepare conversation data for sophisticated analysis
+        conversation_text = "\n".join([f"User: {msg.get('content', '')}" for msg in user_messages])
+        
+        # Get user context using PersonalContextMapper
+        user_context = {}
+        try:
+            user_context = personal_context_mapper.get_user_context_profile(user_id)
+        except Exception as e:
+            logger.warning(f"Could not get user context: {e}")
+            user_context = {
+                'primary_themes': ['personal_growth'],
+                'emotional_expression_style': 'conversational',
+                'engagement_level': 'medium'
+            }
+        
+        # Get domain insights using KnowledgeEngine
+        domain_insights = {}
+        try:
+            domain_insights = knowledge_engine.analyze_story_for_insights(conversation_text, user_id)
+        except Exception as e:
+            logger.warning(f"Could not get domain insights: {e}")
+            domain_insights = {
+                'themes': ['self_reflection'],
+                'emotional_markers': ['thoughtful'],
+                'domains': {'personal_growth': 0.7},
+                'confidence': 0.6
+            }
+        
+        # Generate sophisticated story using PromptsEngine
+        if openai.api_key:
+            try:
+                # Enhanced prompt for natural story generation
+                story_creation_prompt = f"""Transform this conversation into an authentic personal story. Make it sound like a real person (aged 18-28) writing about their own experience.
+
+CONVERSATION DATA:
+{conversation_text}
+
+USER CONTEXT:
+- Name: {user_data.get('name', 'Anonymous')}
+- Themes: {', '.join(domain_insights.get('themes', ['growth']))}
+- Style: Natural, conversational, authentic
+
+INSTRUCTIONS:
+1. Write in first person ("I", "my", "me")
+2. Use natural, conversational language - never flowery or poetic
+3. Include specific details and emotions from the conversation
+4. Show growth or insight, but don't force a "lesson"
+5. Make it feel like something a real Gen Z person would write
+6. Keep it between 200-400 words
+7. Structure: situation → challenge/conflict → reflection/insight
+
+EXAMPLES OF GOOD TONE:
+- "I remember thinking I had everything figured out..."
+- "The weird thing about this whole experience was..."
+- "Looking back, I realize I was just scared of..."
+
+Generate a story that feels authentic and relatable:"""
+                
+                # Generate story with natural, authentic tone
+                story_response = openai.ChatCompletion.create(
+                    model="gpt-4",
+                    messages=[
+                        {
+                            "role": "system", 
+                            "content": "You create authentic, relatable personal stories that sound like real people wrote them about their own experiences. Use natural, conversational language - never poetic or overly sophisticated. Focus on making the person the hero of their own story."
+                        },
+                        {"role": "user", "content": story_creation_prompt}
+                    ],
+                    max_tokens=600,
+                    temperature=0.7,
+                    presence_penalty=0.1
+                )
+                
+                story_content = story_response.choices[0].message.content.strip()
+                
+                # Generate natural title
+                if title_suggestion:
+                    title = title_suggestion
+                else:
+                    title_prompt = f"""Create a natural, authentic title for this personal story. Make it sound like something a real person (age 18-30) would actually write about their own experience.
+
+Story excerpt: {story_content[:200]}...
+
+Key themes: {', '.join(domain_insights.get('themes', ['growth'])[:2])}
+
+Create a title that feels personal and real - NOT poetic or literary. Examples:
+- "Learning to Set Boundaries"
+- "Why I Finally Quit That Job"
+- "My Social Media Wake-Up Call"
+- "Finding My Voice in College"
+
+Make it conversational and authentic. Generate just the title:"""
+
+                    title_response = openai.ChatCompletion.create(
+                        model="gpt-3.5-turbo",
+                        messages=[{"role": "user", "content": title_prompt}],
+                        max_tokens=30,
+                        temperature=0.8
+                    )
+                    
+                    title = title_response.choices[0].message.content.strip().strip('"').strip("'")
+                
+            except Exception as e:
+                logger.error(f"AI story generation error: {e}")
+                # Improved fallback - create a basic story structure
+                story_content = f"I've been thinking about {', '.join(domain_insights.get('themes', ['my life'])[:2])} lately.\n\n"
+                story_content += "Here's what's been on my mind:\n\n"
+                
+                for i, msg in enumerate(user_messages):
+                    content = msg.get('content', '').strip()
+                    if content:
+                        if i == 0:
+                            story_content += f"It started when {content.lower()}\n\n"
+                        elif i == len(user_messages) - 1:
+                            story_content += f"What I've realized is that {content}\n\n"
+                        else:
+                            story_content += f"{content}\n\n"
+                
+                story_content += "I'm still figuring things out, but I feel like I understand myself a bit better now."
+                title = title_suggestion or f"Thoughts on {domain_insights.get('themes', ['Life'])[0].title()}"
+        else:
+            # Improved fallback when no OpenAI
+            story_content = f"I've been thinking about {', '.join(domain_insights.get('themes', ['my life'])[:2])} lately.\n\n"
+            story_content += "Here's what's been on my mind:\n\n"
+            
+            for i, msg in enumerate(user_messages):
+                content = msg.get('content', '').strip()
+                if content:
+                    if i == 0:
+                        story_content += f"It started when {content.lower()}\n\n"
+                    elif i == len(user_messages) - 1:
+                        story_content += f"What I've realized is that {content}\n\n"
+                    else:
+                        story_content += f"{content}\n\n"
+            
+            story_content += "I'm still figuring things out, but I feel like I understand myself a bit better now."
+            title = title_suggestion or f"Thoughts on {domain_insights.get('themes', ['Life'])[0].title()}"
+        
+        # Create story document with rich metadata
+        story_data = {
+            'title': title,
+            'content': story_content,
+            'author': user_data.get('name', 'Anonymous'),
+            'author_id': user_id,
+            'user_id': user_id,  # Add explicit user_id field
+            'created_at': datetime.now().isoformat(),
+            'updated_at': datetime.now().isoformat(),
+            'timestamp': datetime.now().isoformat(),  # For API compatibility
+            'type': 'conversation',
+            'public': is_public,  # Use the provided is_public parameter
+            'metadata': {
+                'source': 'chat_conversation',
+                'message_count': len(user_messages),
+                'conversation_length': len(conversation),
+                'generated_at': datetime.now().isoformat(),
+                'generation_method': 'ai_enhanced' if openai.api_key else 'basic'
+            },
+            'privacy': 'public' if is_public else 'private',  # Set privacy based on is_public parameter
+            'tags': domain_insights.get('themes', [])[:3],  # Use first 3 themes as tags
+            'formats': {},
+            'stats': {
+                'views': 0,
+                'likes': 0,
+                'comments': 0
+            },
+            'reactions': 0,  # For API compatibility
+            'inCosmos': False,  # For API compatibility
+            'createdFormats': [],  # For API compatibility
+            'format': 'story',  # For API compatibility
+            'cosmic_insights': domain_insights.get('themes', [])  # For API compatibility
+        }
+        
+        # Add AI analysis using SmartStoryEngine conversation analysis
+        try:
+            analysis = smart_story_engine.analyze_conversation_for_story_potential(conversation, user_id)
+            if analysis:
+                story_data['analysis'] = {
+                    'story_readiness_score': analysis.get('story_readiness_score', 0.5),
+                    'emotional_themes': domain_insights.get('themes', []),
+                    'key_insights': domain_insights.get('emotional_markers', []),
+                    'reasoning': analysis.get('reasoning', 'Generated from meaningful conversation'),
+                    'ai_generated': True,
+                    'themes': domain_insights.get('themes', [])  # For cosmic_insights
+                }
+        except Exception as e:
+            logger.error(f"Story analysis error: {e}")
+            # Add basic analysis for compatibility
+            story_data['analysis'] = {
+                'story_readiness_score': 0.7,
+                'emotional_themes': domain_insights.get('themes', ['growth']),
+                'themes': domain_insights.get('themes', ['growth']),
+                'ai_generated': True
+            }
+        
+        # Save to database
+        story_ref = db.collection('stories').add(story_data)
+        story_id = story_ref[1].id
+        
+        # Update the document with its ID
+        story_ref[1].update({'id': story_id})
+        
+        # Update user statistics in test environment
+        if IS_TEST:
+            try:
+                user_ref.update({
+                    'stories_created': firestore.Increment(1),
+                    'last_story_created': datetime.now().isoformat()
+                })
+            except Exception as e:
+                logger.warning(f"Failed to update user statistics: {str(e)}")
+        
+        logger.info(f"Story created with sophisticated prompts: {story_id} for user {user_id}")
+        
+        # Return story data
+        return {
+            'id': story_id,
+            'title': title,
+            'content': story_content,
+            'author': story_data['author'],
+            'created_at': story_data['created_at'],
+            'type': story_data['type'],
+            'metadata': story_data['metadata']
+        }
+        
+    except Exception as e:
+        logger.error(f"Error generating story from conversation: {e}")
+        return None
+
+@app.route('/api/debug/stories', methods=['GET'])
+def debug_stories():
+    """Debug endpoint to check database contents"""
+    if db is None:
+        return jsonify({'error': 'Database not available'}), 500
+    
+    try:
+        debug_info = {
+            'total_stories': 0,
+            'stories_list': [],
+            'collections_checked': [],
+            'database_status': 'connected'
+        }
+        
+        # Check stories collection
+        stories_collection = db.collection('stories')
+        stories = list(stories_collection.stream())
+        debug_info['total_stories'] = len(stories)
+        debug_info['collections_checked'].append('stories')
+        
+        for story in stories:
+            data = story.to_dict()
+            debug_info['stories_list'].append({
+                'document_id': story.id,
+                'title': data.get('title', 'No title'),
+                'author': data.get('author', 'No author'),
+                'user_id': data.get('user_id', 'No user_id'),
+                'public': data.get('public', 'Not set'),
+                'is_public': data.get('is_public', 'Not set'),
+                'timestamp': data.get('timestamp', 'No timestamp'),
+                'content_length': len(data.get('content', '')),
+                'has_conversation': 'conversation' in data,
+                'has_analysis': 'analysis' in data
+            })
+        
+        # Check test_users
+        try:
+            users = list(db.collection('test_users').stream())
+            debug_info['test_users_count'] = len(users)
+            debug_info['collections_checked'].append('test_users')
+        except Exception as e:
+            debug_info['test_users_error'] = str(e)
+        
+        return jsonify(debug_info)
+        
+    except Exception as e:
+        return jsonify({
+            'error': f'Debug failed: {str(e)}',
+            'database_status': 'error'
+        }), 500
+
+@app.route('/api/debug/collections', methods=['GET'])
+def debug_collections():
+    """Debug endpoint to check all Firebase collections"""
+    if db is None:
+        return jsonify({'error': 'Database not available'}), 500
+    
+    try:
+        collections_info = {}
+        
+        # List of known collections to check
+        known_collections = [
+            'stories', 'test_users', 'users', 'conversations', 
+            'chat_messages', 'story_formats', 'connections',
+            'waitlist', 'user_preferences', 'analytics'
+        ]
+        
+        for collection_name in known_collections:
+            try:
+                collection_ref = db.collection(collection_name)
+                docs = list(collection_ref.stream())
+                collections_info[collection_name] = {
+                    'count': len(docs),
+                    'sample_ids': [doc.id for doc in docs[:3]]  # First 3 document IDs
+                }
+                
+                # For users collections, show some sample data
+                if collection_name in ['test_users', 'users'] and docs:
+                    sample_data = []
+                    for doc in docs[:3]:
+                        data = doc.to_dict()
+                        sample_data.append({
+                            'id': doc.id,
+                            'email': data.get('email', 'No email'),
+                            'username': data.get('username', 'No username'),
+                            'created': data.get('created_at', 'No date')
+                        })
+                    collections_info[collection_name]['sample_data'] = sample_data
+                
+                # For conversations, show structure
+                if collection_name == 'conversations' and docs:
+                    sample_data = []
+                    for doc in docs[:3]:
+                        data = doc.to_dict()
+                        sample_data.append({
+                            'id': doc.id,
+                            'user_id': data.get('user_id', 'No user_id'),
+                            'message_count': len(data.get('messages', [])),
+                            'last_updated': data.get('last_updated', 'No date')
+                        })
+                    collections_info[collection_name]['sample_data'] = sample_data
+                    
+            except Exception as e:
+                collections_info[collection_name] = {'error': str(e)}
+        
+        return jsonify({
+            'collections': collections_info,
+            'total_collections_checked': len(known_collections)
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/debug/store-conversation', methods=['POST'])
+def store_conversation_directly():
+    """Debug endpoint to store conversations directly in database"""
+    if db is None:
+        return jsonify({'error': 'Database not available'}), 500
     
     try:
         data = request.json
+        user_id = data.get('user_id')
+        messages = data.get('messages', [])
+        scenario = data.get('scenario', 'Direct insert')
+        
+        if not user_id or not messages:
+            return jsonify({'error': 'user_id and messages are required'}), 400
+        
+        # Store conversation in database
+        conversation_doc = {
+            'user_id': user_id,
+            'messages': messages,
+            'scenario': scenario,
+            'created_at': data.get('created_at', datetime.now().isoformat()),
+            'message_count': len([msg for msg in messages if msg.get('role') == 'user']),
+            'last_updated': datetime.now().isoformat()
+        }
+        
+        # Add to conversations collection
+        db.collection('conversations').document(f"{user_id}_conversation").set(conversation_doc)
+        
+        return jsonify({
+            'success': True,
+            'conversation_id': f"{user_id}_conversation",
+            'message_count': conversation_doc['message_count']
+        })
+        
+    except Exception as e:
+        print(f"Error storing conversation: {e}")
+        return jsonify({'error': str(e)}), 500
+
+# Authentication Endpoints for Test Environment
+@app.route('/api/auth/register', methods=['POST'])
+def register_user():
+    """Register/sync a new user from Firebase"""
+    try:
+        data = request.json
+        uid = data.get('uid')  # Firebase UID
         email = data.get('email', '').strip().lower()
-        name = data.get('name', '').strip()
+        name = data.get('name', '')
+        email_verified = data.get('emailVerified', False)
+        photo_url = data.get('photoURL')
+        provider = data.get('provider', 'email')
         
-        if not email or not name:
-            return jsonify({'error': 'Email and name are required'}), 400
-        
-        # Basic email validation
-        import re
-        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-        if not re.match(email_pattern, email):
-            return jsonify({'error': 'Invalid email format'}), 400
+        if not uid or not email:
+            return jsonify({'error': 'Firebase UID and email are required'}), 400
         
         if db is None:
             return jsonify({'error': 'Database not available'}), 500
         
-        # Check if user already exists
-        existing = db.collection('test_users').where('email', '==', email).limit(1).get()
-        if len(list(existing)) > 0:
-            return jsonify({'error': 'User already exists'}), 409
+        # Check if user already exists by UID
+        existing_users = db.collection('test_users').where('firebase_uid', '==', uid).limit(1).get()
+        users_list = list(existing_users)
         
-        # Create user
-        user_data = {
-            'email': email,
-            'name': name,
-            'created_at': firestore.SERVER_TIMESTAMP,
-            'stories_created': 0,
-            'formats_generated': 0
-        }
-        
-        user_ref = db.collection('test_users').add(user_data)
-        user_id = user_ref[1].id
-        
-        logger.info(f"Test user registered: {email}")
-        
-        return jsonify({
-            'message': 'User registered successfully',
-            'user_id': user_id,
-            'email': email,
-            'name': name
-        }), 201
+        if len(users_list) > 0:
+            # User exists, update their info and return
+            user_doc = users_list[0]
+            user_data = user_doc.to_dict()
+            
+            # Update user data
+            updated_data = {
+                'email': email,
+                'name': name or user_data.get('name', email.split('@')[0]),
+                'email_verified': email_verified,
+                'photo_url': photo_url,
+                'last_login': datetime.now().isoformat(),
+                'provider': provider
+            }
+            
+            user_doc.reference.update(updated_data)
+            
+            logger.info(f"User updated: {email} -> {user_doc.id}")
+            
+            return jsonify({
+                'user_id': user_doc.id,
+                'email': email,
+                'name': updated_data['name'],
+                'message': 'User updated successfully'
+            }), 200
+        else:
+            # Create new user
+            user_data = {
+                'firebase_uid': uid,
+                'email': email,
+                'name': name or email.split('@')[0],
+                'email_verified': email_verified,
+                'photo_url': photo_url,
+                'provider': provider,
+                'created_at': datetime.now().isoformat(),
+                'last_login': datetime.now().isoformat(),
+                'stories_created': 0,
+                'formats_generated': 0,
+                'conversations_count': 0
+            }
+            
+            # Add user to database
+            user_ref = db.collection('test_users').add(user_data)
+            user_id = user_ref[1].id
+            
+            logger.info(f"New user registered: {email} -> {user_id}")
+            
+            return jsonify({
+                'user_id': user_id,
+                'email': email,
+                'name': user_data['name'],
+                'message': 'User created successfully'
+            }), 201
         
     except Exception as e:
-        logger.error(f"Error in user registration: {str(e)}")
+        logger.error(f"Error in register endpoint: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
 
 @app.route('/api/auth/login', methods=['POST'])
@@ -598,6 +1868,7 @@ def login_user():
     try:
         data = request.json
         email = data.get('email', '').strip().lower()
+        password = data.get('password', '')
         
         if not email:
             return jsonify({'error': 'Email is required'}), 400
@@ -607,11 +1878,17 @@ def login_user():
         
         # Find user
         users = db.collection('test_users').where('email', '==', email).limit(1).get()
-        if len(list(users)) == 0:
+        users_list = list(users)
+        
+        if len(users_list) == 0:
             return jsonify({'error': 'User not found'}), 404
         
-        user_doc = list(users)[0]
+        user_doc = users_list[0]
         user_data = user_doc.to_dict()
+        
+        # Simple password check for testing
+        if password and str(hash(password)) != user_data.get('password_hash'):
+            return jsonify({'error': 'Invalid password'}), 401
         
         return jsonify({
             'message': 'Login successful',
@@ -626,256 +1903,271 @@ def login_user():
         logger.error(f"Error in user login: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
 
-@app.route('/api/waitlist', methods=['POST'])
-def join_waitlist():
-    """Add email to waitlist"""
+@app.route('/api/auth/firebase-sync', methods=['POST'])
+def firebase_sync():
+    """Sync Firebase user with local database"""
     try:
         data = request.json
+        firebase_uid = data.get('firebase_uid')
         email = data.get('email', '').strip().lower()
+        name = data.get('name', '')
         
-        if not email:
-            return jsonify({'error': 'Email is required'}), 400
+        if not firebase_uid or not email:
+            return jsonify({'error': 'Firebase UID and email are required'}), 400
         
-        # Basic email validation
-        import re
-        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-        if not re.match(email_pattern, email):
-            return jsonify({'error': 'Invalid email format'}), 400
+        if db is None:
+            return jsonify({'error': 'Database not available'}), 500
         
-        # Store in database if available
-        if db is not None:
-            try:
-                # Check if email already exists
-                existing = db.collection('waitlist').where('email', '==', email).limit(1).get()
-                if len(list(existing)) > 0:
-                    return jsonify({'message': 'Email already on waitlist'}), 200
-                
-                # Add to waitlist
-                db.collection('waitlist').add({
-                    'email': email,
-                    'timestamp': firestore.SERVER_TIMESTAMP,
-                    'source': 'landing_page'
-                })
-                logger.info(f"Added {email} to waitlist")
-            except Exception as e:
-                logger.error(f"Error saving to database: {str(e)}")
-                # Continue anyway - we'll log it
+        # Check if user exists
+        existing_users = db.collection('test_users').where('email', '==', email).limit(1).get()
+        users_list = list(existing_users)
         
-        # Send email notification to join@sentimentalapp.com
-        try:
-            # In a real implementation, you'd use a service like SendGrid, Mailgun, etc.
-            # For now, we'll just log it
-            logger.info(f"New waitlist signup: {email} - should notify join@sentimentalapp.com")
-        except Exception as e:
-            logger.error(f"Error sending notification: {str(e)}")
-        
-        return jsonify({'message': 'Successfully joined waitlist'}), 200
-        
+        if len(users_list) > 0:
+            # User exists, return their info
+            user_doc = users_list[0]
+            user_data = user_doc.to_dict()
+            return jsonify({
+                'user_id': user_doc.id,
+                'email': user_data['email'],
+                'name': user_data['name']
+            }), 200
+        else:
+            # Create new user
+            user_data = {
+                'email': email,
+                'name': name or email.split('@')[0],
+                'firebase_uid': firebase_uid,
+                'created_at': datetime.now().isoformat(),
+                'stories_created': 0,
+                'formats_generated': 0
+            }
+            
+            user_ref = db.collection('test_users').add(user_data)
+            user_id = user_ref[1].id
+            
+            return jsonify({
+                'user_id': user_id,
+                'email': email,
+                'name': user_data['name']
+            }), 201
+            
     except Exception as e:
-        logger.error(f"Error in waitlist endpoint: {str(e)}")
+        logger.error(f"Error in firebase sync: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
 
-@app.route('/api/cosmos-data', methods=['GET'])
-def get_cosmos_data():
-    """Get data for cosmos visualization"""
-    if IS_DEMO:
-        # Use mock data in demo environment
-        mock_stories = get_mock_stories()
-        stories = []
-        for story_data in mock_stories:
-            stories.append({
-                'id': story_data.get('id'),
-                'title': story_data.get('title'),
-                'themes': story_data.get('analysis', {}).get('themes', []),
-                'emotional_intensity': story_data.get('emotional_intensity', 0.5),
-                'timestamp': story_data.get('timestamp')
-            })
-        
-        mock_connections = get_mock_connections()
-        connections = []
-        for conn_data in mock_connections:
-            connections.append({
-                'source': conn_data.get('story_id'),
-                'target': conn_data.get('connected_story_id'),
-                'strength': conn_data.get('strength', 0.5)
-            })
+@app.route('/api/ai/providers', methods=['GET'])
+def get_ai_providers():
+    """Get available AI providers for the frontend"""
+    try:
+        providers = {
+            'openai': {
+                'name': 'OpenAI',
+                'models': ['gpt-4', 'gpt-3.5-turbo'],
+                'available': bool(os.getenv('OPENAI_API_KEY'))
+            },
+            'anthropic': {
+                'name': 'Anthropic',
+                'models': ['claude-3-sonnet', 'claude-3-haiku'],
+                'available': bool(os.getenv('ANTHROPIC_API_KEY'))
+            }
+        }
         
         return jsonify({
-            'stories': stories,
-            'connections': connections,
-            'insights': {
-                'total_stories': len(stories),
-                'total_connections': len(connections),
-                'most_common_themes': get_common_themes(mock_stories)
-            }
+            'providers': providers,
+            'default': 'openai'
         })
-    
-    # Regular database query
-    stories = []
-    for story in db.collection('stories').stream():
-        story_data = story.to_dict()
-        stories.append({
-            'id': story_data.get('id'),
-            'title': story_data.get('title'),
-            'themes': story_data.get('analysis', {}).get('themes', []),
-            'emotional_intensity': story_data.get('emotional_intensity', 0.5),
-            'timestamp': story_data.get('timestamp')
+        
+    except Exception as e:
+        logger.error(f"Error getting AI providers: {str(e)}")
+        return jsonify({
+            'providers': {
+                'openai': {
+                    'name': 'OpenAI',
+                    'models': ['gpt-3.5-turbo'],
+                    'available': False
+                }
+            },
+            'default': 'openai'
+        }), 500
+
+@app.route('/api/admin/fix-reflection-order', methods=['POST'])
+def fix_reflection_order():
+    """Temporary endpoint to move all therapeutic formats to the top of the list"""
+    try:
+        # Get all stories from the correct collection
+        stories_ref = db.collection('stories')
+        stories = stories_ref.get()
+        
+        updated_count = 0
+        total_count = 0
+        
+        therapeutic_formats = ['reflection', 'insights', 'growth_summary', 'journal_entry']
+        
+        for story_doc in stories:
+            total_count += 1
+            story_data = story_doc.to_dict()
+            story_id = story_doc.id
+            
+            created_formats = story_data.get('createdFormats', [])
+            
+            # Check if story has any therapeutic formats
+            has_therapeutic = any(f in created_formats for f in therapeutic_formats)
+            
+            if has_therapeutic:
+                # Separate therapeutic and non-therapeutic formats
+                therapeutic_in_story = [f for f in created_formats if f in therapeutic_formats]
+                non_therapeutic = [f for f in created_formats if f not in therapeutic_formats]
+                
+                # Keep therapeutic formats in their current relative order
+                therapeutic_ordered = [f for f in created_formats if f in therapeutic_formats]
+                
+                # New order: ALL therapeutic formats first, then other formats
+                new_order = therapeutic_ordered + non_therapeutic
+                
+                if new_order != created_formats:
+                    logger.info(f"Updating story {story_id}: {created_formats} -> {new_order}")
+                    
+                    # Update the story
+                    story_doc.reference.update({
+                        'createdFormats': new_order
+                    })
+                    updated_count += 1
+        
+        return jsonify({
+            'success': True,
+            'total_stories': total_count,
+            'updated_stories': updated_count,
+            'message': f'Moved therapeutic formats to top in {updated_count} stories'
         })
-    
-    connections = []
-    for conn in db.collection('connections').stream():
-        conn_data = conn.to_dict()
-        connections.append({
-            'source': conn_data.get('story_id'),
-            'target': conn_data.get('connected_story_id'),
-            'strength': conn_data.get('strength', 0.5)
+        
+    except Exception as e:
+        logger.error(f"Error moving therapeutic formats to top: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/upload/audio', methods=['POST'])
+def upload_audio():
+    """Upload an audio file (MP3) for a song"""
+    try:
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file provided'}), 400
+        
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'error': 'No file selected'}), 400
+        
+        if not allowed_file(file.filename):
+            return jsonify({'error': 'Invalid file type. Allowed: MP3, WAV, OGG, M4A'}), 400
+        
+        # Get story_id and format_type from form data
+        story_id = request.form.get('story_id')
+        format_type = request.form.get('format_type', 'song')
+        
+        if not story_id:
+            return jsonify({'error': 'Story ID required'}), 400
+        
+        # Generate unique filename
+        unique_id = str(uuid.uuid4())
+        original_extension = file.filename.rsplit('.', 1)[1].lower()
+        filename = f"{story_id}_{format_type}_{unique_id}.{original_extension}"
+        
+        # Save file
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+        
+        # Update story format with audio URL
+        stories_ref = db.collection('stories')
+        story_doc = stories_ref.document(story_id).get()
+        
+        if story_doc.exists:
+            story_data = story_doc.to_dict()
+            formats = story_data.get('formats', {})
+            
+            if format_type in formats:
+                # Handle both string and dict format storage
+                if isinstance(formats[format_type], str):
+                    # Convert string format to dict format
+                    formats[format_type] = {
+                        'content': formats[format_type],
+                        'audio_url': f'/static/uploads/{filename}',
+                        'created_at': firestore.SERVER_TIMESTAMP
+                    }
+                else:
+                    # Format is already a dict, just add audio_url
+                    formats[format_type]['audio_url'] = f'/static/uploads/{filename}'
+                
+                stories_ref.document(story_id).update({
+                    'formats': formats
+                })
+            else:
+                # Format doesn't exist yet, create it with audio URL
+                formats[format_type] = {
+                    'content': f'Generated {format_type} content',
+                    'audio_url': f'/static/uploads/{filename}',
+                    'created_at': firestore.SERVER_TIMESTAMP
+                }
+                stories_ref.document(story_id).update({
+                    'formats': formats
+                })
+        
+        return jsonify({
+            'success': True,
+            'audio_url': f'/static/uploads/{filename}',
+            'filename': filename
         })
-    
-    return jsonify({
-        'stories': stories,
-        'connections': connections,
-        'insights': {
-            'total_stories': len(stories),
-            'total_connections': len(connections),
-            'most_common_themes': get_common_themes(stories)
-        }
-    })
+        
+    except Exception as e:
+        logger.error(f"Error uploading audio: {str(e)}")
+        return jsonify({'error': 'Upload failed'}), 500
 
-def get_common_themes(stories):
-    """Finds common themes across stories"""
-    all_themes = []
-    for story in stories:
-        if 'analysis' in story and 'themes' in story['analysis']:
-            all_themes.extend(story['analysis']['themes'])
-    
-    theme_counts = Counter(all_themes)
-    return [theme for theme, count in theme_counts.most_common(10)]
-
-def get_mock_stories():
-    """Returns mock data for demo environment"""
-    return [
-        {
-            "id": "demo1",
-            "title": "First step into a new life",
-            "content": "Today I made a decision that changes everything. After long consideration, I finally decided to accept my dream job. Fear and excitement mix together, but I feel this is the right step.",
-            "author": "Maria K.",
-            "timestamp": "2h ago",
-            "format": "text",
-            "public": True,
-            "reactions": 15,
-            "inCosmos": True,
-            "createdFormats": ["poem", "letter"],
-            "emotional_intensity": 0.8,
-            "analysis": {
-                "themes": ["change", "decision", "dream", "work", "fear"],
-                "emotions": ["positive", "neutral"],
-                "sentiment_score": 0.6
-            },
-            "cosmic_insights": ["change", "decision", "dream"]
-        },
-        {
-            "id": "demo2", 
-            "title": "Grandmother's memories",
-            "content": "I found letters in grandmother's old chest that she once wrote to grandfather. Every line was full of love and longing. These words helped me understand that true love lasts forever.",
-            "author": "John P.",
-            "timestamp": "5h ago",
-            "format": "text", 
-            "public": True,
-            "reactions": 23,
-            "inCosmos": True,
-            "createdFormats": ["story"],
-            "emotional_intensity": 0.9,
-            "analysis": {
-                "themes": ["love", "memories", "family", "letters", "longing"],
-                "emotions": ["positive", "neutral"],
-                "sentiment_score": 0.7
-            },
-            "cosmic_insights": ["love", "memories", "family"]
-        },
-        {
-            "id": "demo3",
-            "title": "Night walk",
-            "content": "Couldn't sleep so I went for a walk in the city. Empty streets, quiet night and only my footsteps echoing. I thought about life and realized that sometimes we need silence to hear our inner voice.",
-            "author": "Lisa M.",
-            "timestamp": "1d ago",
-            "format": "text",
-            "public": True, 
-            "reactions": 8,
-            "inCosmos": False,
-            "createdFormats": [],
-            "emotional_intensity": 0.5,
-            "analysis": {
-                "themes": ["silence", "reflection", "night", "walk", "inner_voice"],
-                "emotions": ["neutral", "positive"],
-                "sentiment_score": 0.3
-            },
-            "cosmic_insights": ["silence", "reflection"]
-        },
-        {
-            "id": "demo4",
-            "title": "Taste of childhood",
-            "content": "Today I baked cookies following grandmother's recipe. The first bite took me back to childhood, where everything was simple and safe. Sometimes it's the small things that bring the most joy.",
-            "author": "Kate L.",
-            "timestamp": "2d ago", 
-            "format": "text",
-            "public": True,
-            "reactions": 31,
-            "inCosmos": True,
-            "createdFormats": ["recipe", "memory"],
-            "emotional_intensity": 0.8,
-            "analysis": {
-                "themes": ["childhood", "memories", "grandmother", "cookies", "joy"],
-                "emotions": ["positive", "neutral"],
-                "sentiment_score": 0.8
-            },
-            "cosmic_insights": ["childhood", "memories", "joy"]
-        },
-        {
-            "id": "demo5",
-            "title": "First snowfall",
-            "content": "I looked out the window and saw the first snow of this winter. The world became quiet and pure. I feel that my soul also needs such cleansing - a chance to start with a clean slate.",
-            "author": "Mark R.",
-            "timestamp": "3d ago",
-            "format": "text", 
-            "public": True,
-            "reactions": 12,
-            "inCosmos": False,
-            "createdFormats": [],
-            "emotional_intensity": 0.6,
-            "analysis": {
-                "themes": ["snow", "purity", "new_beginning", "silence", "soul"],
-                "emotions": ["positive", "neutral"],
-                "sentiment_score": 0.5
-            },
-            "cosmic_insights": ["purity", "new_beginning"]
+@app.route('/api/stories/<string:story_id>/privacy', methods=['PUT'])
+def update_story_privacy(story_id):
+    """Update story privacy settings"""
+    try:
+        data = request.get_json()
+        is_public = data.get('is_public', False)
+        user_id = request.headers.get('X-User-ID')
+        
+        # Require authentication 
+        if not user_id or user_id in ['anonymous', 'anonymous_user', '', 'null', 'undefined']:
+            return jsonify({
+                'error': 'Authentication required',
+                'message': 'Please sign in to update story privacy.'
+            }), 401
+        
+        if db is None:
+            return jsonify({'error': 'Database not available'}), 500
+        
+        # Get the story
+        story_ref = db.collection('stories').document(story_id)
+        story_doc = story_ref.get()
+        
+        if not story_doc.exists:
+            return jsonify({'error': 'Story not found'}), 404
+            
+        story_data = story_doc.to_dict()
+        
+        # Check if user owns this story
+        if story_data.get('user_id') != user_id and story_data.get('author_id') != user_id:
+            return jsonify({'error': 'Permission denied'}), 403
+        
+        # Update privacy settings
+        update_data = {
+            'public': is_public,
+            'privacy': 'public' if is_public else 'private',
+            'updated_at': datetime.now().isoformat()
         }
-    ]
-
-def get_mock_connections():
-    """Returns mock connections for demo environment"""
-    return [
-        {
-            "story_id": "demo1",
-            "connected_story_id": "demo4", 
-            "common_words": ["change", "life", "decision"],
-            "strength": 0.7,
-            "description": "Both stories talk about life changes"
-        },
-        {
-            "story_id": "demo2",
-            "connected_story_id": "demo4",
-            "common_words": ["grandmother", "memories", "love"],
-            "strength": 0.8,
-            "description": "Grandmother's memories connect these stories"
-        },
-        {
-            "story_id": "demo3", 
-            "connected_story_id": "demo5",
-            "common_words": ["silence", "peaceful", "reflection"],
-            "strength": 0.6,
-            "description": "Both seek peace and silence"
-        }
-    ]
+        
+        story_ref.update(update_data)
+        
+        return jsonify({
+            'success': True,
+            'message': f"Story is now {'public' if is_public else 'private'}",
+            'is_public': is_public
+        })
+        
+    except Exception as e:
+        logger.error(f"Error updating story privacy: {e}")
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080))) 
