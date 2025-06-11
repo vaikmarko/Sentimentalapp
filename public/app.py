@@ -1095,6 +1095,83 @@ def get_story_format(story_id, format_type):
         logger.error(f"Error getting format: {e}")
         return jsonify({'error': 'Failed to get format'}), 500
 
+@app.route('/api/stories/<string:story_id>/formats/<string:format_type>', methods=['PUT'])
+def update_story_format(story_id, format_type):
+    """Update/edit a specific format for a story"""
+    try:
+        data = request.json
+        new_content = data.get('content', '')
+        user_id = data.get('user_id') or request.headers.get('X-User-ID')
+        
+        logger.info(f"Updating {format_type} format for story {story_id}")
+        logger.info(f"User ID: {user_id}")
+        
+        if not new_content.strip():
+            return jsonify({'error': 'Content cannot be empty'}), 400
+        
+        # Require authentication
+        if is_anonymous_user(user_id):
+            return jsonify({
+                'error': 'Authentication required',
+                'message': 'Please sign in to edit formats.'
+            }), 401
+        
+        # Get story
+        story_ref = db.collection('stories').document(story_id)
+        story = story_ref.get()
+        
+        if not story.exists:
+            return jsonify({'error': 'Story not found'}), 404
+            
+        story_data = story.to_dict()
+        story_author = story_data.get('user_id')
+        
+        # Check if the requesting user is the author of the story
+        if story_author != user_id:
+            logger.warning(f"Unauthorized format edit attempt:")
+            logger.warning(f"  - Story ID: {story_id}")
+            logger.warning(f"  - Story author: {story_author}")
+            logger.warning(f"  - Requesting user: {user_id}")
+            return jsonify({
+                'error': 'Access denied',
+                'message': 'Only the story author can edit formats.'
+            }), 403
+        
+        # Update the format
+        formats = story_data.get('formats', {})
+        
+        if format_type not in formats:
+            return jsonify({'error': f'Format {format_type} not found'}), 404
+        
+        # Handle both string and dict format storage
+        if isinstance(formats[format_type], dict):
+            # Preserve existing metadata (like audio_url, created_at) but update content
+            formats[format_type]['content'] = new_content
+            formats[format_type]['updated_at'] = datetime.now().isoformat()
+        else:
+            # Simple string format, just update the content
+            formats[format_type] = new_content
+        
+        # Update the story with new format content
+        story_ref.update({
+            'formats': formats,
+            'updated_at': datetime.now().isoformat()
+        })
+        
+        logger.info(f"Successfully updated {format_type} format for story {story_id}")
+        
+        return jsonify({
+            'success': True,
+            'message': 'Format updated successfully',
+            'format_type': format_type,
+            'content': new_content,
+            'updated_at': datetime.now().isoformat()
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error updating format: {e}")
+        return jsonify({'error': 'Failed to update format'}), 500
+
 @app.route('/api/stories/<string:story_id>/generate-format', methods=['POST'])
 def generate_format_for_story(story_id):
     """Generate a new format for an existing story using the FormatsGenerationEngine"""
@@ -1313,8 +1390,37 @@ def process_chat_message():
                     {"role": "system", "content": system_prompt}
                 ]
                 
-                # Add conversation history
-                for msg in conversation_history[-10:]:  # Last 10 messages for context
+                # Add conversation history with smart token management
+                max_context_tokens = 2000  # Reserve tokens for system prompt and response
+                context_messages = []
+                current_tokens = 0
+                
+                # Estimate tokens (rough: 1 token ≈ 4 characters)
+                def estimate_tokens(text):
+                    return len(str(text)) // 4
+                
+                # Always include the first message if it exists (sets conversation tone)
+                if conversation_history:
+                    first_msg = conversation_history[0]
+                    first_tokens = estimate_tokens(first_msg.get('content', ''))
+                    if first_tokens < max_context_tokens // 2:  # Don't let first message dominate
+                        context_messages.append(first_msg)
+                        current_tokens += first_tokens
+                
+                # Add recent messages working backwards (most recent first priority)
+                for msg in reversed(conversation_history[-15:]):  # Check last 15 messages
+                    if msg == conversation_history[0]:  # Skip first message (already added)
+                        continue
+                        
+                    msg_tokens = estimate_tokens(msg.get('content', ''))
+                    if current_tokens + msg_tokens < max_context_tokens:
+                        context_messages.insert(-1 if context_messages else 0, msg)
+                        current_tokens += msg_tokens
+                    else:
+                        break
+                
+                # Add context messages to prompt
+                for msg in context_messages:
                     messages.append({
                         "role": msg.get('role', 'user'),
                         "content": msg.get('content', '')
@@ -2051,7 +2157,7 @@ def get_supported_formats():
             'twitter', 'linkedin', 'instagram', 'facebook',
             'poem', 'song', 'reel', 'short_story', 
             'article', 'blog_post', 'presentation', 'newsletter', 'podcast',
-            'insights', 'reflection', 'growth_summary', 'journal_entry'
+            'insights', 'growth_summary', 'journal_entry'
         ]
         
         return jsonify({

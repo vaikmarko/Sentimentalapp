@@ -30,8 +30,7 @@ class FormatType(Enum):
     NEWSLETTER = "newsletter"
     PODCAST = "podcast"
     
-    # Therapeutic Formats - reflection moved to first position
-    REFLECTION = "reflection"
+    # Therapeutic Formats
     INSIGHTS = "insights"
     GROWTH_SUMMARY = "growth_summary"
     JOURNAL_ENTRY = "journal_entry" 

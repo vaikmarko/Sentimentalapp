@@ -342,14 +342,13 @@ Remember: You're not trying to fix or solve anything. You're helping them explor
                 FormatType.POEM: "You are a poet who transforms personal experiences into beautiful, moving verse that captures the essence of human emotion and universal truths.",
                 FormatType.SONG: "You are a viral hit songwriter creating lyrics that stick in people's heads and make them want to sing along.",
                 FormatType.REEL: "You are a viral content creator who transforms personal stories into engaging short-form video scripts for social media reels, with hooks, visual cues, and compelling narratives.",
-                FormatType.SHORT_STORY: "You are a skilled fiction writer who expands personal experiences into fully-realized short stories with rich characters, settings, and narrative depth.",
+                FormatType.SHORT_STORY: "You are a skilled fairytale writer who expands personal experiences into magical, enchanting fairytales with whimsical characters, imaginative settings, and narrative depth.",
                 FormatType.ARTICLE: "You are a professional magazine writer who transforms personal experiences into compelling, publication-ready articles with journalistic structure and storytelling excellence.",
                 FormatType.BLOG_POST: "You are a professional content creator who writes clean, valuable blog posts that provide actionable insights while maintaining authentic personal storytelling.",
                 FormatType.PRESENTATION: "You are a presentation specialist who transforms stories into compelling, structured presentations that engage audiences and deliver clear takeaways.",
                 FormatType.NEWSLETTER: "You are a newsletter writer who creates personal, engaging content that builds relationships with readers through authentic storytelling and valuable insights.",
         FormatType.PODCAST: "You are a podcast content specialist who creates engaging episode outlines and talking points for intimate, conversational storytelling that would work well with AI-generated audio.",
                 FormatType.INSIGHTS: "You are a therapeutic content specialist who helps people extract meaningful psychological insights from their experiences with practical, actionable guidance.",
-                FormatType.REFLECTION: "You are a mindfulness and self-reflection expert who guides people toward deeper understanding of their experiences and personal growth.",
                 FormatType.GROWTH_SUMMARY: "You are a personal development coach who helps people identify and articulate their growth journey with clear, actionable next steps.",
                 FormatType.JOURNAL_ENTRY: "You are a journaling specialist who helps people process experiences through authentic, vulnerable self-expression and emotional exploration."
             },
@@ -440,17 +439,19 @@ Requirements:
 - Add clear call-to-action or engagement prompt
 - Focus on visual storytelling and quick emotional impact""",
 
-                FormatType.SHORT_STORY: """Expand this into a compelling short story:
+                FormatType.SHORT_STORY: """Expand this into a magical fairytale:
 
 Story: {content}
 
 Requirements:
-- Develop characters and setting
-- Use narrative techniques (dialogue, description, action)
-- Create a complete story arc with beginning, middle, end
+- Transform into a whimsical, enchanting fairytale
+- Develop magical characters and fantasy setting
+- Use fairytale narrative techniques (dialogue, description, magical elements)
+- Create a complete fairytale arc with beginning, middle, end
 - 800-1500 words
+- Include magical elements and enchanting atmosphere
 - Show rather than tell the emotional journey
-- Include sensory details and atmosphere""",
+- Include "once upon a time" style opening and "happily ever after" style ending""",
 
                 FormatType.ARTICLE: """Transform this personal story into a professional magazine-style article:
 
@@ -539,29 +540,20 @@ Requirements:
 - Therapeutic value and practical application
 - Connection to broader life patterns""",
 
-                FormatType.REFLECTION: """Create a deep personal reflection based on this story:
-
-Story: {content}
-
-Requirements:
-- Introspective, contemplative tone
-- Explore the deeper meaning and significance
-- Connect to broader life themes
-- Include questions for further self-examination
-- Focus on emotional processing and understanding
-- 300-500 words of thoughtful analysis""",
-
                 FormatType.GROWTH_SUMMARY: """Create a personal growth summary from this experience:
 
 Story: {content}
 
 Requirements:
-- Identify the key growth moment
-- Before and after perspective
-- Lessons learned and skills developed
-- Future applications of this growth
-- Metrics or ways to measure progress
-- Action steps for continued development""",
+- Identify the key growth moment and what triggered it
+- Compare before and after perspectives clearly
+- List specific lessons learned and skills developed
+- Explain how this growth can be applied in future situations
+- Suggest ways to measure or track this progress
+- Provide 2-3 concrete action steps for continued development
+- Write in a structured, coaching-style format
+- Focus on empowerment and forward momentum
+- 300-500 words of practical personal development insights""",
 
                 FormatType.JOURNAL_ENTRY: """Transform this into a reflective journal entry:
 

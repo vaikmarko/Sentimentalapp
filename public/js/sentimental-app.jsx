@@ -60,7 +60,32 @@ const InnerSpace = () => (
   </svg>
 );
 
+const Globe = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 12 3a9 9 0 0 1 9 9 9.71 9.71 0 0 1-.79 4.21M17 21H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5z"/>
+  </svg>
+);
 
+const ChevronRight = ({ size = 16, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M9 18l6-6-6-6"/>
+  </svg>
+);
+
+const Edit = ({ size = 16 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+    <path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+  </svg>
+);
+
+const Lock = ({ size = 16 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+    <circle cx="12" cy="16" r="1"></circle>
+    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+  </svg>
+);
 
 // Format icons
 const getFormatIcon = (formatType) => {
@@ -109,26 +134,38 @@ const getFormatIcon = (formatType) => {
 
 // Main App Component
 const SentimentalApp = () => {
-  const [currentView, setCurrentView] = useState('discover');
-  const [previousView, setPreviousView] = useState('discover');
-  const [user, setUser] = useState(null);
-  const [stories, setStories] = useState([]);
+  const [currentView, setCurrentView] = useState('chat');
   const [selectedStory, setSelectedStory] = useState(null);
+  const [shareModal, setShareModal] = useState(null);
+  const [previousView, setPreviousView] = useState('chat');
+  const [currentFormat, setCurrentFormat] = useState(null);
+  const [formatContent, setFormatContent] = useState('');
+  const [loadingFormat, setLoadingFormat] = useState(false);
+  const [stories, setStories] = useState([]);
+  const [userStories, setUserStories] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [user, setUser] = useState(null);
   const [showLogin, setShowLogin] = useState(false);
+  const [supportedFormats, setSupportedFormats] = useState({});
+  
+  // Edit story state
+  const [editingStory, setEditingStory] = useState(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editContent, setEditContent] = useState('');
+  const [isUpdatingStory, setIsUpdatingStory] = useState(false);
+
+  // Edit format state
+  const [editingFormat, setEditingFormat] = useState(null);
+  const [editFormatContent, setEditFormatContent] = useState('');
+  const [isUpdatingFormat, setIsUpdatingFormat] = useState(false);
+
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [loadingFormat, setLoadingFormat] = useState(false);
-  const [loginForm, setLoginForm] = useState({ name: '', email: '', password: '' });
   const [isSignupMode, setIsSignupMode] = useState(false);
   const [appInitialized, setAppInitialized] = useState(false);
 
-  // Format viewing state
-  const [currentFormat, setCurrentFormat] = useState(null);
-  const [formatContent, setFormatContent] = useState('');
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [uploadingAudio, setUploadingAudio] = useState(false);
-  const [supportedFormats, setSupportedFormats] = useState([]);
   const [loadingFormats, setLoadingFormats] = useState(true);
   const [showSpaceModal, setShowSpaceModal] = useState(false);
 
@@ -295,14 +332,14 @@ const SentimentalApp = () => {
           'twitter', 'linkedin', 'instagram', 'facebook',
           'poem', 'song', 'script', 'short_story', 
           'article', 'blog_post', 'presentation', 'newsletter',
-          'insights', 'reflection', 'growth_summary', 'journal_entry'
+          'insights', 'growth_summary', 'journal_entry'
         ]);
       }
     } catch (error) {
       console.error('Error fetching supported formats:', error);
       // Fallback to core formats that definitely work
       setSupportedFormats([
-        'twitter', 'linkedin', 'instagram', 'poem', 'song', 'article', 'reflection', 'insights'
+        'twitter', 'linkedin', 'instagram', 'poem', 'song', 'article', 'insights'
       ]);
     } finally {
       setLoadingFormats(false);
@@ -825,6 +862,151 @@ const SentimentalApp = () => {
     }
   };
 
+  // Edit story functionality
+  const startEditingStory = (story) => {
+    setEditingStory(story);
+    setEditTitle(story.title);
+    setEditContent(story.content);
+  };
+
+  const cancelEditStory = () => {
+    setEditingStory(null);
+    setEditTitle('');
+    setEditContent('');
+  };
+
+  const saveStoryEdit = async () => {
+    if (!editingStory || !user || !user.id) {
+      return;
+    }
+
+    if (!editTitle.trim() || !editContent.trim()) {
+      alert('Please fill in both title and content');
+      return;
+    }
+
+    setIsUpdatingStory(true);
+
+    try {
+      const response = await fetch(`/api/stories/${editingStory.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-ID': user.id
+        },
+        body: JSON.stringify({
+          title: editTitle.trim(),
+          content: editContent.trim()
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Update the story in local state
+        setStories(prev => prev.map(story => 
+          story.id === editingStory.id ? data : story
+        ));
+        
+        // Update userStories if it exists
+        setUserStories(prev => prev.map(story => 
+          story.id === editingStory.id ? data : story
+        ));
+
+        // Update selectedStory if it's the one being edited
+        if (selectedStory && selectedStory.id === editingStory.id) {
+          setSelectedStory(data);
+        }
+
+        // Clear editing state
+        cancelEditStory();
+        
+        alert('Story updated successfully!');
+      } else {
+        alert(data.message || 'Failed to update story');
+      }
+    } catch (error) {
+      console.error('Error updating story:', error);
+      alert('Failed to update story. Please try again.');
+    } finally {
+      setIsUpdatingStory(false);
+    }
+  };
+
+  // Format editing functions
+  const startEditingFormat = (format, content) => {
+    setEditingFormat(format);
+    const contentText = typeof content === 'object' ? content.content || content : content;
+    setEditFormatContent(contentText || '');
+  };
+
+  const cancelEditFormat = () => {
+    setEditingFormat(null);
+    setEditFormatContent('');
+  };
+
+  const saveFormatEdit = async () => {
+    if (!editingFormat || !currentFormat) return;
+
+    setIsUpdatingFormat(true);
+    try {
+      const response = await fetch(`/api/stories/${currentFormat.story.id}/formats/${editingFormat.formatType}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content: editFormatContent,
+          user_id: user?.id
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Update the format content in current view
+        setFormatContent(editFormatContent);
+        
+        // Update the story's formats in local state
+        setStories(prev => prev.map(story => 
+          story.id === currentFormat.story.id 
+            ? { 
+                ...story, 
+                formats: { 
+                  ...story.formats, 
+                  [editingFormat.formatType]: editFormatContent 
+                }
+              }
+            : story
+        ));
+        
+        // Update selected story if viewing the same story
+        if (selectedStory && selectedStory.id === currentFormat.story.id) {
+          setSelectedStory(prev => ({
+            ...prev,
+            formats: {
+              ...prev.formats,
+              [editingFormat.formatType]: editFormatContent
+            }
+          }));
+        }
+        
+        // Clear editing state
+        setEditingFormat(null);
+        setEditFormatContent('');
+      } else {
+        const errorData = await response.json();
+        console.error('Failed to update format:', errorData);
+        alert(`Failed to update format: ${errorData.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error updating format:', error);
+      alert('Error updating format. Please try again.');
+    } finally {
+      setIsUpdatingFormat(false);
+    }
+  };
+
   // UI Components
   const renderNavbar = () => (
     <nav className="hidden md:block bg-white border-b border-gray-200 px-4 py-2 sticky top-0 z-50">
@@ -1190,7 +1372,9 @@ const SentimentalApp = () => {
                     <div className="mb-4 p-3 bg-purple-50 rounded-lg">
                       <div className="flex items-center gap-2 mb-2">
                         <Sparkles />
-                        <span className="text-sm font-medium text-purple-700">Your Transformations:</span>
+                        <span className="text-sm font-medium text-purple-700">
+                          {user && story.user_id === user.id ? 'Your Transformations:' : 'Available Transformations:'}
+                        </span>
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {story.createdFormats.map(format => (
@@ -1530,65 +1714,82 @@ const SentimentalApp = () => {
             {userStories.map((story) => (
               <div
                 key={story.id}
-                className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-100 p-6"
+                className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 cursor-pointer border border-gray-100 p-6 group"
                 onClick={() => {
                   setSelectedStory(story);
                   setPreviousView('stories');
                   setCurrentView('story-detail');
                 }}
               >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                    <span className="text-white font-semibold text-sm">
-                      {story.author?.[0]?.toUpperCase() || 'U'}
-                    </span>
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-purple-700 transition-colors">
+                      {story.title}
+                    </h3>
+                    <div className="flex items-center gap-3 text-sm text-gray-500 mb-3">
+                      <span>{formatDate(story.created_at || story.timestamp)}</span>
+                      <span>•</span>
+                      <span className="capitalize">{story.type || 'Story'}</span>
+                      {story.public && (
+                        <>
+                          <span>•</span>
+                          <span className="text-green-600 font-medium">Public</span>
+                        </>
+                      )}
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium text-gray-900">{story.author || 'Anonymous'}</p>
-                    <p className="text-sm text-gray-500">
-                      {story.timestamp ? new Date(story.timestamp).toLocaleDateString() : '1 day ago'}
-                    </p>
+                  
+                  <div className="flex items-center gap-2">
+                    {/* Edit Button - Only show for story owner */}
+                    {user && (story.user_id === user.id || story.author_id === user.id) && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          startEditingStory(story);
+                        }}
+                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        title="Edit story"
+                      >
+                        <Edit size={16} />
+                      </button>
+                    )}
                   </div>
                 </div>
 
-                <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
-                  {story.title}
-                </h3>
-                
-                <p className="text-gray-600 text-sm line-clamp-3 mb-4">
-                  {story.content}
-                </p>
+                {/* Story Preview */}
+                <div className="mb-4 p-4 bg-gray-50 rounded-xl group-hover:bg-purple-50 transition-colors">
+                  <p className="text-gray-700 text-sm leading-relaxed line-clamp-3">
+                    {story.content?.substring(0, 200) + '...' || 'Click to read your full story...'}
+                  </p>
+                </div>
 
-                {/* Privacy toggle and formats */}
-                <div className="flex items-center justify-between mt-4">
-                  <div className="flex items-center gap-2">
-                    {/* Privacy Toggle Slider */}
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-gray-600">Private</span>
+                {/* Privacy and formats - exact original style */}
+                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                  <div className="flex items-center gap-3 text-sm text-gray-500">
+                    <span className="text-gray-600">
+                      {story.public ? 'Public' : 'Private'}
+                    </span>
+                    {user && (story.user_id === user.id || story.author_id === user.id) && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           toggleStoryPrivacy(story.id, story.public);
                         }}
-                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${
-                          story.public 
-                            ? 'bg-green-500' 
-                            : 'bg-gray-300'
-                        }`}
+                        className="relative inline-flex items-center h-6 w-11 bg-gray-200 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                        style={{
+                          backgroundColor: story.public ? '#10B981' : '#D1D5DB'
+                        }}
+                        title={story.public ? 'Make private' : 'Make public'}
                       >
                         <span
-                          className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
-                            story.public ? 'translate-x-5' : 'translate-x-1'
-                          }`}
+                          className="inline-block w-4 h-4 bg-white rounded-full transition-transform"
+                          style={{
+                            transform: story.public ? 'translateX(24px)' : 'translateX(4px)'
+                          }}
                         />
                       </button>
-                      <span className="text-xs text-gray-600">Public</span>
-                      <div className="text-xs">
-                        {story.public ? '🌍' : '🔒'}
-                      </div>
-                    </div>
+                    )}
                     
-                    {/* Your Transformations */}
                     {story.createdFormats && story.createdFormats.length > 0 && (
                       <>
                         <span className="text-xs text-purple-600 font-medium">•</span>
@@ -1602,6 +1803,13 @@ const SentimentalApp = () => {
                         )}
                       </>
                     )}
+                  </div>
+                  
+                  {/* Read Full Story Button */}
+                  <div className="flex items-center gap-2 text-purple-600 group-hover:text-purple-700 font-medium text-sm">
+                    <BookOpen size={16} />
+                    <span>Read Full Story</span>
+                    <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
               </div>
@@ -1631,6 +1839,7 @@ const SentimentalApp = () => {
 
     return (
       <div className="p-6">
+        {/* Back Button - Top of Content */}
         <div className="mb-6">
           <button
             onClick={() => setCurrentView(previousView || 'discover')}
@@ -1641,18 +1850,32 @@ const SentimentalApp = () => {
           </button>
           
           <div className="bg-white rounded-2xl shadow-lg p-8">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                <span className="text-white font-semibold">
-                  {selectedStory.author?.[0]?.toUpperCase() || 'U'}
-                </span>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                  <span className="text-white font-semibold">
+                    {selectedStory.author?.[0]?.toUpperCase() || 'U'}
+                  </span>
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900 text-lg">{selectedStory.author || 'Anonymous'}</p>
+                  <p className="text-gray-500">
+                    {selectedStory.timestamp ? new Date(selectedStory.timestamp).toLocaleDateString() : '1 day ago'}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="font-semibold text-gray-900 text-lg">{selectedStory.author || 'Anonymous'}</p>
-                <p className="text-gray-500">
-                  {selectedStory.timestamp ? new Date(selectedStory.timestamp).toLocaleDateString() : '1 day ago'}
-                </p>
-              </div>
+              
+              {/* Edit Button - Only show for story owner */}
+              {user && (selectedStory.user_id === user.id || selectedStory.author_id === user.id) && (
+                <button
+                  onClick={() => startEditingStory(selectedStory)}
+                  className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                  title="Edit story"
+                >
+                  <Edit size={16} />
+                  <span className="text-sm font-medium">Edit</span>
+                </button>
+              )}
             </div>
 
             <h1 className="text-3xl font-bold text-gray-900 mb-6">{selectedStory.title}</h1>
@@ -1663,12 +1886,25 @@ const SentimentalApp = () => {
               </p>
             </div>
 
+                         {/* Bottom Back Button - After Story Content */}
+             <div className="mt-8 pt-6 border-t border-gray-200 flex justify-center">
+               <button
+                 onClick={() => setCurrentView(previousView || 'discover')}
+                 className="flex items-center gap-2 text-gray-600 hover:text-purple-600 px-4 py-2 rounded-lg font-medium transition-colors hover:bg-gray-50"
+               >
+                 <ArrowLeft size={16} />
+                 Back to {previousView === 'stories' ? 'My Stories' : 'Discover'}
+               </button>
+             </div>
+
             {/* Your Transformations */}
             {selectedStory.createdFormats && selectedStory.createdFormats.length > 0 && (
               <div className="mt-8 p-4 bg-purple-50 rounded-xl">
                 <div className="flex items-center gap-2 mb-3">
                   <Sparkles />
-                  <span className="font-medium text-purple-700">Your Transformations:</span>
+                  <span className="font-medium text-purple-700">
+                  {user && selectedStory.user_id === user.id ? 'Your Transformations:' : 'Available Transformations:'}
+                </span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {selectedStory.createdFormats.map(format => (
@@ -1715,8 +1951,6 @@ const SentimentalApp = () => {
                 </div>
               </div>
             )}
-
-
           </div>
         </div>
       </div>
@@ -1730,6 +1964,8 @@ const SentimentalApp = () => {
       video: 'Reel', 
       tiktok_script: 'TikTok Reel',
       instagram_reel: 'Instagram Reel',
+      short_story: 'Fairytale',
+      insights: 'Therapeutic Feedback',
       // Add other custom names as needed
     };
     
@@ -1894,18 +2130,32 @@ const SentimentalApp = () => {
           
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
             <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center gap-3">
-                <div className="text-3xl">{getFormatIcon(currentFormat.formatType)}</div>
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900">
-                    {currentFormat.formatType === 'song' ? (
-                      currentFormat.title && currentFormat.title !== 'Default Title' ? 
-                        currentFormat.title : 
-                        extractSongTitle(typeof formatContent === 'object' ? formatContent.content || '' : formatContent || '') || getFormatDisplayName(currentFormat.formatType)
-                    ) : getFormatDisplayName(currentFormat.formatType)}
-                  </h1>
-                  <p className="text-gray-600">{currentFormat.story.title}</p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="text-3xl">{getFormatIcon(currentFormat.formatType)}</div>
+                  <div>
+                    <h1 className="text-2xl font-bold text-gray-900">
+                      {currentFormat.formatType === 'song' ? (
+                        currentFormat.title && currentFormat.title !== 'Default Title' ? 
+                          currentFormat.title : 
+                          extractSongTitle(typeof formatContent === 'object' ? formatContent.content || '' : formatContent || '') || getFormatDisplayName(currentFormat.formatType)
+                      ) : getFormatDisplayName(currentFormat.formatType)}
+                    </h1>
+                    <p className="text-gray-600">{currentFormat.story.title}</p>
+                  </div>
                 </div>
+                
+                {/* Edit Button - Only show for story owner */}
+                {user && currentFormat.story.user_id === user.id && (
+                  <button
+                    onClick={() => startEditingFormat(currentFormat, formatContent)}
+                    className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    title="Edit format"
+                  >
+                    <Edit size={16} />
+                    <span className="text-sm font-medium">Edit</span>
+                  </button>
+                )}
               </div>
             </div>
 
@@ -2331,12 +2581,168 @@ const SentimentalApp = () => {
     return null;
   }
 
+  // Edit Story Modal
+  const renderEditStoryModal = () => {
+    if (!editingStory) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Edit Story</h2>
+              <button
+                onClick={cancelEditStory}
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Title Input */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Story Title
+                </label>
+                <input
+                  type="text"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  placeholder="Enter story title..."
+                />
+              </div>
+
+              {/* Content Textarea */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Story Content
+                </label>
+                <textarea
+                  value={editContent}
+                  onChange={(e) => setEditContent(e.target.value)}
+                  rows={12}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-vertical"
+                  placeholder="Write your story content..."
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
+                <button
+                  onClick={cancelEditStory}
+                  className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                  disabled={isUpdatingStory}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={saveStoryEdit}
+                  disabled={isUpdatingStory || !editTitle.trim() || !editContent.trim()}
+                  className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                >
+                  {isUpdatingStory && (
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                  )}
+                  {isUpdatingStory ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Edit Format Modal
+  const renderEditFormatModal = () => {
+    if (!editingFormat) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">
+                Edit {getFormatDisplayName(editingFormat.formatType)}
+              </h2>
+              <button
+                onClick={cancelEditFormat}
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Format Type Info */}
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="flex items-center gap-3">
+                  <div className="text-2xl">{getFormatIcon(editingFormat.formatType)}</div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">
+                      {getFormatDisplayName(editingFormat.formatType)}
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      Based on: {editingFormat.story.title}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Content Textarea */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Format Content
+                </label>
+                <textarea
+                  value={editFormatContent}
+                  onChange={(e) => setEditFormatContent(e.target.value)}
+                  rows={16}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-vertical font-sans text-sm"
+                  placeholder={`Edit your ${getFormatDisplayName(editingFormat.formatType).toLowerCase()} content...`}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Make your changes to the generated content above
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
+                <button
+                  onClick={cancelEditFormat}
+                  className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                  disabled={isUpdatingFormat}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={saveFormatEdit}
+                  disabled={isUpdatingFormat || !editFormatContent.trim()}
+                  className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                >
+                  {isUpdatingFormat && (
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                  )}
+                  {isUpdatingFormat ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {renderNavbar()}
       {renderLoginModal()}
       {renderUploadModal()}
       {renderSpaceModal()}
+      {editingStory && renderEditStoryModal()}
+      {editingFormat && renderEditFormatModal()}
       
       {/* Main Content with bottom padding on mobile for footer */}
       <div className="pb-20 md:pb-0">

@@ -50,6 +50,14 @@ logger.info(f"Starting application in {ENVIRONMENT} environment")
 
 app = Flask(__name__)
 
+# Add CORS support for local development
+try:
+    from flask_cors import CORS
+    CORS(app)
+    logger.info("CORS enabled for local development")
+except ImportError:
+    logger.warning("flask-cors not installed, skipping CORS setup")
+
 # Initialize db variable
 db = None
 
@@ -1095,6 +1103,83 @@ def get_story_format(story_id, format_type):
         logger.error(f"Error getting format: {e}")
         return jsonify({'error': 'Failed to get format'}), 500
 
+@app.route('/api/stories/<string:story_id>/formats/<string:format_type>', methods=['PUT'])
+def update_story_format(story_id, format_type):
+    """Update/edit a specific format for a story"""
+    try:
+        data = request.json
+        new_content = data.get('content', '')
+        user_id = data.get('user_id') or request.headers.get('X-User-ID')
+        
+        logger.info(f"Updating {format_type} format for story {story_id}")
+        logger.info(f"User ID: {user_id}")
+        
+        if not new_content.strip():
+            return jsonify({'error': 'Content cannot be empty'}), 400
+        
+        # Require authentication
+        if is_anonymous_user(user_id):
+            return jsonify({
+                'error': 'Authentication required',
+                'message': 'Please sign in to edit formats.'
+            }), 401
+        
+        # Get story
+        story_ref = db.collection('stories').document(story_id)
+        story = story_ref.get()
+        
+        if not story.exists:
+            return jsonify({'error': 'Story not found'}), 404
+            
+        story_data = story.to_dict()
+        story_author = story_data.get('user_id')
+        
+        # Check if the requesting user is the author of the story
+        if story_author != user_id:
+            logger.warning(f"Unauthorized format edit attempt:")
+            logger.warning(f"  - Story ID: {story_id}")
+            logger.warning(f"  - Story author: {story_author}")
+            logger.warning(f"  - Requesting user: {user_id}")
+            return jsonify({
+                'error': 'Access denied',
+                'message': 'Only the story author can edit formats.'
+            }), 403
+        
+        # Update the format
+        formats = story_data.get('formats', {})
+        
+        if format_type not in formats:
+            return jsonify({'error': f'Format {format_type} not found'}), 404
+        
+        # Handle both string and dict format storage
+        if isinstance(formats[format_type], dict):
+            # Preserve existing metadata (like audio_url, created_at) but update content
+            formats[format_type]['content'] = new_content
+            formats[format_type]['updated_at'] = datetime.now().isoformat()
+        else:
+            # Simple string format, just update the content
+            formats[format_type] = new_content
+        
+        # Update the story with new format content
+        story_ref.update({
+            'formats': formats,
+            'updated_at': datetime.now().isoformat()
+        })
+        
+        logger.info(f"Successfully updated {format_type} format for story {story_id}")
+        
+        return jsonify({
+            'success': True,
+            'message': 'Format updated successfully',
+            'format_type': format_type,
+            'content': new_content,
+            'updated_at': datetime.now().isoformat()
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error updating format: {e}")
+        return jsonify({'error': 'Failed to update format'}), 500
+
 @app.route('/api/stories/<string:story_id>/generate-format', methods=['POST'])
 def generate_format_for_story(story_id):
     """Generate a new format for an existing story using the FormatsGenerationEngine"""
@@ -1282,7 +1367,7 @@ def generate_format_for_story(story_id):
 
 @app.route('/api/chat/message', methods=['POST'])
 def process_chat_message():
-    """Process a chat message and potentially generate stories"""
+    """Process a chat message with intelligent conversation summarization"""
     try:
         data = request.get_json()
         message = data.get('message', '')
@@ -1299,22 +1384,107 @@ def process_chat_message():
                 'message': 'Please sign in to start chatting. Create an account to save your conversations and stories.'
             }), 401
         
-
-        
         logger.info(f"Processing chat message for user {user_id}")
         
         # Generate AI response
         if openai.api_key:
             try:
-                # Build conversation context
-                # Use the sophisticated conversation prompt from prompts_engine
+                # Build conversation context with intelligent summarization
                 system_prompt = prompts_engine.get_conversation_prompt(PromptType.DISCOVERY)
-                messages = [
-                    {"role": "system", "content": system_prompt}
-                ]
+                messages = [{"role": "system", "content": system_prompt}]
                 
-                # Add conversation history
-                for msg in conversation_history[-10:]:  # Last 10 messages for context
+                # Enhanced conversation management with summarization
+                max_context_tokens = 2000  # Reserve tokens for system prompt and response
+                context_messages = []
+                current_tokens = 0
+                conversation_length = len(conversation_history)
+                
+                # Estimate tokens (rough: 1 token ≈ 4 characters)
+                def estimate_tokens(text):
+                    return len(str(text)) // 4
+                
+                # Apply intelligent conversation summarization for very long conversations
+                if conversation_length > 30:
+                    logger.info(f"Long conversation detected ({conversation_length} messages), applying summarization")
+                    
+                    try:
+                        # Create a comprehensive conversation summary that maintains topic coherence
+                        summary_messages = []
+                        
+                        # Always preserve the first few messages (conversation foundation)
+                        foundation_messages = conversation_history[:3]
+                        summary_messages.extend(foundation_messages)
+                        
+                        # Identify conversation phases for targeted summarization
+                        middle_start = 3
+                        middle_end = max(middle_start, conversation_length - 12)  # Keep last 12 messages intact
+                        
+                        if middle_end > middle_start:
+                            # Split middle section into chunks for progressive summarization
+                            middle_section = conversation_history[middle_start:middle_end]
+                            chunk_size = 8  # Process 8 messages at a time
+                            
+                            for i in range(0, len(middle_section), chunk_size):
+                                chunk = middle_section[i:i + chunk_size]
+                                if len(chunk) >= 4:  # Only summarize substantial chunks
+                                    chunk_text = "\n".join([f"{msg.get('role', 'user')}: {msg.get('content', '')}" for msg in chunk])
+                                    
+                                    # Create contextual summary that preserves topic flow
+                                    summary_response = openai.ChatCompletion.create(
+                                        model="gpt-3.5-turbo",
+                                        messages=[
+                                            {"role": "system", "content": """Create a flowing summary that captures:
+1. Key topics and emotional themes discussed
+2. Important insights or breakthroughs shared
+3. Questions or concerns raised
+4. The natural progression of the conversation
+
+Keep the summary conversational and preserve the user's voice. Focus on continuity and topic coherence."""},
+                                            {"role": "user", "content": f"Summarize this conversation section while maintaining topic flow:\n\n{chunk_text}"}
+                                        ],
+                                        max_tokens=120,
+                                        temperature=0.2
+                                    )
+                                    
+                                    summary_content = summary_response.choices[0].message.content.strip()
+                                    summary_messages.append({
+                                        "role": "system",
+                                        "content": f"[Conversation summary]: {summary_content}"
+                                    })
+                                else:
+                                    # Keep smaller chunks as-is
+                                    summary_messages.extend(chunk)
+                        
+                        # Always include recent messages (last 12) to maintain immediate context
+                        recent_messages = conversation_history[-12:]
+                        summary_messages.extend(recent_messages)
+                        
+                        # Use summarized conversation as context
+                        processed_history = summary_messages
+                        
+                        logger.info(f"Conversation summarized: {conversation_length} → {len(processed_history)} messages")
+                        
+                    except Exception as e:
+                        logger.warning(f"Summarization failed, using recent messages only: {e}")
+                        # Fallback: use recent messages only
+                        processed_history = conversation_history[-15:]
+                else:
+                    # Standard processing for shorter conversations
+                    processed_history = conversation_history
+                
+                # Apply token-based context management to processed history
+                for msg in processed_history:
+                    msg_tokens = estimate_tokens(msg.get('content', ''))
+                    if current_tokens + msg_tokens < max_context_tokens:
+                        context_messages.append(msg)
+                        current_tokens += msg_tokens
+                    else:
+                        # If we run out of space, prioritize the most recent messages
+                        context_messages = context_messages[-10:] + [msg]
+                        break
+                
+                # Add context messages to prompt
+                for msg in context_messages:
                     messages.append({
                         "role": msg.get('role', 'user'),
                         "content": msg.get('content', '')
@@ -1323,6 +1493,7 @@ def process_chat_message():
                 # Add current message
                 messages.append({"role": "user", "content": message})
                 
+                # Generate response with enhanced context
                 response = openai.ChatCompletion.create(
                     model="gpt-3.5-turbo",
                     messages=messages,
@@ -1334,10 +1505,8 @@ def process_chat_message():
                 
             except Exception as e:
                 logger.error(f"OpenAI API error: {e}")
-                # Use intelligent fallback instead of hardcoded response
                 ai_response = prompts_engine.get_fallback_response(message, {})
         else:
-            # Use intelligent fallback instead of hardcoded response
             ai_response = prompts_engine.get_fallback_response(message, {})
         
         # Check if this conversation is ready for story generation
@@ -1368,6 +1537,12 @@ def process_chat_message():
             'response': ai_response,
             'timestamp': datetime.now().isoformat()
         }
+        
+        # Add summarization info for debugging/monitoring
+        if conversation_length > 30:
+            result['conversation_summarized'] = True
+            result['original_length'] = conversation_length
+            result['processed_length'] = len(context_messages)
         
         # Generate story if appropriate
         if should_generate_story:
@@ -1405,8 +1580,6 @@ def generate_story_endpoint():
                 'error': 'Authentication required',
                 'message': 'Please sign in to create stories. Create an account to save your stories and access them later.'
             }), 401
-        
-
         
         logger.info(f"Generating story from conversation for user {user_id}")
         
@@ -2051,7 +2224,7 @@ def get_supported_formats():
             'twitter', 'linkedin', 'instagram', 'facebook',
             'poem', 'song', 'reel', 'short_story', 
             'article', 'blog_post', 'presentation', 'newsletter', 'podcast',
-            'insights', 'reflection', 'growth_summary', 'journal_entry'
+            'insights', 'growth_summary', 'journal_entry'
         ]
         
         return jsonify({

@@ -279,7 +279,7 @@ class FormatsGenerationEngine:
             FormatType.POEM: "You are a poet who transforms personal experiences into beautiful, moving verse that captures the essence of human emotion and universal truths.",
             FormatType.SONG: "You are a songwriter who creates emotionally resonant lyrics that capture life experiences in musical, memorable language that people can connect with.",
             FormatType.REEL: "You are a viral content creator who transforms personal stories into engaging short-form video scripts for social media reels, with hooks, visual cues, and compelling narratives.",
-            FormatType.SHORT_STORY: "You are a skilled fiction writer who expands personal experiences into fully-realized short stories with rich characters, settings, and narrative depth.",
+            FormatType.SHORT_STORY: "You are a skilled fairytale writer who expands personal experiences into magical, enchanting fairytales with whimsical characters, imaginative settings, and narrative depth.",
             
             # Professional Formats
             FormatType.ARTICLE: "You are a skilled writer who creates compelling personal essays that blend storytelling with universal insights and actionable wisdom.",
@@ -290,7 +290,6 @@ class FormatsGenerationEngine:
             
             # Therapeutic Formats
             FormatType.INSIGHTS: "You are a therapeutic content specialist who helps people extract meaningful psychological insights from their experiences with practical, actionable guidance.",
-            FormatType.REFLECTION: "You are a mindfulness and self-reflection expert who guides people toward deeper understanding of their experiences and personal growth.",
             FormatType.GROWTH_SUMMARY: "You are a personal development coach who helps people identify and articulate their growth journey with clear, actionable next steps.",
             FormatType.JOURNAL_ENTRY: "You are a journaling specialist who helps people process experiences through authentic, vulnerable self-expression and emotional exploration."
         }
