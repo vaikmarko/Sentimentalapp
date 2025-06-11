@@ -1950,6 +1950,24 @@ def register_user():
         if db is None:
             return jsonify({'error': 'Database not available'}), 500
         
+        # Check if user already exists by EMAIL first (prevent duplicates)
+        existing_users_by_email = db.collection('test_users').where('email', '==', email).limit(1).get()
+        users_by_email = list(existing_users_by_email)
+        
+        if len(users_by_email) > 0:
+            # User with this email already exists, return existing account
+            user_doc = users_by_email[0]
+            user_data = user_doc.to_dict()
+            
+            logger.info(f"User with email {email} already exists: {user_doc.id}")
+            
+            return jsonify({
+                'user_id': user_doc.id,
+                'email': user_data['email'],
+                'name': user_data['name'],
+                'message': 'User already exists with this email'
+            }), 200
+        
         # Check if user already exists by UID
         existing_users = db.collection('test_users').where('firebase_uid', '==', uid).limit(1).get()
         users_list = list(existing_users)
