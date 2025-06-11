@@ -237,7 +237,7 @@ class FormatsGenerationEngine:
         """Select appropriate OpenAI model based on format complexity"""
         
         # Use GPT-4 for complex creative formats
-        complex_formats = [FormatType.ARTICLE, FormatType.SCRIPT, FormatType.POEM, FormatType.INSIGHTS]
+        complex_formats = [FormatType.ARTICLE, FormatType.REEL, FormatType.POEM, FormatType.INSIGHTS, FormatType.PODCAST]
         
         if format_type in complex_formats:
             return "gpt-4"
@@ -258,7 +258,7 @@ class FormatsGenerationEngine:
     
     def _get_temperature_for_format(self, format_type: FormatType) -> float:
         """Get appropriate creativity level for format"""
-        creative_formats = [FormatType.POEM, FormatType.SONG, FormatType.SCRIPT]
+        creative_formats = [FormatType.POEM, FormatType.SONG, FormatType.REEL]
         
         if format_type in creative_formats:
             return 0.8  # More creative
@@ -278,14 +278,15 @@ class FormatsGenerationEngine:
             # Creative Formats
             FormatType.POEM: "You are a poet who transforms personal experiences into beautiful, moving verse that captures the essence of human emotion and universal truths.",
             FormatType.SONG: "You are a songwriter who creates emotionally resonant lyrics that capture life experiences in musical, memorable language that people can connect with.",
-            FormatType.SCRIPT: "You are a screenwriter and dramatist who transforms personal stories into compelling dramatic narratives with authentic dialogue and emotional depth.",
+            FormatType.REEL: "You are a viral content creator who transforms personal stories into engaging short-form video scripts for social media reels, with hooks, visual cues, and compelling narratives.",
             FormatType.SHORT_STORY: "You are a skilled fiction writer who expands personal experiences into fully-realized short stories with rich characters, settings, and narrative depth.",
             
             # Professional Formats
             FormatType.ARTICLE: "You are a skilled writer who creates compelling personal essays that blend storytelling with universal insights and actionable wisdom.",
             FormatType.BLOG_POST: "You are an experienced blogger who creates engaging, shareable content that combines personal storytelling with practical insights and strong reader engagement.",
             FormatType.PRESENTATION: "You are a presentation specialist who transforms stories into compelling, structured presentations that engage audiences and deliver clear takeaways.",
-            FormatType.NEWSLETTER: "You are a newsletter writer who creates personal, engaging content that builds relationships with readers through authentic storytelling and valuable insights.",
+                          FormatType.NEWSLETTER: "You are a newsletter writer who creates personal, engaging content that builds relationships with readers through authentic storytelling and valuable insights.",
+              FormatType.PODCAST: "You are a podcast content specialist who creates engaging episode outlines and talking points for intimate, conversational storytelling that would work well with AI-generated audio.",
             
             # Therapeutic Formats
             FormatType.INSIGHTS: "You are a therapeutic content specialist who helps people extract meaningful psychological insights from their experiences with practical, actionable guidance.",

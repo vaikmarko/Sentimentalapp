@@ -53,6 +53,15 @@ const X = () => (
   </svg>
 );
 
+const InnerSpace = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10"/>
+    <polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88"/>
+  </svg>
+);
+
+
+
 // Format icons
 const getFormatIcon = (formatType) => {
   const icons = {
@@ -119,20 +128,49 @@ const SentimentalApp = () => {
   const [formatContent, setFormatContent] = useState('');
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [uploadingAudio, setUploadingAudio] = useState(false);
+  const [supportedFormats, setSupportedFormats] = useState([]);
+  const [loadingFormats, setLoadingFormats] = useState(true);
+  const [showSpaceModal, setShowSpaceModal] = useState(false);
 
   // Initialize
   useEffect(() => {
     const initializeApp = async () => {
       try {
+        // Check if user has access - if not, redirect to landing page
+        const storedAccess = localStorage.getItem('sentimental_access');
+        if (storedAccess !== 'granted') {
+          window.location.href = '/';
+          return;
+        }
+        
         // Load initial data
-        await fetchStories();
+        await Promise.all([
+          fetchStories(),
+          fetchSupportedFormats()
+        ]);
         
         // Check for existing user session
         const savedUser = localStorage.getItem('sentimental_user');
         if (savedUser) {
           try {
-            setUser(JSON.parse(savedUser));
+            const parsedUser = JSON.parse(savedUser);
+            console.log('Found saved user:', parsedUser);
+            
+            // Validate stored user ID
+            if (parsedUser.id && 
+                parsedUser.id !== 'anonymous' && 
+                parsedUser.id !== 'anonymous_user' && 
+                parsedUser.id !== '' && 
+                parsedUser.id !== 'null' && 
+                parsedUser.id !== 'undefined') {
+              setUser(parsedUser);
+              console.log('Using valid saved user:', parsedUser.id);
+            } else {
+              console.warn('Saved user has invalid ID, clearing:', parsedUser.id);
+              localStorage.removeItem('sentimental_user');
+            }
           } catch (e) {
+            console.error('Error parsing saved user:', e);
             localStorage.removeItem('sentimental_user');
           }
         }
@@ -140,16 +178,61 @@ const SentimentalApp = () => {
         // Set up Firebase auth state listener
         const unsubscribe = window.firebaseAuth?.onAuthStateChanged(async (firebaseUser) => {
           if (firebaseUser) {
-            const userData = {
-              id: firebaseUser.uid,
-              email: firebaseUser.email,
-              name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
-              emailVerified: firebaseUser.emailVerified,
-              photoURL: firebaseUser.photoURL
-            };
-            
-            setUser(userData);
-            localStorage.setItem('sentimental_user', JSON.stringify(userData));
+            // Sync with backend to get proper user ID
+            try {
+              const syncResponse = await fetch('/api/auth/firebase-sync', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  uid: firebaseUser.uid,
+                  email: firebaseUser.email,
+                  name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
+                  emailVerified: firebaseUser.emailVerified,
+                  provider: 'google'
+                })
+              });
+              
+              if (syncResponse.ok) {
+                const syncData = await syncResponse.json();
+                const userData = {
+                  id: syncData.user_id, // Use backend user ID
+                  email: syncData.email,
+                  name: syncData.name,
+                  emailVerified: firebaseUser.emailVerified,
+                  photoURL: firebaseUser.photoURL
+                };
+                
+                console.log('Firebase user synced with backend:', userData);
+                setUser(userData);
+                localStorage.setItem('sentimental_user', JSON.stringify(userData));
+              } else {
+                console.error('Failed to sync Firebase user with backend');
+                // Fallback to Firebase data
+                const userData = {
+                  id: firebaseUser.uid,
+                  email: firebaseUser.email,
+                  name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
+                  emailVerified: firebaseUser.emailVerified,
+                  photoURL: firebaseUser.photoURL
+                };
+                
+                setUser(userData);
+                localStorage.setItem('sentimental_user', JSON.stringify(userData));
+              }
+            } catch (error) {
+              console.error('Error syncing Firebase user:', error);
+              // Fallback to Firebase data
+              const userData = {
+                id: firebaseUser.uid,
+                email: firebaseUser.email,
+                name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
+                emailVerified: firebaseUser.emailVerified,
+                photoURL: firebaseUser.photoURL
+              };
+              
+              setUser(userData);
+              localStorage.setItem('sentimental_user', JSON.stringify(userData));
+            }
           } else {
             // User is signed out or authentication failed
             // Only clear if user was previously authenticated via Firebase
@@ -197,23 +280,117 @@ const SentimentalApp = () => {
     }
   };
 
+  const fetchSupportedFormats = async () => {
+    try {
+      setLoadingFormats(true);
+      const response = await fetch('/api/formats/supported');
+      if (response.ok) {
+        const data = await response.json();
+        setSupportedFormats(data.supported_formats || []);
+        console.log('Loaded supported formats:', data.supported_formats);
+      } else {
+        console.error('Failed to fetch supported formats, using fallback');
+        // Fallback to formats that are actually supported by prompts engine
+        setSupportedFormats([
+          'twitter', 'linkedin', 'instagram', 'facebook',
+          'poem', 'song', 'script', 'short_story', 
+          'article', 'blog_post', 'presentation', 'newsletter',
+          'insights', 'reflection', 'growth_summary', 'journal_entry'
+        ]);
+      }
+    } catch (error) {
+      console.error('Error fetching supported formats:', error);
+      // Fallback to core formats that definitely work
+      setSupportedFormats([
+        'twitter', 'linkedin', 'instagram', 'poem', 'song', 'article', 'reflection', 'insights'
+      ]);
+    } finally {
+      setLoadingFormats(false);
+    }
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     
     try {
-      // For now, just create a demo user
-      const demoUser = {
-        id: 'demo_' + Date.now(),
-        name: loginForm.name || 'Demo User',
-        email: loginForm.email || 'demo@example.com'
-      };
-      setUser(demoUser);
-      localStorage.setItem('sentimental_user', JSON.stringify(demoUser));
-      setShowLogin(false);
+      if (isSignupMode) {
+        // Register new user
+        const registerResponse = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            uid: `temp_${Date.now()}`,
+            email: loginForm.email,
+            name: loginForm.name,
+            emailVerified: false,
+            provider: 'email'
+          })
+        });
+
+        const registerData = await registerResponse.json();
+        if (registerResponse.ok) {
+          const newUser = {
+            id: registerData.user_id,
+            email: registerData.email,
+            name: registerData.name
+          };
+          
+          console.log('User registered successfully:', newUser);
+          
+          // Validate user ID
+          if (!newUser.id || newUser.id === 'anonymous' || newUser.id === 'anonymous_user' || newUser.id === '' || newUser.id === 'null' || newUser.id === 'undefined') {
+            console.error('Invalid user ID received:', newUser.id);
+            alert('Registration failed: Invalid user ID received. Please try again.');
+            return;
+          }
+          
+          setUser(newUser);
+          localStorage.setItem('sentimental_user', JSON.stringify(newUser));
+          setShowLogin(false);
+          await fetchStories();
+        } else {
+          alert(registerData.message || 'Registration failed. Please try again.');
+        }
+      } else {
+        // Login existing user
+        const loginResponse = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: loginForm.email,
+            password: loginForm.password || 'testpassword123'
+          })
+        });
+
+        const loginData = await loginResponse.json();
+        if (loginResponse.ok) {
+          const loggedInUser = {
+            id: loginData.user_id,
+            email: loginData.email,
+            name: loginData.name
+          };
+          
+          console.log('User logged in successfully:', loggedInUser);
+          
+          // Validate user ID
+          if (!loggedInUser.id || loggedInUser.id === 'anonymous' || loggedInUser.id === 'anonymous_user' || loggedInUser.id === '' || loggedInUser.id === 'null' || loggedInUser.id === 'undefined') {
+            console.error('Invalid user ID received:', loggedInUser.id);
+            alert('Login failed: Invalid user ID received. Please try again.');
+            return;
+          }
+          
+          setUser(loggedInUser);
+          localStorage.setItem('sentimental_user', JSON.stringify(loggedInUser));
+          setShowLogin(false);
+          await fetchStories();
+        } else {
+          alert(loginData.message || 'Login failed. Please check your credentials.');
+        }
+      }
     } catch (error) {
-      console.error('Login error:', error);
-      alert('Login failed. Please try again.');
+      console.error('Authentication error:', error);
+      alert('Authentication failed. Please try again.');
     }
     
     setIsLoading(false);
@@ -236,15 +413,29 @@ const SentimentalApp = () => {
 
   const handleLogout = async () => {
     try {
-      if (window.firebaseAuth) {
+      // Only sign out from Firebase if user has a Firebase UID (not demo users)
+      if (window.firebaseAuth && user && !user.id.startsWith('demo_')) {
         await window.firebaseAuth.signOut();
       }
+      
+      // Clear user state and local storage
       setUser(null);
+      setMessages([]);
+      setCurrentView('discover');
       localStorage.removeItem('sentimental_user');
+      
+      console.log('User logged out successfully');
     } catch (error) {
       console.error('Logout error:', error);
+      // Force logout even if Firebase fails
+      setUser(null);
+      setMessages([]);
+      setCurrentView('discover');
+      localStorage.removeItem('sentimental_user');
     }
   };
+
+
 
   const sendMessage = async () => {
     if (!message.trim()) return;
@@ -263,7 +454,10 @@ const SentimentalApp = () => {
     try {
       const response = await fetch('/api/chat/message', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-User-ID': user.id
+        },
         body: JSON.stringify({
           message: userMessage,
           user_id: user.id
@@ -340,6 +534,11 @@ const SentimentalApp = () => {
           content: '✨ Your story has been created successfully! You can find it in your Stories tab.'
         }]);
         await fetchStories();
+        // Clean up any previous story/format state before switching to stories
+        setSelectedStory(null);
+        setCurrentFormat(null);
+        setFormatContent('');
+        setPreviousView('share');
         setCurrentView('stories');
       } else {
         alert('Failed to create story. Please try again.');
@@ -430,6 +629,27 @@ const SentimentalApp = () => {
       // First check if format content is already in story data
       if (story.formats && story.formats[formatType]) {
         setFormatContent(story.formats[formatType]);
+        
+        // Ensure the createdFormats array includes this format
+        if (!story.createdFormats || !story.createdFormats.includes(formatType)) {
+          setStories(prev => prev.map(s => 
+            s.id === story.id 
+              ? { 
+                  ...s, 
+                  createdFormats: [...(s.createdFormats || []), formatType].filter((format, index, arr) => arr.indexOf(format) === index)
+                }
+              : s
+          ));
+          
+          // Also update the selectedStory if it's the same story being viewed
+          if (selectedStory && selectedStory.id === story.id) {
+            setSelectedStory(prev => ({
+              ...prev,
+              createdFormats: [...(prev.createdFormats || []), formatType].filter((format, index, arr) => arr.indexOf(format) === index)
+            }));
+          }
+        }
+        
         // Extract title for song format from local data
         if (formatType === 'song') {
           const contentText = typeof story.formats[formatType] === 'object' ? story.formats[formatType].content || '' : story.formats[formatType] || '';
@@ -448,6 +668,33 @@ const SentimentalApp = () => {
       if (response.ok) {
         const data = await response.json();
         setFormatContent(data.content);
+        
+        // Update the story in local state to include the fetched format
+        setStories(prev => prev.map(s => 
+          s.id === story.id 
+            ? { 
+                ...s, 
+                formats: { 
+                  ...s.formats, 
+                  [formatType]: data.content 
+                },
+                createdFormats: [...(s.createdFormats || []), formatType].filter((format, index, arr) => arr.indexOf(format) === index)
+              }
+            : s
+        ));
+        
+        // Also update the selectedStory if it's the same story being viewed
+        if (selectedStory && selectedStory.id === story.id) {
+          setSelectedStory(prev => ({
+            ...prev,
+            formats: {
+              ...prev.formats,
+              [formatType]: data.content
+            },
+            createdFormats: [...(prev.createdFormats || []), formatType].filter((format, index, arr) => arr.indexOf(format) === index)
+          }));
+        }
+        
         // Extract title for song format
         if (formatType === 'song') {
           const contentText = typeof data.content === 'object' ? data.content.content || '' : data.content || '';
@@ -456,12 +703,22 @@ const SentimentalApp = () => {
           setCurrentFormat(prev => ({...prev, title, audio_url: audioUrl}));
         }
       } else {
-        // Format doesn't exist, try to generate it
+        // Format doesn't exist, check authentication before trying to generate it
+        if (!user || !user.id || user.id === 'anonymous' || user.id === 'anonymous_user' || user.id === '' || user.id === 'null' || user.id === 'undefined') {
+          setFormatContent('This transformation has not been created yet. Please sign in to create new transformations.');
+          setLoadingFormat(false);
+          return;
+        }
+        
+        console.log('Generating format for user:', user);
+        console.log('User ID being sent:', user.id);
+        console.log('Format type:', formatType);
+        
         const generateResponse = await fetch(`/api/stories/${story.id}/generate-format`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
-            'X-User-ID': user.id // Add authentication header
+            'X-User-ID': user.id || 'undefined' // Add authentication header with fallback
           },
           body: JSON.stringify({ format_type: formatType })
         });
@@ -469,12 +726,54 @@ const SentimentalApp = () => {
         if (generateResponse.ok) {
           const generateData = await generateResponse.json();
           setFormatContent(generateData.content);
+          
+          // Update the story in local state to include the new format
+          setStories(prev => prev.map(s => 
+            s.id === story.id 
+              ? { 
+                  ...s, 
+                  formats: { 
+                    ...s.formats, 
+                    [formatType]: generateData.content 
+                  },
+                  createdFormats: [...(s.createdFormats || []), formatType].filter((format, index, arr) => arr.indexOf(format) === index) // Add to createdFormats and remove duplicates
+                }
+              : s
+          ));
+          
+          // Also update the selectedStory if it's the same story being viewed
+          if (selectedStory && selectedStory.id === story.id) {
+            setSelectedStory(prev => ({
+              ...prev,
+              formats: {
+                ...prev.formats,
+                [formatType]: generateData.content
+              },
+              createdFormats: [...(prev.createdFormats || []), formatType].filter((format, index, arr) => arr.indexOf(format) === index)
+            }));
+          }
+          
           // Extract title for song format
           if (formatType === 'song' && generateData.title) {
             setCurrentFormat(prev => ({...prev, title: generateData.title}));
           }
         } else {
-          setFormatContent('Error loading format. Please try again.');
+          const errorData = await generateResponse.json().catch(() => ({}));
+          console.error('Format generation failed:', {
+            status: generateResponse.status,
+            statusText: generateResponse.statusText,
+            error: errorData,
+            user: user,
+            userId: user.id
+          });
+          
+          if (generateResponse.status === 401) {
+            setFormatContent(`Authentication error: ${errorData.message || 'Please sign in to transform your stories.'}\n\nDebug info: User ID = "${user.id || 'undefined'}"`);
+          } else if (generateResponse.status === 403) {
+                          setFormatContent(`Access denied: ${errorData.message || 'Only the story author can create additional transformations.'}\n\nThis story belongs to another user.`);
+          } else {
+            setFormatContent(`Error loading format (${generateResponse.status}): ${errorData.message || 'Please try again.'}`);
+          }
         }
       }
     } catch (error) {
@@ -527,22 +826,62 @@ const SentimentalApp = () => {
 
   // UI Components
   const renderNavbar = () => (
-    <nav className="bg-white border-b border-gray-200 px-4 py-2 sticky top-0 z-50">
-      <div className="max-width-full flex items-center justify-between">
+    <nav className="hidden md:block bg-white border-b border-gray-200 px-4 py-2 sticky top-0 z-50">
+      <div className="max-w-6xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <a href="#" className="text-xl font-bold text-purple-600 no-underline">
+          <button 
+            onClick={() => {
+              setCurrentView('discover');
+              setSelectedStory(null);
+              setCurrentFormat(null);
+              setFormatContent('');
+              setPreviousView('discover');
+            }}
+            className="text-xl font-bold text-purple-600 no-underline hover:text-purple-700 transition-colors"
+          >
             Sentimental
-          </a>
+          </button>
           
           <div className="hidden md:flex items-center gap-1">
             {[
               { id: 'discover', label: 'Discover', icon: Search },
-              { id: 'share', label: 'Share', icon: MessageCircle },
-              { id: 'stories', label: 'Stories', icon: BookOpen }
+              { id: 'share', label: 'Chat', icon: MessageCircle },
+              { id: 'stories', label: 'Stories', icon: BookOpen },
+              { 
+                id: 'inner-space', 
+                label: 'Space', 
+                icon: () => (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88"/>
+                  </svg>
+                )
+              }
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setCurrentView(tab.id)}
+                onClick={() => {
+                  if (tab.id === 'inner-space') {
+                    // Show modal first, then allow access to concept page
+                    setShowSpaceModal(true);
+                    setCurrentView('inner-space');
+                    setSelectedStory(null);
+                    setCurrentFormat(null);
+                    setFormatContent('');
+                    setPreviousView(tab.id);
+                  } else {
+                    // Clean up any format/story state when changing tabs
+                    setCurrentView(tab.id);
+                    setSelectedStory(null);
+                    setCurrentFormat(null);
+                    setFormatContent('');
+                    setPreviousView(tab.id);
+                    // Refresh stories when switching to stories or discover tabs
+                    if (tab.id === 'stories' || tab.id === 'discover') {
+                      fetchStories();
+                    }
+                  }
+                }}
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   currentView === tab.id 
                     ? 'bg-purple-100 text-purple-700' 
@@ -715,6 +1054,58 @@ const SentimentalApp = () => {
   // Discover Page with beautiful story cards
   const renderDiscover = () => (
     <div className="h-full flex flex-col">
+      {/* Mobile Header - Only show on mobile */}
+      <div className="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+        <button 
+          onClick={() => {
+            setCurrentView('discover');
+            setSelectedStory(null);
+            setCurrentFormat(null);
+            setFormatContent('');
+            setPreviousView('discover');
+          }}
+          className="text-lg font-bold text-purple-600 hover:text-purple-700 transition-colors"
+        >
+          Sentimental
+        </button>
+        
+        {user ? (
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              {user.photoURL ? (
+                <img 
+                  src={user.photoURL} 
+                  alt={user.name}
+                  className="w-8 h-8 rounded-full border border-gray-200"
+                />
+              ) : (
+                <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-semibold">
+                    {user.name?.[0]?.toUpperCase() || 'U'}
+                  </span>
+                </div>
+              )}
+              <span className="text-sm font-medium text-gray-700 max-w-[80px] truncate">
+                {user.name}
+              </span>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="text-xs text-gray-500 hover:text-gray-700 px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              Logout
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setShowLogin(true)}
+            className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors"
+          >
+            Login
+          </button>
+        )}
+      </div>
+      
       {/* Welcome Section */}
       <div className="bg-gradient-to-br from-purple-50 to-indigo-50 border-b border-gray-100 p-6">
         <div className="max-w-4xl mx-auto text-center">
@@ -766,7 +1157,7 @@ const SentimentalApp = () => {
           </div>
         ) : (
           <div className="grid gap-6">
-            {stories.map(story => (
+            {stories.filter(story => story.public === true).map(story => (
               <div key={story.id} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-200">
                 {/* Story Header */}
                 <div className="p-6 pb-4">
@@ -798,7 +1189,7 @@ const SentimentalApp = () => {
                     <div className="mb-4 p-3 bg-purple-50 rounded-lg">
                       <div className="flex items-center gap-2 mb-2">
                         <Sparkles />
-                        <span className="text-sm font-medium text-purple-700">Available formats:</span>
+                        <span className="text-sm font-medium text-purple-700">Your Transformations:</span>
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {story.createdFormats.map(format => (
@@ -826,16 +1217,16 @@ const SentimentalApp = () => {
               </div>
             ))}
             
-            {stories.length === 0 && (
+            {stories.filter(story => story.public === true).length === 0 && (
               <div className="text-center py-12 bg-white rounded-2xl border border-gray-200">
                 <div className="text-6xl mb-4">📚</div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">No stories to discover yet</h3>
-                <p className="text-gray-600 mb-6">Be the first to share your story!</p>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">No public stories to discover yet</h3>
+                <p className="text-gray-600 mb-6">Be the first to share a public story!</p>
                 <button 
                   onClick={() => setCurrentView('share')}
                   className="px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-all font-medium"
                 >
-                  Share Your Story
+                                        Start Chatting
                 </button>
               </div>
             )}
@@ -848,8 +1239,60 @@ const SentimentalApp = () => {
   // Share Page - Chat Interface
   const renderShare = () => (
     <div className="flex flex-col min-h-[calc(100vh-4rem)] md:min-h-[calc(100vh-5rem)]">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-4 flex-shrink-0">
+      {/* Mobile Header */}
+      <div className="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+        <button 
+          onClick={() => {
+            setCurrentView('discover');
+            setSelectedStory(null);
+            setCurrentFormat(null);
+            setFormatContent('');
+            setPreviousView('discover');
+          }}
+          className="text-lg font-bold text-purple-600 hover:text-purple-700 transition-colors"
+        >
+          Sentimental
+        </button>
+        
+        {user ? (
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              {user.photoURL ? (
+                <img 
+                  src={user.photoURL} 
+                  alt={user.name}
+                  className="w-8 h-8 rounded-full border border-gray-200"
+                />
+              ) : (
+                <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-semibold">
+                    {user.name?.[0]?.toUpperCase() || 'U'}
+                  </span>
+                </div>
+              )}
+              <span className="text-sm font-medium text-gray-700 max-w-[80px] truncate">
+                {user.name}
+              </span>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="text-xs text-gray-500 hover:text-gray-700 px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              Logout
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setShowLogin(true)}
+            className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors"
+          >
+            Login
+          </button>
+        )}
+      </div>
+      
+      {/* Desktop Header */}
+      <div className="hidden md:block bg-white border-b border-gray-200 p-4 flex-shrink-0">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-gray-900">Express Your True Self</h1>
@@ -892,10 +1335,10 @@ const SentimentalApp = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                   </div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-4">Sign In to Share Your Story</h2>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4">Sign In to Start Chatting</h2>
                   <p className="text-gray-600 mb-8 max-w-lg mx-auto">
                     Create an account to start meaningful conversations with your AI companion 
-                    and transform your experiences into beautiful, shareable stories.
+                    and transform your experiences into beautiful content.
                   </p>
                   <div className="space-y-3 max-w-sm mx-auto">
                     <button
@@ -915,13 +1358,13 @@ const SentimentalApp = () => {
                   <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-6">
                     <MessageCircle />
                   </div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-4">Share What's Really On Your Mind ✨</h2>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4">Chat About What's Really On Your Mind ✨</h2>
                   <p className="text-gray-600 mb-4 max-w-lg mx-auto">
                     Have a real conversation about what matters to you. Your AI companion will listen deeply 
                     and help you express your thoughts in ways that feel authentic and beautiful.
                   </p>
                   <p className="text-gray-600 mb-4 max-w-lg mx-auto">
-                    Share your dreams, achievements, or wild moments with me and I'll help you turn them into:
+                    Tell me about your dreams, achievements, or wild moments and I'll help you turn them into:
                   </p>
                   <div className="flex flex-wrap justify-center gap-3 mb-6">
                     <span className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-medium">🌟 Reflections</span>
@@ -930,7 +1373,7 @@ const SentimentalApp = () => {
                     <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium">✨ Poems</span>
                   </div>
                   <p className="text-gray-600 mb-6 max-w-lg mx-auto text-sm">
-                    Share what's on your mind - your dreams, challenges, relationships, or anything that matters to you.
+                    Tell me what's on your mind - your dreams, challenges, relationships, or anything that matters to you.
                   </p>
                 </>
               )}
@@ -1000,13 +1443,13 @@ const SentimentalApp = () => {
         <div className="p-6">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">My Stories</h1>
-            <p className="text-lg text-gray-600">Your personal collection of stories</p>
+            <p className="text-lg text-gray-600">Your journey of self-discovery through stories</p>
           </div>
           
           <div className="text-center py-12">
             <div className="text-6xl mb-4">👤</div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Sign in to see your stories</h3>
-            <p className="text-gray-600 mb-6">Create an account to save and access your personalized stories.</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Sign in to see your personal stories</h3>
+            <p className="text-gray-600 mb-6">Sign in to save your stories and continue your journey of personal growth and self-discovery.</p>
             <button
               onClick={() => setShowLogin(true)}
               className="bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors"
@@ -1022,11 +1465,64 @@ const SentimentalApp = () => {
     const userStories = stories.filter(story => story.user_id === user.id);
 
     return (
-      <div className="p-6">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">My Stories</h1>
-          <p className="text-lg text-gray-600">Your personal collection of stories</p>
+      <div>
+        {/* Mobile Header */}
+        <div className="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+          <button 
+            onClick={() => {
+              setCurrentView('discover');
+              setSelectedStory(null);
+              setCurrentFormat(null);
+              setFormatContent('');
+              setPreviousView('discover');
+            }}
+            className="text-lg font-bold text-purple-600 hover:text-purple-700 transition-colors"
+          >
+            Sentimental
+          </button>
+          
+          {user ? (
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                {user.photoURL ? (
+                  <img 
+                    src={user.photoURL} 
+                    alt={user.name}
+                    className="w-8 h-8 rounded-full border border-gray-200"
+                  />
+                ) : (
+                  <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm font-semibold">
+                      {user.name?.[0]?.toUpperCase() || 'U'}
+                    </span>
+                  </div>
+                )}
+                <span className="text-sm font-medium text-gray-700 max-w-[80px] truncate">
+                  {user.name}
+                </span>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="text-xs text-gray-500 hover:text-gray-700 px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowLogin(true)}
+              className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors"
+            >
+              Login
+            </button>
+          )}
         </div>
+        
+        <div className="p-6">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">My Stories</h1>
+            <p className="text-lg text-gray-600">Your journey of self-discovery through stories</p>
+          </div>
 
         {userStories.length > 0 ? (
           <div className="grid gap-6">
@@ -1065,22 +1561,33 @@ const SentimentalApp = () => {
                 {/* Privacy toggle and formats */}
                 <div className="flex items-center justify-between mt-4">
                   <div className="flex items-center gap-2">
-                    {/* Privacy Toggle */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleStoryPrivacy(story.id, story.public);
-                      }}
-                      className={`text-xs px-3 py-1 rounded-full border transition-colors ${
-                        story.public 
-                          ? 'bg-green-100 text-green-700 border-green-200' 
-                          : 'bg-gray-100 text-gray-700 border-gray-200'
-                      }`}
-                    >
-                      {story.public ? '🌍 Public' : '🔒 Private'}
-                    </button>
+                    {/* Privacy Toggle Slider */}
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-gray-600">Private</span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleStoryPrivacy(story.id, story.public);
+                        }}
+                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${
+                          story.public 
+                            ? 'bg-green-500' 
+                            : 'bg-gray-300'
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                            story.public ? 'translate-x-5' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
+                      <span className="text-xs text-gray-600">Public</span>
+                      <div className="text-xs">
+                        {story.public ? '🌍' : '🔒'}
+                      </div>
+                    </div>
                     
-                    {/* Available formats */}
+                    {/* Your Transformations */}
                     {story.createdFormats && story.createdFormats.length > 0 && (
                       <>
                         <span className="text-xs text-purple-600 font-medium">•</span>
@@ -1103,7 +1610,7 @@ const SentimentalApp = () => {
           <div className="text-center py-12">
             <BookOpen className="mx-auto mb-4 text-gray-400" size={48} />
             <h3 className="text-lg font-medium text-gray-900 mb-2">No stories yet</h3>
-            <p className="text-gray-600 mb-6">Chat with your AI companion to create personalized stories.</p>
+            <p className="text-gray-600 mb-6">Start conversations with your AI companion to explore your inner world and create meaningful stories about your journey.</p>
             <button
               onClick={() => setCurrentView('share')}
               className="bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors"
@@ -1112,6 +1619,7 @@ const SentimentalApp = () => {
             </button>
           </div>
         )}
+        </div>
       </div>
     );
   };
@@ -1154,12 +1662,12 @@ const SentimentalApp = () => {
               </p>
             </div>
 
-            {/* Format Buttons */}
+            {/* Your Transformations */}
             {selectedStory.createdFormats && selectedStory.createdFormats.length > 0 && (
               <div className="mt-8 p-4 bg-purple-50 rounded-xl">
                 <div className="flex items-center gap-2 mb-3">
                   <Sparkles />
-                  <span className="font-medium text-purple-700">Available formats:</span>
+                  <span className="font-medium text-purple-700">Your Transformations:</span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {selectedStory.createdFormats.map(format => (
@@ -1175,6 +1683,39 @@ const SentimentalApp = () => {
                 </div>
               </div>
             )}
+
+            {/* Transform Into - Only show for story author */}
+            {user && selectedStory.user_id === user.id && (
+              <div className="mt-8 p-4 bg-green-50 rounded-xl">
+                <div className="flex items-center gap-2 mb-3">
+                  <Plus />
+                  <span className="font-medium text-green-700">Transform Into:</span>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {loadingFormats ? (
+                    <div className="col-span-full flex items-center justify-center py-4">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
+                      <span className="ml-2 text-sm text-gray-600">Loading formats...</span>
+                    </div>
+                  ) : (
+                                         supportedFormats
+                       .filter(format => !selectedStory.createdFormats?.includes(format))
+                       .map(format => (
+                         <button 
+                           key={format} 
+                           onClick={() => viewFormat(selectedStory, format)}
+                           className="bg-green-100 text-green-700 rounded-lg p-3 text-center hover:bg-green-200 transition-colors cursor-pointer border-none"
+                         >
+                           <div className="text-2xl mb-1">{getFormatIcon(format)}</div>
+                           <div className="text-sm font-medium">{getFormatDisplayName(format)}</div>
+                         </button>
+                       ))
+                   )}
+                </div>
+              </div>
+            )}
+
+
           </div>
         </div>
       </div>
@@ -1238,15 +1779,13 @@ const SentimentalApp = () => {
                 </div>
               </div>
               
-              {/* Admin Upload Button */}
-              {(user?.email === 'admin@sentimental.com' || user?.id === 'admin' || user?.name === 'Admin' || user?.name?.includes('Admin') || user?.email?.includes('admin')) && (
-                <button
-                  onClick={() => setShowUploadModal(true)}
-                  className="mr-2 px-3 py-1 bg-white/20 rounded-lg text-xs hover:bg-white/30 transition-colors"
-                >
-                  Upload MP3
-                </button>
-              )}
+              {/* Upload Button */}
+              <button
+                onClick={() => setShowUploadModal(true)}
+                className="mr-2 px-3 py-1 bg-white/20 rounded-lg text-xs hover:bg-white/30 transition-colors"
+              >
+                Upload MP3
+              </button>
             </div>
             
             {/* Audio Player */}
@@ -1266,23 +1805,17 @@ const SentimentalApp = () => {
               <div className="bg-black/20 rounded-lg p-4 mb-4">
                 <div className="flex items-center justify-between text-sm mb-2">
                   <span>🎧 Music Player</span>
-                  {(user?.email === 'admin@sentimental.com' || user?.id === 'admin' || user?.name === 'Admin' || user?.name?.includes('Admin') || user?.email?.includes('admin')) && (
-                    <button 
-                      onClick={() => setShowUploadModal(true)}
-                      className="bg-white/20 hover:bg-white/30 px-2 py-1 rounded text-xs transition-colors"
-                    >
-                      Upload MP3
-                    </button>
-                  )}
+                  <button 
+                    onClick={() => setShowUploadModal(true)}
+                    className="bg-white/20 hover:bg-white/30 px-2 py-1 rounded text-xs transition-colors"
+                  >
+                    Upload MP3
+                  </button>
                 </div>
                 <div className="w-full bg-white/20 rounded-full h-2">
                   <div className="bg-white/50 h-2 rounded-full w-0"></div>
                 </div>
-                {(user?.email === 'admin@sentimental.com' || user?.id === 'admin' || user?.name === 'Admin' || user?.name?.includes('Admin') || user?.email?.includes('admin')) ? (
-                  <div className="text-xs text-center mt-2 opacity-75">Click "Upload MP3" to add audio</div>
-                ) : (
-                  <div className="text-xs text-center mt-2 opacity-75">Audio coming soon...</div>
-                )}
+                <div className="text-xs text-center mt-2 opacity-75">Click "Upload MP3" to add audio</div>
               </div>
             )}
 
@@ -1292,14 +1825,12 @@ const SentimentalApp = () => {
               </pre>
             </div>
             
-            {(user?.email === 'admin@sentimental.com' || user?.id === 'admin' || user?.name === 'Admin' || user?.name?.includes('Admin') || user?.email?.includes('admin')) && (
-              <div className="mt-4 text-xs opacity-75">
-                {hasAudio ? 
-                  '🎵 Music ready to play!' : 
-                  '🎧 Upload MP3 file to enable playback'
-                }
-              </div>
-            )}
+            <div className="mt-4 text-xs opacity-75">
+              {hasAudio ? 
+                '🎵 Music ready to play!' : 
+                '🎧 Upload MP3 file to enable playback'
+              }
+            </div>
           </div>
         );
       }
@@ -1352,6 +1883,7 @@ const SentimentalApp = () => {
               setCurrentView('story-detail');
               setCurrentFormat(null);
               setFormatContent('');
+              // Keep the selected story but clear format state
             }}
             className="flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-4"
           >
@@ -1476,6 +2008,223 @@ const SentimentalApp = () => {
     );
   };
 
+  // Inner Space Concept Page
+  const renderInnerSpace = () => (
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-pink-50">
+      <div className="p-6 max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="w-20 h-20 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88"/>
+            </svg>
+          </div>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Your Inner Space</h1>
+          <p className="text-xl text-gray-600 mb-2">Personal AI-powered self-discovery dashboard</p>
+          <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 px-4 py-2 rounded-full text-sm font-medium">
+            <span>🚧</span>
+            Coming Soon - Preview Mode
+          </div>
+        </div>
+
+        {/* Features Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+          {/* Ask Yourself Anything */}
+          <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
+                <span className="text-2xl">🤔</span>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">Ask Yourself Anything</h3>
+                <p className="text-gray-600">Deep questions about your life, patterns & growth</p>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="bg-gray-50 rounded-lg p-4">
+                <p className="text-gray-800 font-medium mb-2">"What are my core values in relationships?"</p>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span>Answered from 3 stories</span>
+                </div>
+              </div>
+              
+              <div className="bg-gray-50 rounded-lg p-4">
+                <p className="text-gray-800 font-medium mb-2">"How do I handle stress and challenges?"</p>
+                <div className="flex items-center gap-2 text-sm text-orange-600">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                  <span>Needs exploration → Chat suggested</span>
+                </div>
+              </div>
+              
+              <div className="bg-gray-50 rounded-lg p-4">
+                <p className="text-gray-800 font-medium mb-2">"What patterns do I see in my career choices?"</p>
+                <div className="flex items-center gap-2 text-sm text-blue-600">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <span>Partial insights → More data needed</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Curated Discovery Chats */}
+          <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-teal-500 rounded-xl flex items-center justify-center">
+                <span className="text-2xl">💭</span>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">Guided Discovery</h3>
+                <p className="text-gray-600">AI-curated conversations that unlock insights</p>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="bg-gradient-to-r from-green-50 to-teal-50 rounded-lg p-4 border border-green-200">
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-lg">🎯</span>
+                  <h4 className="font-semibold text-gray-900">Values Deep Dive</h4>
+                </div>
+                <p className="text-gray-700 text-sm mb-3">Explore what truly matters to you through guided reflection</p>
+                <div className="flex items-center gap-2 text-xs text-green-700">
+                  <span>✨ Becomes story</span>
+                  <span>•</span>
+                  <span>🧠 Builds your knowledge</span>
+                </div>
+              </div>
+              
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4 border border-purple-200">
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-lg">🚀</span>
+                  <h4 className="font-semibold text-gray-900">Growth Moments</h4>
+                </div>
+                <p className="text-gray-700 text-sm mb-3">Reflect on challenges that shaped you</p>
+                <div className="flex items-center gap-2 text-xs text-purple-700">
+                  <span>📖 Multiple formats</span>
+                  <span>•</span>
+                  <span>🔍 Pattern recognition</span>
+                </div>
+              </div>
+              
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-lg">💡</span>
+                  <h4 className="font-semibold text-gray-900">Decision Analysis</h4>
+                </div>
+                <p className="text-gray-700 text-sm mb-3">Understand your decision-making patterns</p>
+                <div className="flex items-center gap-2 text-xs text-blue-700">
+                  <span>🔄 Continuous learning</span>
+                  <span>•</span>
+                  <span>📊 Visual insights</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Vision Statement */}
+        <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl p-8 text-white text-center mb-8">
+          <h2 className="text-2xl font-bold mb-4">Like Cursor writes code, we guide conversations</h2>
+          <p className="text-lg opacity-90 max-w-3xl mx-auto leading-relaxed">
+            Just as Cursor understands your intent and writes the perfect code, Inner Space will understand your questions 
+            and guide you through the perfect conversations to discover the answers about yourself. Every chat becomes a story, 
+            every story builds your personal knowledge base.
+          </p>
+        </div>
+
+        {/* Future Features Preview */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white rounded-xl p-6 border border-gray-100 text-center">
+            <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center mx-auto mb-4">
+              <span className="text-2xl">📊</span>
+            </div>
+            <h3 className="font-bold text-gray-900 mb-2">Life Patterns</h3>
+            <p className="text-gray-600 text-sm">Visual maps of your behavioral patterns, growth cycles, and recurring themes</p>
+          </div>
+          
+          <div className="bg-white rounded-xl p-6 border border-gray-100 text-center">
+            <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center mx-auto mb-4">
+              <span className="text-2xl">🎭</span>
+            </div>
+            <h3 className="font-bold text-gray-900 mb-2">Personality Insights</h3>
+            <p className="text-gray-600 text-sm">Deep understanding of your unique traits, preferences, and tendencies</p>
+          </div>
+          
+          <div className="bg-white rounded-xl p-6 border border-gray-100 text-center">
+            <div className="w-16 h-16 bg-gradient-to-br from-rose-400 to-pink-500 rounded-xl flex items-center justify-center mx-auto mb-4">
+              <span className="text-2xl">🌟</span>
+            </div>
+            <h3 className="font-bold text-gray-900 mb-2">Growth Tracking</h3>
+            <p className="text-gray-600 text-sm">Monitor your personal development journey with meaningful metrics</p>
+          </div>
+        </div>
+
+        {/* Call to Action */}
+        <div className="text-center mt-12">
+          <p className="text-gray-600 mb-6">Start building your Inner Space today by creating meaningful stories</p>
+          <button
+            onClick={() => {
+              setCurrentView('share');
+              setSelectedStory(null);
+              setCurrentFormat(null);
+              setFormatContent('');
+              setPreviousView('inner-space');
+            }}
+            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-xl font-medium hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105"
+          >
+            Start Your Journey
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Space Coming Soon Modal
+  const renderSpaceModal = () => {
+    if (!showSpaceModal) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-2xl max-w-lg w-full p-8 text-center">
+          <div className="w-20 h-20 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88"/>
+            </svg>
+          </div>
+          
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Welcome to Inner Space!</h2>
+          <p className="text-gray-600 mb-6 leading-relaxed">
+            Your personal AI-powered self-discovery dashboard is coming soon. Get a preview of what's possible 
+            and see how we'll help you understand yourself like never before.
+          </p>
+          
+          <div className="space-y-3">
+            <button
+              onClick={() => setShowSpaceModal(false)}
+              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all"
+            >
+              Explore the Vision
+            </button>
+            
+            <button
+              onClick={() => {
+                setShowSpaceModal(false);
+                setCurrentView('discover');
+                setPreviousView('discover');
+              }}
+              className="w-full text-gray-500 hover:text-gray-700 py-2 text-sm"
+            >
+              Back to Discover
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // Main Render Logic
   const renderMainContent = () => {
     switch(currentView) {
@@ -1484,6 +2233,7 @@ const SentimentalApp = () => {
       case 'stories': return renderStories();
       case 'story-detail': return renderStoryDetail();
       case 'format-detail': return renderFormatDetail();
+      case 'inner-space': return renderInnerSpace();
       default: return renderDiscover();
     }
   };
@@ -1491,13 +2241,13 @@ const SentimentalApp = () => {
   // Mobile Footer Navigation
   const renderMobileFooter = () => (
     <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
-      <div className="flex items-center justify-around py-2">
+      <div className="flex items-center justify-evenly py-2">
         {[
           { 
             id: 'discover', 
             label: 'Discover', 
             icon: () => (
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="8"/>
                 <path d="m21 21-4.35-4.35"/>
               </svg>
@@ -1505,9 +2255,9 @@ const SentimentalApp = () => {
           },
           { 
             id: 'share', 
-            label: 'Share', 
+            label: 'Chat', 
             icon: () => (
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
               </svg>
             )
@@ -1516,7 +2266,7 @@ const SentimentalApp = () => {
             id: 'stories', 
             label: 'Stories', 
             icon: () => (
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
                 <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
               </svg>
@@ -1526,7 +2276,7 @@ const SentimentalApp = () => {
             id: 'inner-space', 
             label: 'Space', 
             icon: () => (
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10"/>
                 <polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88"/>
               </svg>
@@ -1537,12 +2287,27 @@ const SentimentalApp = () => {
             key={tab.id}
             onClick={() => {
               if (tab.id === 'inner-space') {
-                alert('🚀 Inner Space is coming soon! A personal dashboard for deeper insights into your stories and patterns.');
+                // Show modal first, then allow access to concept page
+                setShowSpaceModal(true);
+                setCurrentView('inner-space');
+                setSelectedStory(null);
+                setCurrentFormat(null);
+                setFormatContent('');
+                setPreviousView(tab.id);
               } else {
+                // Clean up any format/story state when changing tabs
                 setCurrentView(tab.id);
+                setSelectedStory(null);
+                setCurrentFormat(null);
+                setFormatContent('');
+                setPreviousView(tab.id);
+                // Refresh stories when switching to stories or discover tabs
+                if (tab.id === 'stories' || tab.id === 'discover') {
+                  fetchStories();
+                }
               }
             }}
-            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors ${
+            className={`flex flex-col items-center gap-1 px-1 py-2 transition-colors ${
               currentView === tab.id 
                 ? 'text-purple-600' 
                 : 'text-gray-500 hover:text-gray-700'
@@ -1558,6 +2323,8 @@ const SentimentalApp = () => {
     </div>
   );
 
+
+
   // Don't render anything until app is initialized to prevent flashing
   if (!appInitialized) {
     return null;
@@ -1568,9 +2335,10 @@ const SentimentalApp = () => {
       {renderNavbar()}
       {renderLoginModal()}
       {renderUploadModal()}
+      {renderSpaceModal()}
       
       {/* Main Content with bottom padding on mobile for footer */}
-      <div className="max-w-6xl mx-auto pb-20 md:pb-0">
+      <div className="pb-20 md:pb-0">
         {renderMainContent()}
       </div>
 

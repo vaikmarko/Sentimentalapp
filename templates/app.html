@@ -265,7 +265,8 @@
     <!-- React App Root -->
     <div id="sentimental-app"></div>
 
-    <!-- Service Worker Registration (for PWA) -->
+    <!-- Service Worker Registration (for PWA) - TEMPORARILY DISABLED FOR DEBUGGING -->
+    <!--
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
@@ -279,9 +280,10 @@
             });
         }
     </script>
+    -->
 
     <!-- Load React Component -->
-    <script type="text/babel" src="/static/js/sentimental-app.jsx"></script>
+    <script type="text/babel" src="/static/js/sentimental-app.jsx?v={{ cache_bust }}"></script>
     
     <!-- Load 3D Inner Space Component -->
 <script type="text/babel" src="/static/js/inner-space-3d.jsx"></script>

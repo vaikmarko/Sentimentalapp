@@ -341,12 +341,13 @@ Remember: You're not trying to fix or solve anything. You're helping them explor
                 FormatType.FACEBOOK: "You are a community-focused social media specialist who creates content that brings people together through shared experiences and meaningful conversations.",
                 FormatType.POEM: "You are a poet who transforms personal experiences into beautiful, moving verse that captures the essence of human emotion and universal truths.",
                 FormatType.SONG: "You are a viral hit songwriter creating lyrics that stick in people's heads and make them want to sing along.",
-                FormatType.SCRIPT: "You are a screenwriter and dramatist who transforms personal stories into compelling dramatic narratives with authentic dialogue and emotional depth.",
+                FormatType.REEL: "You are a viral content creator who transforms personal stories into engaging short-form video scripts for social media reels, with hooks, visual cues, and compelling narratives.",
                 FormatType.SHORT_STORY: "You are a skilled fiction writer who expands personal experiences into fully-realized short stories with rich characters, settings, and narrative depth.",
-                FormatType.ARTICLE: "You are a skilled writer who creates compelling personal essays that blend storytelling with universal insights and actionable wisdom.",
-                FormatType.BLOG_POST: "You are an experienced blogger who creates engaging, shareable content that combines personal storytelling with practical insights and strong reader engagement.",
+                FormatType.ARTICLE: "You are a professional magazine writer who transforms personal experiences into compelling, publication-ready articles with journalistic structure and storytelling excellence.",
+                FormatType.BLOG_POST: "You are a professional content creator who writes clean, valuable blog posts that provide actionable insights while maintaining authentic personal storytelling.",
                 FormatType.PRESENTATION: "You are a presentation specialist who transforms stories into compelling, structured presentations that engage audiences and deliver clear takeaways.",
                 FormatType.NEWSLETTER: "You are a newsletter writer who creates personal, engaging content that builds relationships with readers through authentic storytelling and valuable insights.",
+        FormatType.PODCAST: "You are a podcast content specialist who creates engaging episode outlines and talking points for intimate, conversational storytelling that would work well with AI-generated audio.",
                 FormatType.INSIGHTS: "You are a therapeutic content specialist who helps people extract meaningful psychological insights from their experiences with practical, actionable guidance.",
                 FormatType.REFLECTION: "You are a mindfulness and self-reflection expert who guides people toward deeper understanding of their experiences and personal growth.",
                 FormatType.GROWTH_SUMMARY: "You are a personal development coach who helps people identify and articulate their growth journey with clear, actionable next steps.",
@@ -425,17 +426,19 @@ Requirements:
 - Make it rhythmic and easy to sing along to
 - Keep it punchy and viral-worthy""",
 
-                FormatType.SCRIPT: """Write a short dramatic script or dialogue based on this story:
+                FormatType.REEL: """Create a viral social media reel script based on this story:
 
 Story: {content}
 
 Requirements:
-- 2-3 characters maximum
-- Include stage directions
-- Capture the emotional core through dialogue
-- 1-2 scenes, 2-3 pages maximum
-- Show the story through action and conversation
-- Include a clear dramatic arc""",
+- Write in short-form video script format with visual hooks
+- Include on-screen text suggestions and scene directions
+- Create a strong opening hook within first 3 seconds  
+- Structure for 15-60 second video format
+- Include trending audio/music suggestions
+- Make it highly shareable and relatable
+- Add clear call-to-action or engagement prompt
+- Focus on visual storytelling and quick emotional impact""",
 
                 FormatType.SHORT_STORY: """Expand this into a compelling short story:
 
@@ -449,30 +452,36 @@ Requirements:
 - Show rather than tell the emotional journey
 - Include sensory details and atmosphere""",
 
-                FormatType.ARTICLE: """Expand this story into a compelling personal essay:
+                FormatType.ARTICLE: """Transform this personal story into a professional magazine-style article:
 
 Story: {content}
 
 Requirements:
-- Clear introduction, body, and conclusion
-- Deeper reflection and analysis
-- Universal insights readers can relate to
-- Engaging narrative voice
-- 800-1200 words
-- Include actionable takeaways""",
+- Write a compelling headline that hooks readers
+- Open with a strong lead paragraph that sets the scene
+- Use journalistic storytelling structure (who, what, when, where, why)
+- Include quotes and specific details from the experience
+- Weave in expert insights or broader context where relevant
+- End with a powerful conclusion that ties back to the opening
+- 800-1200 words in professional article format
+- Write as if for publication in a major magazine or newspaper
+- NO meta-commentary, subheadings, or blog-style formatting""",
 
-                FormatType.BLOG_POST: """Create an engaging blog post from this personal experience:
+                FormatType.BLOG_POST: """Create a professional blog post from this personal experience:
 
 Story: {content}
 
 Requirements:
-- Catchy, SEO-friendly title
-- Engaging opening hook
-- Personal storytelling mixed with insights
-- Subheadings for readability
-- 600-1000 words
-- Call-to-action at the end
-- Relatable and shareable content""",
+- Write an engaging, SEO-friendly title
+- Create a compelling opening that hooks readers immediately
+- Structure the content with clear H2 subheadings (## format)
+- Mix personal storytelling with actionable insights
+- Include practical takeaways readers can apply
+- End with an engaging question or call-to-action
+- 600-1000 words total
+- Write in clean, professional blog format
+- NO meta-information like word counts, labels, or structural notes
+- Focus on valuable, shareable content that provides real value to readers""",
 
                 FormatType.PRESENTATION: """Create a presentation outline based on this story:
 
@@ -487,18 +496,36 @@ Requirements:
 - Speaking notes for each slide
 - Audience engagement elements""",
 
-                FormatType.NEWSLETTER: """Write a newsletter segment featuring this story:
+                FormatType.NEWSLETTER: """Create a complete newsletter featuring this personal story:
 
 Story: {content}
 
 Requirements:
-- Compelling subject line
-- Personal, conversational tone
-- Story as the main feature
-- Key insights highlighted
-- Reader engagement elements
-- Call-to-action or reflection question
-- 400-600 words""",
+- Write an engaging subject line in the format: "Subject: [Your Title]"
+- Open with a warm, personal greeting to readers
+- Tell the story in an engaging, newsletter-style narrative
+- Include 2-3 key insights or takeaways clearly highlighted
+- Add a thoughtful reflection section connecting to universal themes
+- End with a clear, engaging call-to-action question for readers
+- Close with a warm sign-off (like "Until next time" or "With gratitude")
+- 500-700 words total
+- Write in complete, polished newsletter format
+- Ensure the newsletter has a clear beginning, middle, and complete ending
+- NO abrupt cut-offs - always finish the final thought completely""",
+
+                FormatType.PODCAST: """Create a podcast episode outline and talking points based on this story:
+
+Story: {content}
+
+Requirements:
+- Compelling episode title and description
+- 3-5 main talking points with natural conversation flow
+- Opening hook and closing thoughts
+- Questions for audience engagement
+- Personal anecdotes and reflections woven throughout
+- Conversational tone suitable for AI audio generation
+- 15-30 minute episode structure
+- Include suggested transition phrases and natural pauses""",
 
                 FormatType.INSIGHTS: """Extract the key psychological and personal growth insights from this story:
 

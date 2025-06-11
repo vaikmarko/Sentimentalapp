@@ -17,6 +17,11 @@ import openai
 import random
 from werkzeug.utils import secure_filename
 import uuid
+from dotenv import load_dotenv
+
+# Load environment variables from .env files
+load_dotenv('functions/.env')  # Load from functions/.env first
+load_dotenv()  # Then try root .env as fallback
 
 # Import our intelligent engines
 from smart_story_engine import SmartStoryEngine
@@ -25,6 +30,7 @@ from knowledge_engine import KnowledgeEngine
 from formats_generation_engine import FormatsGenerationEngine
 from format_types import FormatType
 from prompts_engine import PromptsEngine, PromptType, AIProviderManager
+from utils import is_anonymous_user, allowed_file, is_valid_access_code, is_demo_user
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -94,9 +100,7 @@ app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 ALLOWED_EXTENSIONS = {'mp3', 'wav', 'ogg', 'm4a'}
 
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+# allowed_file function moved to utils.py
 
 # Ensure upload directory exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -335,7 +339,8 @@ def app_view():
     # Only allow app access in demo and test environments
     if ENVIRONMENT == 'production':
         return render_template('index.html', environment=ENVIRONMENT)
-    return render_template('app.html', environment=ENVIRONMENT)
+    import time
+    return render_template('app.html', environment=ENVIRONMENT, cache_bust=int(time.time()))
 
 @app.route('/landing')
 def landing():
@@ -1032,6 +1037,25 @@ def get_story_format(story_id, format_type):
             return jsonify({'error': 'Story not found'}), 404
             
         story_data = story.to_dict()
+        story_author = story_data.get('user_id')
+        is_public = story_data.get('public', False)
+        
+        # Get requesting user ID
+        user_id = request.headers.get('X-User-ID')
+        
+        # Check access permissions:
+        # - Public stories: anyone can view formats
+        # - Private stories: only the author can view formats
+        if not is_public and story_author != user_id:
+            logger.warning(f"Unauthorized format access attempt:")
+            logger.warning(f"  - Story ID: {story_id}, Format: {format_type}")
+            logger.warning(f"  - Story author: {story_author}")
+            logger.warning(f"  - Requesting user: {user_id}")
+            logger.warning(f"  - Story is public: {is_public}")
+            return jsonify({
+                'error': 'Access denied',
+                'message': 'This story is private. Only the author can view its formats.'
+            }), 403
         
         # Handle numeric format requests (frontend sometimes sends index)
         if format_type.isdigit():
@@ -1079,14 +1103,30 @@ def generate_format_for_story(story_id):
         format_type_str = data.get('format_type', 'article')
         user_id = request.headers.get('X-User-ID')
         
+        # Enhanced logging for debugging authentication issues
+        logger.info(f"Format generation request for story {story_id}:")
+        logger.info(f"  - Format type: {format_type_str}")
+        logger.info(f"  - User ID from header: '{user_id}'")
+        logger.info(f"  - User ID type: {type(user_id)}")
+        logger.info(f"  - All headers: {dict(request.headers)}")
+        
         # Require authentication for format generation
-        if not user_id or user_id in ['anonymous', 'anonymous_user', '', 'null', 'undefined']:
+        if is_anonymous_user(user_id):
+            logger.warning(f"Authentication failed for format generation:")
+            logger.warning(f"  - User ID: '{user_id}'")
+            logger.warning(f"  - Is None: {user_id is None}")
+            logger.warning(f"  - Is anonymous: {is_anonymous_user(user_id)}")
             return jsonify({
                 'error': 'Authentication required',
-                'message': 'Please sign in to generate story formats.'
+                'message': 'Please sign in to generate story formats.',
+                'debug_info': {
+                    'user_id_received': user_id,
+                    'user_id_type': str(type(user_id)),
+                    'headers_received': list(request.headers.keys())
+                }
             }), 401
         
-        logger.info(f"Generating {format_type_str} format for story {story_id}")
+        logger.info(f"Authentication successful - Generating {format_type_str} format for story {story_id}")
         
         # Validate format type
         try:
@@ -1107,6 +1147,22 @@ def generate_format_for_story(story_id):
         
         story_data = story.to_dict()
         story_content = story_data.get('content', '')
+        story_author = story_data.get('user_id')
+        
+        # Check if the requesting user is the author of the story
+        if story_author != user_id:
+            logger.warning(f"Unauthorized format generation attempt:")
+            logger.warning(f"  - Story ID: {story_id}")
+            logger.warning(f"  - Story author: {story_author}")
+            logger.warning(f"  - Requesting user: {user_id}")
+            return jsonify({
+                'error': 'Access denied',
+                'message': 'Only the story author can generate additional formats.',
+                'debug_info': {
+                    'story_author': story_author,
+                    'requesting_user': user_id
+                }
+            }), 403
         
         if not story_content:
             return jsonify({'error': 'Story has no content to format'}), 400
@@ -1237,11 +1293,13 @@ def process_chat_message():
             return jsonify({'error': 'Message and user_id are required'}), 400
         
         # Reject anonymous users - require authentication for chat
-        if not user_id or user_id in ['anonymous', 'anonymous_user', '', 'null', 'undefined']:
+        if is_anonymous_user(user_id):
             return jsonify({
                 'error': 'Authentication required',
                 'message': 'Please sign in to start chatting. Create an account to save your conversations and stories.'
             }), 401
+        
+
         
         logger.info(f"Processing chat message for user {user_id}")
         
@@ -1342,11 +1400,13 @@ def generate_story_endpoint():
             return jsonify({'error': 'user_id and conversation are required'}), 400
         
         # Reject anonymous users - require authentication for story creation
-        if not user_id or user_id in ['anonymous', 'anonymous_user', '', 'null', 'undefined']:
+        if is_anonymous_user(user_id):
             return jsonify({
                 'error': 'Authentication required',
                 'message': 'Please sign in to create stories. Create an account to save your stories and access them later.'
             }), 401
+        
+
         
         logger.info(f"Generating story from conversation for user {user_id}")
         
@@ -1873,9 +1933,13 @@ def login_user():
         user_doc = users_list[0]
         user_data = user_doc.to_dict()
         
-        # Simple password check for testing
-        if password and str(hash(password)) != user_data.get('password_hash'):
-            return jsonify({'error': 'Invalid password'}), 401
+        # Simple password check for testing - skip for demo users
+        if email != 'demo@sentimental.app':
+            if password and str(hash(password)) != user_data.get('password_hash'):
+                return jsonify({'error': 'Invalid password'}), 401
+        else:
+            # Demo user - accept any password for easy testing
+            pass
         
         return jsonify({
             'message': 'Login successful',
@@ -1895,7 +1959,7 @@ def firebase_sync():
     """Sync Firebase user with local database"""
     try:
         data = request.json
-        firebase_uid = data.get('firebase_uid')
+        firebase_uid = data.get('uid') or data.get('firebase_uid')  # Support both field names
         email = data.get('email', '').strip().lower()
         name = data.get('name', '')
         
@@ -1976,6 +2040,33 @@ def get_ai_providers():
             },
             'default': 'openai'
         }), 500
+
+@app.route('/api/formats/supported', methods=['GET'])
+def get_supported_formats():
+    """Get formats that are actually supported by the prompts engine"""
+    try:
+        # Only return formats that have prompts defined in prompts_engine
+        # These are the formats that can actually be generated
+        prompts_engine_formats = [
+            'twitter', 'linkedin', 'instagram', 'facebook',
+            'poem', 'song', 'reel', 'short_story', 
+            'article', 'blog_post', 'presentation', 'newsletter', 'podcast',
+            'insights', 'reflection', 'growth_summary', 'journal_entry'
+        ]
+        
+        return jsonify({
+            'supported_formats': prompts_engine_formats,
+            'total_count': len(prompts_engine_formats),
+            'engine_available': bool(formats_generation_engine),
+            'source': 'prompts_engine',
+            'updated_at': datetime.now().isoformat()
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error getting supported formats: {e}")
+        return jsonify({'error': 'Failed to get supported formats'}), 500
+
+
 
 @app.route('/api/admin/fix-reflection-order', methods=['POST'])
 def fix_reflection_order():
@@ -2115,7 +2206,7 @@ def update_story_privacy(story_id):
         user_id = request.headers.get('X-User-ID')
         
         # Require authentication 
-        if not user_id or user_id in ['anonymous', 'anonymous_user', '', 'null', 'undefined']:
+        if is_anonymous_user(user_id):
             return jsonify({
                 'error': 'Authentication required',
                 'message': 'Please sign in to update story privacy.'
@@ -2155,6 +2246,175 @@ def update_story_privacy(story_id):
     except Exception as e:
         logger.error(f"Error updating story privacy: {e}")
         return jsonify({'error': str(e)}), 500
+
+# Code-based access control
+VALID_ACCESS_CODES = {
+    "UNICORN",             # Main access code
+    "SENTI2025",           # Backup access code
+}
+
+# is_valid_access_code and is_demo_user functions moved to utils.py
+
+@app.route('/api/auth/check-access-code', methods=['POST'])
+def check_access_code():
+    """Check if access code is valid"""
+    try:
+        data = request.get_json()
+        code = data.get('code', '').strip()
+        
+        if is_valid_access_code(code):
+            return jsonify({
+                "valid": True, 
+                "message": "Welcome to Sentimental! Access granted.",
+                "code": code.upper()
+            })
+        else:
+            return jsonify({
+                "valid": False, 
+                "message": "Invalid access code. Please contact us for early access."
+            }), 403
+            
+    except Exception as e:
+        logger.error(f"Error checking access code: {e}")
+        return jsonify({"error": "Failed to check access code"}), 500
+
+@app.route('/api/auth/verify-user-access', methods=['POST'])
+def verify_user_access():
+    """Verify if user has access (either valid code or demo user)"""
+    try:
+        data = request.get_json()
+        user_id = data.get('user_id')
+        access_code = data.get('access_code', '').strip()
+        
+        # Demo users always have access
+        if is_demo_user(user_id):
+            return jsonify({
+                "access_granted": True,
+                "message": "Demo user access granted",
+                "user_type": "demo"
+            })
+        
+        # Check access code
+        if is_valid_access_code(access_code):
+            return jsonify({
+                "access_granted": True,
+                "message": "Access code verified",
+                "user_type": "invited"
+            })
+        
+        return jsonify({
+            "access_granted": False,
+            "message": "Access code required. Sentimental is currently in early access."
+        }), 403
+            
+    except Exception as e:
+        logger.error(f"Error verifying user access: {e}")
+        return jsonify({"error": "Failed to verify access"}), 500
+
+@app.route('/api/admin/fix-story-authors', methods=['POST'])
+def fix_story_authors():
+    """Admin endpoint to fix story author names without authentication requirements"""
+    try:
+        if db is None:
+            return jsonify({'error': 'Database not available'}), 500
+        
+        # Manual mapping of stories to correct authors
+        story_author_fixes = [
+            {
+                'title_contains': 'My Career Reflection Journey',
+                'new_author': 'Merike Sisask',
+                'reason': 'Created by Merike'
+            },
+            {
+                'title_contains': 'Thoughts on Challenge',
+                'new_author': 'Lars-Erik Hion',
+                'reason': 'Created by Lars-Erik'
+            },
+            {
+                'title_contains': 'Embracing the Shadows Within',
+                'new_author': 'Debug User',
+                'reason': 'Test/debug story'
+            },
+            {
+                'title_contains': 'From Confusion to Hilarity',
+                'new_author': 'Demo User',
+                'reason': 'Demo story'
+            }
+        ]
+        
+        # Get all stories
+        stories = []
+        for doc in db.collection('stories').stream():
+            story_data = doc.to_dict()
+            story_data['id'] = doc.id
+            stories.append(story_data)
+        
+        updated_count = 0
+        updates_made = []
+        
+        for fix in story_author_fixes:
+            # Find matching story
+            matching_story = None
+            for story in stories:
+                if fix['title_contains'] in story.get('title', ''):
+                    matching_story = story
+                    break
+            
+            if matching_story:
+                current_author = matching_story.get('author', 'No author')
+                
+                # Only update if needed
+                if current_author != fix['new_author']:
+                    try:
+                        story_ref = db.collection('stories').document(matching_story['id'])
+                        update_data = {
+                            'author': fix['new_author'],
+                            'updated_at': datetime.now().isoformat()
+                        }
+                        story_ref.update(update_data)
+                        
+                        updates_made.append({
+                            'title': matching_story['title'],
+                            'old_author': current_author,
+                            'new_author': fix['new_author'],
+                            'reason': fix['reason']
+                        })
+                        updated_count += 1
+                        
+                    except Exception as e:
+                        logger.error(f"Failed to update story {matching_story['id']}: {e}")
+        
+        logger.info(f"Admin fix: Updated {updated_count} story authors")
+        
+        return jsonify({
+            'success': True,
+            'updated_count': updated_count,
+            'updates_made': updates_made,
+            'message': f'Successfully updated {updated_count} story authors'
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error in admin fix endpoint: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/auth/fix-marko-user', methods=['POST'])
+def fix_marko_user():
+    """Temporary endpoint to fix Marko's user authentication"""
+    try:
+        return jsonify({
+            'success': True,
+            'user_id': '4wySrfiOLvZeGXCGJ85Z',
+            'email': 'marko@sentimental.app',
+            'name': 'Marko Vaik',
+            'message': 'Use this user data'
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/debug')
+def debug_page():
+    """Debug page to test user authentication"""
+    return send_from_directory('.', 'debug_user_state.html')
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080))) 
