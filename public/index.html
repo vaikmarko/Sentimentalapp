@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GHR6MC542E"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+
+gtag('config', 'G-GHR6MC542E');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sentimental - Your Life, Your Story</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+body {
+font-family: 'Inter', sans-serif;
+}
+
+h1, h2, h3, h4 {
+font-family: 'Playfair Display', serif;
+}
+
+.gradient-bg {
+background: linear-gradient(135deg, #8639E8 0%, #FF6B6B 100%);
+}
+
+.btn-primary {
+background-color: #8639E8;
+color: white;
+padding: 0.75rem 1.5rem;
+border-radius: 9999px;
+font-weight: 600;
+transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+background-color: #7529D8;
+box-shadow: 0 10px 15px rgba(134, 57, 232, 0.2);
+}
+
+.layer-card {
+transition: all 0.3s ease;
+}
+
+.layer-card:hover {
+transform: translateY(-5px);
+}
+</style>
+</head>
+<body class="bg-gray-50">
+<!-- Navigation -->
+<nav class="bg-white sticky top-0 z-50 shadow-sm py-0 px-6">
+<div class="max-w-6xl mx-auto flex justify-between items-center">
+<a href="/" class="text-3xl font-bold text-purple-600">Sentimental</a>
+<div class="hidden md:flex space-x-8 items-center">
+<a href="#how-it-works" class="hover:text-purple-600 transition">How It Works</a>
+<a href="#examples" class="hover:text-purple-600 transition">Examples</a>
+<a href="#team" class="hover:text-purple-600 transition">Team</a>
+<button onclick="openWaitlist()" class="btn-primary">Join Waitlist</button>
+</div>
+<button class="md:hidden">
+<i class="fas fa-bars text-2xl"></i>
+</button>
+</div>
+</nav>
+
+<!-- Hero Section -->
+<section class="pt-0 pb-20 px-6 gradient-bg text-white">
+<div class="container mx-auto">
+<div class="max-w-4xl mx-auto text-center">
+<h1 class="text-5xl md:text-6xl font-bold mb-8 leading-tight">
+Your Life as a Netflix Series or Spotify Hit
+</h1>
+<p class="text-xl mb-10 leading-relaxed max-w-3xl mx-auto">
+                    Sentimental uses AI to transform your personal moments into cinematic stories, music, and meaningful content with therapeutic insights that help you understand your life's journey.
+                    Everyone has a story — but few have a place to truly tell it.
+</p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button onclick="openEarlyAccess()" class="btn-primary text-center px-8 py-4 text-lg">
+                        🦄 Early Access
+                    </button>
+                    <button onclick="openWaitlist()" class="bg-white text-purple-600 px-8 py-4 text-lg rounded-full font-semibold hover:bg-gray-100 transition-colors">
+                        Join Waitlist
+                    </button>
+                </div>
+</div>
+</div>
+</section>
+
+<!-- Value Proposition Section -->
+<section class="py-20 px-6 bg-white">
+<div class="container mx-auto">
+<div class="max-w-5xl mx-auto">
+<div class="text-center mb-16">
+                    <h2 class="text-4xl font-bold mb-6">Find Meaning in a World of Efficiency</h2>
+<p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                       We live in an era where efficiency is everywhere, but meaning is rare. At Sentimental, we're building a journey that bridges self-reflection and cultural expression, therapy and aesthetics. Whether it's everyday moments, major milestones, or personal reflections, your experiences deserve a form that is not just therapeutic, but expressive, shareable, and deeply human.
+</p>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+<!-- Value 1 -->
+<div class="bg-gray-50 rounded-xl shadow-md p-8 text-center">
+<div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+<i class="fas fa-lightbulb text-2xl"></i>
+</div>
+<h3 class="text-xl font-bold mb-4">Discover Patterns</h3>
+<p class="text-gray-600">
+AI helps you identify themes and insights in your life that might otherwise go unnoticed.
+</p>
+</div>
+
+<!-- Value 2 -->
+<div class="bg-gray-50 rounded-xl shadow-md p-8 text-center">
+<div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+<i class="fas fa-film text-2xl"></i>
+</div>
+<h3 class="text-xl font-bold mb-4">Cinematic Transformation</h3>
+<p class="text-gray-600">
+See your life transformed into Netflix-style series, music, or books that feel professionally produced.
+</p>
+</div>
+
+<!-- Value 3 -->
+<div class="bg-gray-50 rounded-xl shadow-md p-8 text-center">
+<div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+<i class="fas fa-share-alt text-2xl"></i>
+</div>
+<h3 class="text-xl font-bold mb-4">Meaningful Sharing</h3>
+<p class="text-gray-600">
+Create different versions of your experiences to inspire friends, family, or your professional network.
+</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- How It Works - Simplified -->
+<section id="how-it-works" class="py-20 px-6 bg-gray-50">
+<div class="container mx-auto">
+<div class="max-w-5xl mx-auto">
+<div class="text-center mb-16">
+<h2 class="text-4xl font-bold mb-6">How It Works</h2>
+</div>
+
+<div class="space-y-12">
+<!-- Step 1 -->
+<div class="flex flex-col md:flex-row items-center bg-white rounded-xl shadow-md overflow-hidden">
+<div class="md:w-1/3 bg-purple-600 text-white p-8 flex items-center justify-center">
+<div class="text-center py-8">
+<div class="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+<span class="text-3xl font-bold">1</span>
+</div>
+<h3 class="text-2xl font-bold">Capture</h3>
+</div>
+</div>
+<div class="md:w-2/3 p-8">
+<p class="text-gray-600 text-lg">
+                                Record your thoughts, experiences, and moments through simple voice memos, text entries, or by answering AI-guided questions. No need for writing skills or structure—just your authentic voice.
+</p>
+</div>
+</div>
+
+<!-- Step 2 -->
+<div class="flex flex-col md:flex-row items-center bg-white rounded-xl shadow-md overflow-hidden">
+<div class="md:w-1/3 bg-blue-600 text-white p-8 flex items-center justify-center">
+<div class="text-center py-8">
+<div class="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+<span class="text-3xl font-bold">2</span>
+</div>
+<h3 class="text-2xl font-bold">Transform</h3>
+</div>
+</div>
+<div class="md:w-2/3 p-8">
+<p class="text-gray-600 text-lg">
+                                Our AI helps you see your experiences in multiple dimensions—imagine turning a memory into a song, a heartbreak into a podcast episode, or a breakthrough into a beautifully crafted visual story that reveals patterns you never noticed before.
+</p>
+</div>
+</div>
+
+<!-- Step 3 -->
+<div class="flex flex-col md:flex-row items-center bg-white rounded-xl shadow-md overflow-hidden">
+<div class="md:w-1/3 bg-green-600 text-white p-8 flex items-center justify-center">
+<div class="text-center py-8">
+<div class="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+<span class="text-3xl font-bold">3</span>
+</div>
+<h3 class="text-2xl font-bold">Share</h3>
+</div>
+</div>
+<div class="md:w-2/3 p-8">
+<p class="text-gray-600 text-lg">
+                                In a world where attention is fragmented and authenticity is in crisis, share your transformed stories in ways that truly connect. Create different versions for different audiences or keep them as personal touchstones for your own journey.
+</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Examples - One Simplified Example -->
+<section id="examples" class="py-20 px-6 bg-white">
+<div class="container mx-auto">
+<div class="max-w-5xl mx-auto">
+<div class="text-center mb-16">
+<h2 class="text-4xl font-bold mb-6">See the Possibilities</h2>
+<p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                        Swipe through emotional dimensions of your story as if flipping through alternate realities of your experiences—each with its own aesthetic, insight, and purpose.
+</p>
+</div>
+
+<div class="bg-gray-50 rounded-xl shadow-md overflow-hidden">
+<div class="md:flex">
+<div class="md:w-1/3 bg-purple-600 text-white p-8 flex items-center justify-center">
+<div class="text-center">
+<div class="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+<i class="fas fa-mountain text-3xl"></i>
+</div>
+<h3 class="text-2xl font-bold">Life Adventures</h3>
+<p class="mt-2 text-purple-100">From everyday to extraordinary</p>
+</div>
+</div>
+<div class="md:w-2/3 p-8">
+<p class="text-gray-600 mb-6">
+With Sentimental, your experiences become meaningful stories. A travel journey becomes a cinematic adventure. Career milestones transform into an inspiring podcast series. Family memories evolve into a beautiful keepsake book. Personal reflections gain new perspective through AI insights.
+</p>
+<h4 class="font-bold text-xl mb-4">Your Sentimental Story Could Become:</h4>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div class="bg-purple-50 p-4 rounded-lg">
+<div class="font-bold text-purple-600 mb-2">Netflix-Style Series</div>
+<p class="text-sm text-gray-600">
+Your year abroad with visual chapters, themes, and emotional arcs
+</p>
+</div>
+<div class="bg-purple-50 p-4 rounded-lg">
+<div class="font-bold text-purple-600 mb-2">Podcast Episodes</div>
+<p class="text-sm text-gray-600">
+Your career insights narrated with music and professional quality
+</p>
+</div>
+<div class="bg-purple-50 p-4 rounded-lg">
+<div class="font-bold text-purple-600 mb-2">Illustrated Journal</div>
+<p class="text-sm text-gray-600">
+Your personal growth journey with beautiful visuals and insights
+</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Team Section -->
+<section id="team" class="py-20 px-6 bg-gray-50">
+<div class="container mx-auto">
+<div class="max-w-5xl mx-auto">
+<div class="text-center mb-16">
+<h2 class="text-4xl font-bold mb-6">Meet the Team</h2>
+<p class="text-xl text-gray-600 max-w-3xl mx-auto">
+Blending expertise in storytelling, technology, and human experience.
+</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+<!-- Founder 1 -->
+<div class="bg-white rounded-xl shadow-md overflow-hidden">
+<div class="h-48 bg-purple-600 flex items-center justify-center">
+<div class="w-32 h-32 bg-white rounded-full flex items-center justify-center text-purple-600 text-4xl font-bold">
+MV
+</div>
+</div>
+<div class="p-6">
+<h3 class="text-xl font-bold mb-2">Marko Vaik</h3>
+<p class="text-purple-600 font-semibold mb-4">Founder & CEO</p>
+<p class="text-gray-600">
+Co-founded Estonia's largest mental health platform, Serenity Platform. Marko's vision for user-centered wellbeing technology drives Sentimental's mission to transform personal storytelling.
+</p>
+</div>
+</div>
+
+<!-- Founder 2 -->
+<div class="bg-white rounded-xl shadow-md overflow-hidden">
+<div class="h-48 bg-blue-600 flex items-center justify-center">
+<div class="w-32 h-32 bg-white rounded-full flex items-center justify-center text-blue-600 text-4xl font-bold">
+MS
+</div>
+</div>
+<div class="p-6">
+<h3 class="text-xl font-bold mb-2">Merike Sisask</h3>
+<p class="text-blue-600 font-semibold mb-4">Co-Founder & Chief Scientific Officer</p>
+<p class="text-gray-600">
+Social health professor and member of The Centre of Excellence for Well-Being Sciences. Author of 100+ scientific publications. Merike bridges the gap between personal storytelling and mental wellbeing, giving Sentimental its scientific foundation in meaningful ways.
+</p>
+</div>
+</div>
+
+<!-- Founder 3 -->
+<div class="bg-white rounded-xl shadow-md overflow-hidden">
+<div class="h-48 bg-green-600 flex items-center justify-center">
+<div class="w-32 h-32 bg-white rounded-full flex items-center justify-center text-green-600 text-4xl font-bold">
+LH
+</div>
+</div>
+<div class="p-6">
+<h3 class="text-xl font-bold mb-2">Lars-Erik Hion</h3>
+<p class="text-green-600 font-semibold mb-4">Co-Founder & CTO</p>
+<p class="text-gray-600">
+Digital innovation veteran who's built scalable solutions for SEB, Swedbank, and Telia. Co-founder of Tailwind and founder of Rethink, Lars-Erik creates powerful technology that feels effortlessly simple in meaningful ways.
+</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Try Beta Section (Replacing Waitlist Section) -->
+<section id="try-beta" class="py-20 px-6 gradient-bg text-white">
+<div class="container mx-auto">
+<div class="max-w-4xl mx-auto text-center">
+<h2 class="text-4xl font-bold mb-6">Transform Your Stories Into Viral Media with Therapeutic Insights</h2>
+<p class="text-xl mb-10 max-w-2xl mx-auto">
+    Be among the first to experience our next-generation media platform. Chat with our AI and see your personal stories transformed into content that delivers meaningful psychological patterns and insights while creating engaging media that people will connect with and share.
+</p>
+
+<div class="bg-white bg-opacity-10 backdrop-filter backdrop-blur-md p-8 rounded-xl max-w-xl mx-auto">
+<button onclick="openWaitlist()" class="block w-full bg-white text-purple-600 font-bold py-4 rounded-lg hover:bg-gray-100 transition text-center text-xl">
+    Join Waitlist
+</button>
+<p class="text-sm mt-4 text-white opacity-80">Free to try. Get therapeutic insights and viral-ready content.</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-gray-900 text-white py-12 px-6">
+<div class="container mx-auto">
+<div class="flex flex-col md:flex-row justify-between items-center">
+<div class="mb-8 md:mb-0">
+<a href="/" class="text-2xl font-bold">Sentimental</a>
+<p class="mt-2 text-gray-400">Your Life, Your Story.</p>
+</div>
+<div class="flex space-x-6">
+<a href="#" class="hover:text-purple-400 transition"><i class="fab fa-x-twitter text-xl"></i></a>
+<a href="#" class="hover:text-purple-400 transition"><i class="fab fa-instagram text-xl"></i></a>
+<a href="#" class="hover:text-purple-400 transition"><i class="fab fa-linkedin text-xl"></i></a>
+</div>
+</div>
+<hr class="border-gray-800 my-8">
+<div class="text-center text-gray-400">
+<p>&copy; 2025 Sentimental. All rights reserved.</p>
+</div>
+</div>
+</footer>
+
+<!-- Mobile Menu Script -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const menuButton = document.querySelector('button.md\\:hidden');
+    const mobileMenu = document.createElement('div');
+    mobileMenu.className = 'fixed inset-0 bg-gray-900 bg-opacity-90 z-50 flex flex-col items-center justify-center transform translate-x-full transition-transform duration-300 ease-in-out';
+    mobileMenu.style.display = 'none';
+    
+    // Create close button
+    const closeButton = document.createElement('button');
+    closeButton.className = 'absolute top-6 right-6 text-white text-3xl';
+    closeButton.innerHTML = '<i class="fas fa-times"></i>';
+    mobileMenu.appendChild(closeButton);
+    
+    // Create menu items
+    const menuItems = document.createElement('div');
+    menuItems.className = 'flex flex-col space-y-8 text-center';
+    
+    const navItems = [
+      { text: 'How It Works', href: '#how-it-works' },
+      { text: 'Examples', href: '#examples' },
+      { text: 'Team', href: '#team' },
+      { text: 'Join Waitlist', onclick: 'openWaitlist()', class: 'bg-purple-600 text-white px-6 py-3 rounded-full' }
+    ];
+    
+    navItems.forEach(item => {
+      const element = item.onclick ? document.createElement('button') : document.createElement('a');
+      if (item.href) element.href = item.href;
+      if (item.onclick) element.onclick = () => { eval(item.onclick); };
+      element.textContent = item.text;
+      element.className = item.class ? item.class : 'text-white text-2xl';
+      
+      element.addEventListener('click', function() {
+        mobileMenu.style.transform = 'translateX(100%)';
+        setTimeout(() => { mobileMenu.style.display = 'none'; }, 300);
+      });
+      
+      menuItems.appendChild(element);
+    });
+    
+    mobileMenu.appendChild(menuItems);
+    document.body.appendChild(mobileMenu);
+    
+    // Toggle menu
+    menuButton.addEventListener('click', function() {
+      if (mobileMenu.style.display === 'none') {
+        mobileMenu.style.display = 'flex';
+        setTimeout(() => { mobileMenu.style.transform = 'translateX(0)'; }, 10);
+      }
+    });
+    
+    // Close menu
+    closeButton.addEventListener('click', function() {
+      mobileMenu.style.transform = 'translateX(100%)';
+      setTimeout(() => { mobileMenu.style.display = 'none'; }, 300);
+    });
+  });
+
+  // Waitlist functionality
+  function openWaitlist() {
+    document.getElementById('waitlistModal').style.display = 'flex';
+  }
+
+  function closeWaitlist() {
+    document.getElementById('waitlistModal').style.display = 'none';
+    document.getElementById('waitlistForm').reset();
+    document.getElementById('waitlistForm').style.display = 'block';
+    document.getElementById('waitlistSuccess').style.display = 'none';
+  }
+
+  // Early Access functionality
+  function openEarlyAccess() {
+    document.getElementById('earlyAccessModal').style.display = 'flex';
+  }
+
+  function closeEarlyAccess() {
+    document.getElementById('earlyAccessModal').style.display = 'none';
+    document.getElementById('earlyAccessForm').reset();
+    document.getElementById('accessError').style.display = 'none';
+  }
+
+  function verifyAccessCode(event) {
+    event.preventDefault();
+    const accessCode = document.getElementById('accessCodeInput').value.trim();
+    const errorDiv = document.getElementById('accessError');
+    
+    if (accessCode.toUpperCase() === 'UNICORN') {
+      // Store access in localStorage
+      localStorage.setItem('sentimental_access', 'granted');
+      // Redirect to app
+      window.location.href = '/app';
+    } else {
+      errorDiv.textContent = 'Invalid access code. Please try again.';
+      errorDiv.style.display = 'block';
+      document.getElementById('accessCodeInput').value = '';
+      document.getElementById('accessCodeInput').focus();
+    }
+  }
+
+  async function submitWaitlist(event) {
+    event.preventDefault();
+    const email = document.getElementById('waitlistEmail').value;
+    const submitBtn = document.getElementById('submitBtn');
+    
+    // Show loading state
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Joining...';
+    
+    try {
+      const response = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: email })
+      });
+      
+      if (response.ok) {
+        // Show success message
+        document.getElementById('waitlistForm').style.display = 'none';
+        document.getElementById('waitlistSuccess').style.display = 'block';
+      } else {
+        throw new Error('Failed to join waitlist');
+      }
+    } catch (error) {
+      alert('Something went wrong. Please try again.');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Join Waitlist';
+    }
+  }
+</script>
+
+<!-- Waitlist Modal -->
+<div id="waitlistModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style="display: none;">
+  <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 relative">
+    <button onclick="closeWaitlist()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl">
+      ×
+    </button>
+    
+    <!-- Waitlist Form -->
+    <div id="waitlistForm">
+      <div class="text-center mb-6">
+        <h3 class="text-2xl font-bold text-gray-900 mb-2">Join Our Waitlist</h3>
+        <p class="text-gray-600">Be the first to experience Sentimental when we launch. We'll send you early access and updates.</p>
+      </div>
+      
+      <form onsubmit="submitWaitlist(event)">
+        <div class="mb-4">
+          <label for="waitlistEmail" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+          <input 
+            type="email" 
+            id="waitlistEmail" 
+            required 
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            placeholder="your@email.com"
+          >
+        </div>
+        
+        <button 
+          type="submit" 
+          id="submitBtn"
+          class="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors"
+        >
+          Join Waitlist
+        </button>
+      </form>
+      
+      <p class="text-xs text-gray-500 text-center mt-4">
+        We respect your privacy. No spam, just updates about Sentimental.
+      </p>
+    </div>
+    
+    <!-- Success Message -->
+    <div id="waitlistSuccess" class="text-center" style="display: none;">
+      <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+      </div>
+      <h3 class="text-2xl font-bold text-gray-900 mb-2">Welcome to the Waitlist!</h3>
+      <p class="text-gray-600 mb-6">
+        Thank you for joining! We'll send you early access and updates about Sentimental. 
+        Keep an eye on your inbox for exciting news.
+      </p>
+      <button 
+        onclick="closeWaitlist()" 
+        class="bg-purple-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-purple-700 transition-colors"
+      >
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Early Access Modal -->
+<div id="earlyAccessModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style="display: none;">
+  <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 relative">
+    <button onclick="closeEarlyAccess()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl">
+      ×
+    </button>
+    
+    <div id="earlyAccessForm">
+      <div class="text-center mb-6">
+        <div class="text-6xl mb-4">🦄</div>
+        <h3 class="text-2xl font-bold text-gray-900 mb-2">Early Access</h3>
+        <p class="text-gray-600">Enter your access code to test Sentimental</p>
+      </div>
+      
+      <form onsubmit="verifyAccessCode(event)">
+        <div class="mb-4">
+          <label for="accessCodeInput" class="block text-sm font-medium text-gray-700 mb-2">Access Code</label>
+          <input 
+            type="text" 
+            id="accessCodeInput" 
+            required 
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-center text-lg font-mono"
+            placeholder="Enter access code"
+            autocomplete="off"
+          >
+        </div>
+        
+        <div id="accessError" class="mb-4 text-red-600 text-sm text-center" style="display: none;"></div>
+        
+        <button 
+          type="submit"
+          class="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors"
+        >
+          Access App
+        </button>
+      </form>
+      
+      <p class="text-xs text-gray-500 text-center mt-4">
+        Don't have an access code? <button onclick="closeEarlyAccess(); openWaitlist();" class="text-purple-600 hover:underline">Join the waitlist</button>
+      </p>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<!-- Intelligence Report System -->
+<script src="{{ url_for('static', filename='js/intelligence-report.js') }}"></script>
+
+<!-- Main App -->
+<script type="text/babel" src="{{ url_for('static', filename='js/sentimental-app.jsx') }}"></script>
+
+</body>
+</html>
