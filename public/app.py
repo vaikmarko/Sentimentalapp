@@ -1334,9 +1334,11 @@ def process_chat_message():
                 
             except Exception as e:
                 logger.error(f"OpenAI API error: {e}")
-                ai_response = "I'm here to listen and help you discover more about yourself. What's been on your mind lately? ✨"
+                # Use intelligent fallback instead of hardcoded response
+                ai_response = prompts_engine.get_fallback_response(message, {})
         else:
-            ai_response = "I'm here to listen and help you discover more about yourself. What's been on your mind lately? ✨"
+            # Use intelligent fallback instead of hardcoded response
+            ai_response = prompts_engine.get_fallback_response(message, {})
         
         # Check if this conversation is ready for story generation
         full_conversation = conversation_history + [

@@ -171,6 +171,23 @@ firebase-credentials.json     # Firebase service account
 - **Demo**: Polished experience for demonstrations  
 - **Production**: Live deployment optimized
 
+## 🚀 Deployment
+
+For detailed deployment instructions, troubleshooting, and API key management, see **[DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)**.
+
+### Quick Deploy to Test Environment
+```bash
+# Deploy with API key
+gcloud run deploy sentimentalapp-test \
+  --source . \
+  --region europe-west1 \
+  --allow-unauthenticated \
+  --set-env-vars OPENAI_API_KEY="$(python3 -c "import os; from dotenv import load_dotenv; load_dotenv('functions/.env'); load_dotenv(); print(os.getenv('OPENAI_API_KEY'))")"
+
+# Deploy hosting
+firebase deploy --only hosting
+```
+
 ---
 
 **Clean, focused, and ready for users! 🎉** 

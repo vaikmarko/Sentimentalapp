@@ -460,7 +460,8 @@ const SentimentalApp = () => {
         },
         body: JSON.stringify({
           message: userMessage,
-          user_id: user.id
+          user_id: user.id,
+          conversation_history: messages // Send the conversation history!
         })
       });
 
