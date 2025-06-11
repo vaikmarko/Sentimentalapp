@@ -184,6 +184,7 @@ const SentimentalApp = () => {
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState('');
   const [isSignupMode, setIsSignupMode] = useState(false);
+  const [loginForm, setLoginForm] = useState({ name: '', email: '', password: '' });
   const [appInitialized, setAppInitialized] = useState(false);
 
   // Format viewing state
@@ -375,7 +376,29 @@ const SentimentalApp = () => {
     
     try {
       if (isSignupMode) {
-        // Register new user
+        // Try Firebase signup first if available
+        if (window.firebaseAuth) {
+          try {
+            const userCredential = await window.firebaseAuth.createUserWithEmailAndPassword(loginForm.email, loginForm.password);
+            const firebaseUser = userCredential.user;
+            
+            // Update display name
+            if (loginForm.name) {
+              await firebaseUser.updateProfile({
+                displayName: loginForm.name
+              });
+            }
+            
+            // User will be synced automatically by auth state listener
+            setShowLogin(false);
+            return;
+          } catch (firebaseError) {
+            console.log('Firebase signup failed, falling back to local registration:', firebaseError);
+            // Fall through to local registration
+          }
+        }
+        
+        // Fallback: Register new user locally
         const registerResponse = await fetch('/api/auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -413,7 +436,20 @@ const SentimentalApp = () => {
           alert(registerData.message || 'Registration failed. Please try again.');
         }
       } else {
-        // Login existing user
+        // Try Firebase signin first if available
+        if (window.firebaseAuth) {
+          try {
+            const userCredential = await window.firebaseAuth.signInWithEmailAndPassword(loginForm.email, loginForm.password);
+            // User will be synced automatically by auth state listener
+            setShowLogin(false);
+            return;
+          } catch (firebaseError) {
+            console.log('Firebase signin failed, falling back to local login:', firebaseError);
+            // Fall through to local login
+          }
+        }
+        
+        // Fallback: Login existing user locally
         const loginResponse = await fetch('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -467,6 +503,34 @@ const SentimentalApp = () => {
     } catch (error) {
       console.error('Google login error:', error);
       alert('Google login failed. Please try again.');
+    }
+    setIsLoading(false);
+  };
+
+  const handleForgotPassword = async () => {
+    if (!loginForm.email) {
+      alert('Please enter your email address first.');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      if (window.firebaseAuth) {
+        await window.firebaseAuth.sendPasswordResetEmail(loginForm.email);
+        alert('Password reset email sent! Please check your email and follow the instructions to reset your password.');
+      } else {
+        // Fallback for test environment - show instructions
+        alert('Password reset: Please contact support at hello@sentimental.app with your email address to reset your password.');
+      }
+    } catch (error) {
+      console.error('Password reset error:', error);
+      if (error.code === 'auth/user-not-found') {
+        alert('No account found with this email address. Please check your email or create a new account.');
+      } else if (error.code === 'auth/invalid-email') {
+        alert('Please enter a valid email address.');
+      } else {
+        alert('Failed to send password reset email. Please try again or contact support.');
+      }
     }
     setIsLoading(false);
   };
@@ -1212,16 +1276,26 @@ const SentimentalApp = () => {
             </button>
           </form>
 
-          <div className="mt-4 text-center">
+          <div className="mt-4 text-center space-y-2">
             <button
               onClick={() => {
                 setIsSignupMode(!isSignupMode);
                 setLoginForm({ name: '', email: '', password: '' });
               }}
-              className="text-purple-600 hover:text-purple-700 text-sm font-medium"
+              className="text-purple-600 hover:text-purple-700 text-sm font-medium block w-full"
             >
               {isSignupMode ? 'Already have an account? Sign in' : 'Need an account? Sign up'}
             </button>
+            
+            {!isSignupMode && (
+              <button
+                onClick={handleForgotPassword}
+                disabled={isLoading}
+                className="text-gray-500 hover:text-gray-700 text-sm font-medium disabled:opacity-50"
+              >
+                Forgot your password?
+              </button>
+            )}
           </div>
 
           <div className="my-4 flex items-center">

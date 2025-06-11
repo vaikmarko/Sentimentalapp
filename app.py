@@ -2127,6 +2127,50 @@ def login_user():
         logger.error(f"Error in user login: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
 
+@app.route('/api/auth/firebase-signup', methods=['POST'])
+def firebase_signup():
+    """Create Firebase user account"""
+    try:
+        data = request.json
+        email = data.get('email', '').strip().lower()
+        password = data.get('password', '')
+        name = data.get('name', '')
+        
+        if not email or not password:
+            return jsonify({'error': 'Email and password are required'}), 400
+        
+        # For now, return success - actual Firebase user creation will be handled by frontend
+        return jsonify({
+            'message': 'Firebase signup initiated',
+            'email': email,
+            'name': name
+        }), 200
+            
+    except Exception as e:
+        logger.error(f"Error in firebase signup: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/api/auth/firebase-signin', methods=['POST'])
+def firebase_signin():
+    """Sign in with Firebase"""
+    try:
+        data = request.json
+        email = data.get('email', '').strip().lower()
+        password = data.get('password', '')
+        
+        if not email or not password:
+            return jsonify({'error': 'Email and password are required'}), 400
+        
+        # For now, return success - actual Firebase authentication will be handled by frontend
+        return jsonify({
+            'message': 'Firebase signin initiated',
+            'email': email
+        }), 200
+            
+    except Exception as e:
+        logger.error(f"Error in firebase signin: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500
+
 @app.route('/api/auth/firebase-sync', methods=['POST'])
 def firebase_sync():
     """Sync Firebase user with local database"""
