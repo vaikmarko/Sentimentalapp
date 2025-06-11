@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentimental - Transform Your Stories Into Any Format</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 50%, #10B981 100%);
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .transform-card {
+            transition: all 0.3s ease;
+            transform: perspective(1000px) rotateY(0deg);
+        }
+        
+        .transform-card:hover {
+            transform: perspective(1000px) rotateY(5deg) translateY(-10px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+        
+        .story-preview {
+            background: linear-gradient(145deg, #f8fafc 0%, #e2e8f0 100%);
+            border-left: 4px solid #8B5CF6;
+        }
+        
+        .format-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+        }
+        
+        .format-badge {
+            background: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+        
+        .format-badge:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(139, 92, 246, 0.4);
+        }
+        
+        .inner-space-preview {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 24px;
+            color: white;
+        }
+        
+        .feature-icon {
+            background: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+        
+        .demo-story {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+        }
+        
+        .navbar-scroll {
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-hidden {
+            transform: translateY(-100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav id="navbar" class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 navbar-scroll">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-cyan-600 bg-clip-text text-transparent">
+                    Sentimental
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#how-it-works" class="text-gray-600 hover:text-purple-600 transition">How It Works</a>
+                    <a href="#examples" class="text-gray-600 hover:text-purple-600 transition">Examples</a>
+                    <a href="#features" class="text-gray-600 hover:text-purple-600 transition">Features</a>
+                    <button onclick="openDemo()" class="bg-gradient-to-r from-purple-600 to-cyan-600 text-white px-6 py-2 rounded-lg font-medium hover:shadow-lg transition">
+                        Try Demo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-32 pb-20 px-6 gradient-bg text-white relative overflow-hidden">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <!-- Left: Main Content -->
+                <div>
+                    <h1 class="text-5xl lg:text-6xl font-bold mb-8 leading-tight">
+                        Transform Your Stories Into 
+                        <span class="text-yellow-300">Any Format</span>
+                    </h1>
+                    <p class="text-xl mb-8 text-blue-100 leading-relaxed">
+                        Turn personal moments into poems, articles, songs, Instagram posts, newsletters, presentations, and more. 
+                        AI-powered transformations that help you understand and share your experiences in beautiful ways.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button onclick="openDemo()" class="bg-white text-purple-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition shadow-lg">
+                            🚀 Try Live Demo
+                        </button>
+                        <button onclick="scrollToExamples()" class="glass-effect text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white/20 transition">
+                            See Examples
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right: Live Demo Preview -->
+                <div class="transform-card">
+                    <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+                        <div class="bg-gradient-to-r from-purple-600 to-cyan-600 p-4">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3 h-3 bg-red-400 rounded-full"></div>
+                                <div class="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                                <div class="w-3 h-3 bg-green-400 rounded-full"></div>
+                                <div class="ml-4 text-white text-sm font-medium">Sentimental App</div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="story-preview p-4 rounded-lg mb-4">
+                                <div class="text-sm text-gray-600 mb-2">Your Story:</div>
+                                <p class="text-gray-800 font-medium">"Started a new job today. Nervous but excited about the possibilities..."</p>
+                            </div>
+                            <div class="mb-4">
+                                <div class="text-sm font-medium text-purple-600 mb-3">✨ Transform Into:</div>
+                                <div class="format-grid">
+                                    <div class="format-badge">📝 Article</div>
+                                    <div class="format-badge">🎵 Song</div>
+                                    <div class="format-badge">📱 Instagram</div>
+                                    <div class="format-badge">📧 Newsletter</div>
+                                    <div class="format-badge">🎭 Poem</div>
+                                    <div class="format-badge">📊 Presentation</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Floating Elements -->
+        <div class="absolute top-20 right-10 w-20 h-20 bg-yellow-300 rounded-full opacity-20 animate-pulse"></div>
+        <div class="absolute bottom-20 left-10 w-16 h-16 bg-cyan-300 rounded-full opacity-20 animate-pulse delay-75"></div>
+    </section>
+
+    <!-- Live Examples Section -->
+    <section id="examples" class="py-20 px-6 bg-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-6">See Real Story Transformations</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Watch how one personal story becomes 15+ different formats, each with its own purpose and style.
+                </p>
+            </div>
+
+            <!-- Example Story Transformation -->
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- Original Story -->
+                <div class="demo-story">
+                    <div class="text-sm font-medium text-purple-600 mb-3">📖 Original Story</div>
+                    <h3 class="text-lg font-semibold mb-3">Finding Purpose in Work</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed mb-4">
+                        "Man, I've been grappling with this gut feeling that's been nagging me for a while now. It's like every morning I wake up, I stare at the ceiling, and all I can think is, 'I need to quit my job.' But, this isn't just about a bad day or a difficult project..."
+                    </p>
+                    <div class="text-xs text-gray-500">by Marcus Rodriguez</div>
+                </div>
+
+                <!-- Transformed Formats -->
+                <div class="lg:col-span-2">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <!-- Poem Format -->
+                        <div class="demo-story border-l-4 border-purple-500">
+                            <div class="text-sm font-medium text-purple-600 mb-3">🎭 Poem</div>
+                            <h4 class="font-semibold mb-2">The Weight of Mornings</h4>
+                            <p class="text-gray-600 text-sm italic">
+                                "Each dawn brings the same familiar dread,<br/>
+                                A ceiling stare, thoughts in my head..."
+                            </p>
+                        </div>
+
+                        <!-- Article Format -->
+                        <div class="demo-story border-l-4 border-cyan-500">
+                            <div class="text-sm font-medium text-cyan-600 mb-3">📝 Article</div>
+                            <h4 class="font-semibold mb-2">The Modern Career Crisis</h4>
+                            <p class="text-gray-600 text-sm">
+                                "In an era where professional fulfillment seems increasingly elusive, one man's morning ritual reveals a deeper truth about workplace satisfaction..."
+                            </p>
+                        </div>
+
+                        <!-- Instagram Format -->
+                        <div class="demo-story border-l-4 border-pink-500">
+                            <div class="text-sm font-medium text-pink-600 mb-3">📱 Instagram</div>
+                            <h4 class="font-semibold mb-2">Career Crossroads 💭</h4>
+                            <p class="text-gray-600 text-sm">
+                                "That moment when you realize your gut is trying to tell you something important... 🤔✨ #careerchange #authentic..."
+                            </p>
+                        </div>
+
+                        <!-- Newsletter Format -->
+                        <div class="demo-story border-l-4 border-green-500">
+                            <div class="text-sm font-medium text-green-600 mb-3">📧 Newsletter</div>
+                            <h4 class="font-semibold mb-2">Finding Your True North</h4>
+                            <p class="text-gray-600 text-sm">
+                                "Dear readers, this week I want to share something deeply personal about those moments when life asks us to choose between comfort and calling..."
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 text-center">
+                        <div class="text-sm text-gray-500 mb-3">+ 11 more formats available</div>
+                        <button onclick="openDemo()" class="text-purple-600 hover:text-purple-700 font-medium">
+                            Try with your own story →
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section id="how-it-works" class="py-20 px-6 bg-gray-50">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-6">Simple. Powerful. Transformative.</h2>
+                <p class="text-xl text-gray-600">Three steps to unlock your stories' potential</p>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-12">
+                <!-- Step 1 -->
+                <div class="text-center">
+                    <div class="feature-icon mx-auto mb-6">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <h3 class="text-2xl font-semibold mb-4">1. Share Your Story</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Write, speak, or simply answer AI-guided questions about your experience. No special skills needed—just your authentic voice.
+                    </p>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="text-center">
+                    <div class="feature-icon mx-auto mb-6">
+                        <i class="fas fa-magic"></i>
+                    </div>
+                    <h3 class="text-2xl font-semibold mb-4">2. Choose Your Transform</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Pick from 15+ formats: poems, articles, songs, social posts, presentations, newsletters, and more. Each captures different aspects of your story.
+                    </p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="text-center">
+                    <div class="feature-icon mx-auto mb-6">
+                        <i class="fas fa-share-alt"></i>
+                    </div>
+                    <h3 class="text-2xl font-semibold mb-4">3. Discover & Share</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Get professional-quality content that reveals new insights about your experiences. Share what resonates or keep it for personal reflection.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Inner Space Feature -->
+    <section id="features" class="py-20 px-6 bg-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div>
+                    <h2 class="text-4xl font-bold mb-6">Your Inner Space</h2>
+                    <p class="text-xl text-gray-600 mb-8 leading-relaxed">
+                        Beyond transformations, discover patterns in your life through AI-powered insights. 
+                        Ask deep questions about your experiences and get answers based on your story collection.
+                    </p>
+                    
+                    <div class="space-y-6">
+                        <div class="flex items-start space-x-4">
+                            <div class="w-8 h-8 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                                <i class="fas fa-question-circle text-sm"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold mb-2">Ask Yourself Anything</h4>
+                                <p class="text-gray-600">"What are my core values in relationships?" Get answers from your own experiences.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-4">
+                            <div class="w-8 h-8 bg-cyan-100 text-cyan-600 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                                <i class="fas fa-chart-line text-sm"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold mb-2">Discover Life Patterns</h4>
+                                <p class="text-gray-600">Identify recurring themes, growth moments, and behavioral insights across your stories.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-4">
+                            <div class="w-8 h-8 bg-green-100 text-green-600 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                                <i class="fas fa-compass text-sm"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold mb-2">Guided Self-Discovery</h4>
+                                <p class="text-gray-600">AI-curated conversations that help you explore deeper aspects of your personality and journey.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inner Space Preview -->
+                <div class="transform-card">
+                    <div class="inner-space-preview">
+                        <div class="flex items-center mb-6">
+                            <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-compass text-white text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold">Your Inner Space</h3>
+                                <p class="text-blue-100">Personal AI-powered self-discovery</p>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="bg-white/10 rounded-lg p-4">
+                                <h4 class="font-medium mb-2">💭 Ask Yourself Anything</h4>
+                                <p class="text-sm text-blue-100">"What are my core values in relationships?"</p>
+                                <div class="text-xs text-green-300 mt-2">✓ Answered from 3 stories</div>
+                            </div>
+                            
+                            <div class="bg-white/10 rounded-lg p-4">
+                                <h4 class="font-medium mb-2">📈 Life Patterns</h4>
+                                <p class="text-sm text-blue-100">"How do I handle stress and challenges?"</p>
+                                <div class="text-xs text-orange-300 mt-2">○ Needs exploration → Chat suggested</div>
+                            </div>
+                            
+                            <div class="text-center pt-4">
+                                <div class="text-sm text-blue-200">Coming Soon - Preview Mode</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 px-6 gradient-bg text-white">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-4xl font-bold mb-6">Ready to Transform Your Stories?</h2>
+            <p class="text-xl mb-8 text-blue-100">
+                Join thousands discovering new dimensions of their experiences through AI-powered storytelling.
+            </p>
+            <button onclick="openDemo()" class="bg-white text-purple-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition shadow-lg mr-4">
+                🚀 Try Free Demo
+            </button>
+            <button onclick="openWaitlist()" class="glass-effect text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white/20 transition">
+                Join Waitlist
+            </button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-300 py-12 px-6">
+        <div class="max-w-7xl mx-auto text-center">
+            <div class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent mb-4">
+                Sentimental
+            </div>
+            <p class="mb-6">Transform your stories. Discover yourself.</p>
+            <div class="text-sm text-gray-500">
+                © 2024 Sentimental. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling
+        function scrollToExamples() {
+            document.getElementById('examples').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Demo redirect
+        function openDemo() {
+            window.location.href = '/app';
+        }
+
+        // Waitlist modal (you can reuse from original landing page)
+        function openWaitlist() {
+            alert('Waitlist functionality - integrate from original landing page');
+        }
+
+        // Navbar scroll behavior
+        let lastScrollTop = 0;
+        const navbar = document.getElementById('navbar');
+        
+        window.addEventListener('scroll', function() {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+                navbar.classList.add('navbar-hidden');
+            } else {
+                navbar.classList.remove('navbar-hidden');
+            }
+            
+            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+        });
+
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe all transform cards
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.transform-card, .demo-story').forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(card);
+            });
+        });
+    </script>
+</body>
+</html> 

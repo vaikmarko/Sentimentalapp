@@ -346,6 +346,10 @@ def app_view():
 def landing():
     return render_template('index.html', environment=ENVIRONMENT)
 
+@app.route('/new-landing')
+def new_landing():
+    return render_template('landing-new.html', environment=ENVIRONMENT)
+
 @app.route('/manifest.json')
 def manifest():
     return send_from_directory('static', 'manifest.json')
