@@ -1418,7 +1418,7 @@ const SentimentalApp = () => {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                placeholder="Type your message..."
+                placeholder="Type your message... (Say 'turn this into a story' when you want to save our chat)"
                 className="flex-1 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 disabled={isLoading}
               />

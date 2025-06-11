@@ -1346,23 +1346,21 @@ def process_chat_message():
             {'role': 'assistant', 'content': ai_response, 'timestamp': datetime.now().isoformat()}
         ]
         
-        # Detect if story should be generated
+        # Detect if story should be generated - only when user explicitly requests it
         should_generate_story = False
         story_indicators = [
             "turn this into something",
-            "keep and reflect",
-            "story",
-            "remember this",
-            "meaningful",
-            "important conversation"
+            "turn this into a story",
+            "create a story",
+            "make this a story",
+            "save this as a story",
+            "story from this",
+            "remember this conversation",
+            "keep this conversation",
+            "save this chat"
         ]
         
         if any(indicator in message.lower() for indicator in story_indicators):
-            should_generate_story = True
-        
-        # Or if conversation is substantial (5+ user messages)
-        user_messages = [msg for msg in full_conversation if msg.get('role') == 'user']
-        if len(user_messages) >= 5:
             should_generate_story = True
         
         result = {

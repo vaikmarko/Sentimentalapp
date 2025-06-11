@@ -207,5 +207,5 @@ gcloud run deploy sentimentalapp-test \
 firebase deploy --only hosting
 
 # 3. Test the site
-echo "Test at: https://sentimentalapp-test.web.app/app"
+echo "Test at: https://sentimental-f95e6.web.app/app"
 ``` 
