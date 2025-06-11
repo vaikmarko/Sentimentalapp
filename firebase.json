@@ -9,13 +9,11 @@
       "*.py",
       "requirements.txt"
     ],
-    "rewrites": [
+    "redirects": [
       {
         "source": "**",
-        "run": {
-          "serviceId": "sentimentalapp",
-          "region": "europe-west1"
-        }
+        "destination": "https://sentimentalapp-319737737925.europe-west1.run.app/**",
+        "type": 301
       }
     ]
   },
