@@ -55,7 +55,7 @@ transform: translateY(-5px);
 </head>
 <body class="bg-gray-50">
 <!-- Navigation -->
-<nav id="navbar" class="bg-white sticky top-0 z-50 shadow-sm py-4 px-6 transition-all duration-300">
+<nav class="bg-white sticky top-0 z-50 shadow-sm py-0 px-6">
 <div class="max-w-6xl mx-auto flex justify-between items-center">
 <a href="/" class="text-3xl font-bold text-purple-600">Sentimental</a>
 <div class="hidden md:flex space-x-8 items-center">
@@ -71,7 +71,7 @@ transform: translateY(-5px);
 </nav>
 
 <!-- Hero Section -->
-<section class="pt-20 pb-20 px-6 gradient-bg text-white">
+<section class="pt-0 pb-20 px-6 gradient-bg text-white">
 <div class="container mx-auto">
 <div class="max-w-4xl mx-auto text-center">
 <h1 class="text-5xl md:text-6xl font-bold mb-8 leading-tight">
@@ -494,24 +494,6 @@ Digital innovation veteran who's built scalable solutions for SEB, Swedbank, and
       submitBtn.textContent = 'Join Waitlist';
     }
   }
-
-  // Header scroll behavior
-  let lastScrollTop = 0;
-  const navbar = document.getElementById('navbar');
-  
-  window.addEventListener('scroll', function() {
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    
-    if (scrollTop > lastScrollTop && scrollTop > 100) {
-      // Scrolling down - hide navbar
-      navbar.style.transform = 'translateY(-100%)';
-    } else {
-      // Scrolling up - show navbar
-      navbar.style.transform = 'translateY(0)';
-    }
-    
-    lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; // For Mobile or negative scrolling
-  });
 </script>
 
 <!-- Waitlist Modal -->

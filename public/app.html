@@ -23,30 +23,8 @@
     <meta name="apple-mobile-web-app-title" content="Sentimental">
     <link rel="apple-touch-icon" href="/static/icons/icon-192x192.png">
     
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        purple: {
-                            50: '#faf5ff',
-                            100: '#f3e8ff',
-                            200: '#e9d5ff',
-                            300: '#d8b4fe',
-                            400: '#c084fc',
-                            500: '#a855f7',
-                            600: '#8639E8',
-                            700: '#7c3aed',
-                            800: '#6b21a8',
-                            900: '#581c87',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Tailwind CSS (Production Build) -->
+    <link rel="stylesheet" href="/static/css/tailwind.css">
     
     <!-- React -->
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
@@ -62,6 +40,12 @@
     <!-- Three.js for 3D inner space -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <!-- API Configuration -->
+    <script>
+        // Configure API base URL for Cloud Run backend
+        window.API_BASE_URL = 'https://sentimentalapp-319737737925.europe-west1.run.app';
+    </script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -283,10 +267,10 @@
     -->
 
     <!-- Load React Component -->
-    <script type="text/babel" src="/static/js/sentimental-app.jsx?v={{ cache_bust }}"></script>
+    <script type="text/babel" src="/static/js/sentimental-app.jsx"></script>
     
     <!-- Load 3D Inner Space Component -->
-<script type="text/babel" src="/static/js/inner-space-3d.jsx"></script>
+    <script type="text/babel" src="/static/js/inner-space-3d.jsx"></script>
     
     <!-- Firebase Configuration -->
     <script>

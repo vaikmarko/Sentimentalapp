@@ -188,6 +188,20 @@ gcloud run deploy sentimentalapp-test \
 firebase deploy --only hosting
 ```
 
+## Backend File Structure Update (June 2025)
+
+The Flask backend now **lives only at the project root**—`app.py` plus the supporting engines (`smart_story_engine.py`, `prompts_engine.py`, etc.).
+
+Previously there was an outdated copy of these files under `public/` used for a Cloud-Functions prototype. Those duplicates have been removed to:
+
+* Prevent accidental imports of incompatible code (they used the new OpenAI 1.x client).
+* Keep a single source of truth for the API routes.
+* Make navigation and maintenance simpler.
+
+`public/` now contains **only static assets** (HTML, JS, CSS, images, icons).
+
+If you encounter any references to `public/app.py` in deployment scripts, update them to point to the root `app.py`.
+
 ---
 
 **Clean, focused, and ready for users! 🎉** 

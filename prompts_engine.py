@@ -316,14 +316,14 @@ Remember: You're not trying to fix or solve anything. You're helping them explor
             'system_base': "You are a content creation expert who transforms personal stories into engaging formats while preserving their authentic emotional core.",
             
             'system_specialized': {
-                FormatType.TWITTER: "You are a social media expert who creates viral, authentic content that resonates emotionally with readers while staying within character limits.",
+                FormatType.X: "You are a social media expert who creates viral, authentic content for X (formerly Twitter) that resonates emotionally with readers while staying within character limits.",
                 FormatType.LINKEDIN: "You are a professional content creator who helps people share meaningful insights in a way that builds genuine connections and encourages professional dialogue.",
-                FormatType.INSTAGRAM: "You are an Instagram content specialist who creates visually-oriented, engaging posts that tell stories through authentic, relatable content with strong visual appeal.",
+                FormatType.INSTAGRAM: "You are an Instagram content specialist who creates short, engaging posts with visual storytelling that captures attention quickly.",
                 FormatType.FACEBOOK: "You are a community-focused social media specialist who creates content that brings people together through shared experiences and meaningful conversations.",
                 FormatType.POEM: "You are a poet who transforms personal experiences into beautiful, moving verse that captures the essence of human emotion and universal truths.",
                 FormatType.SONG: "You are a viral hit songwriter creating lyrics that stick in people's heads and make them want to sing along.",
                 FormatType.REEL: "You are a viral content creator who transforms personal stories into engaging short-form video scripts for social media reels, with hooks, visual cues, and compelling narratives.",
-                FormatType.SHORT_STORY: "You are a skilled fairytale writer who expands personal experiences into magical, enchanting fairytales with whimsical characters, imaginative settings, and narrative depth.",
+                FormatType.FAIRYTALE: "You are a skilled fairytale writer who expands personal experiences into magical, enchanting fairytales with whimsical characters, imaginative settings, and narrative depth.",
                 FormatType.ARTICLE: "You are a professional magazine writer who transforms personal experiences into compelling, publication-ready articles with journalistic structure and storytelling excellence.",
                 FormatType.BLOG_POST: "You are a professional content creator who writes clean, valuable blog posts that provide actionable insights while maintaining authentic personal storytelling.",
                 FormatType.PRESENTATION: "You are a presentation specialist who transforms stories into compelling, structured presentations that engage audiences and deliver clear takeaways.",
@@ -335,7 +335,7 @@ Remember: You're not trying to fix or solve anything. You're helping them explor
             },
             
             'generation_templates': {
-                FormatType.TWITTER: """Transform this personal story into a compelling tweet that captures its essence:
+                FormatType.X: """Transform this personal story into a compelling X (formerly Twitter) post that captures its essence:
 
 Story: {content}
 
@@ -358,17 +358,17 @@ Requirements:
 - 1-3 paragraphs maximum
 - Professional hashtags""",
 
-                FormatType.INSTAGRAM: """Create an engaging Instagram post that tells this story visually:
+                FormatType.INSTAGRAM: """Create a short, engaging Instagram post that tells this story:
 
 Story: {content}
 
 Requirements:
-- Visual storytelling approach
-- Emotional and authentic voice
+- Keep it concise and impactful (1-2 short paragraphs)
+- Visual storytelling approach with emotional punch
 - Include relevant hashtags (5-10)
-- Encourage engagement and sharing
-- 1-4 paragraphs with line breaks for readability
-- Include emojis where appropriate""",
+- Include emojis where appropriate
+- Hook readers in the first line
+- Encourage engagement""",
 
                 FormatType.FACEBOOK: """Transform this into a Facebook post that encourages meaningful discussion:
 
@@ -420,7 +420,7 @@ Requirements:
 - Add clear call-to-action or engagement prompt
 - Focus on visual storytelling and quick emotional impact""",
 
-                FormatType.SHORT_STORY: """Expand this into a magical fairytale:
+                FormatType.FAIRYTALE: """Expand this into a magical fairytale:
 
 Story: {content}
 
@@ -454,8 +454,8 @@ Requirements:
 Story: {content}
 
 Requirements:
-- Write an engaging, SEO-friendly title
-- Create a compelling opening that hooks readers immediately
+- Start directly with a compelling opening that hooks readers immediately
+- NO title at the beginning - jump straight into the content
 - Structure the content with clear H2 subheadings (## format)
 - Mix personal storytelling with actionable insights
 - Include practical takeaways readers can apply
@@ -541,13 +541,13 @@ Requirements:
 Story: {content}
 
 Requirements:
-- Personal, intimate tone
+- Start directly with personal, intimate thoughts - NO "Journal Entry" or date headers
 - Stream-of-consciousness style
 - Emotional honesty and vulnerability
 - Questions and wonderings
 - Personal insights and realizations
-- Date and context setting
-- Raw, authentic voice"""
+- Raw, authentic voice
+- Write as if someone is writing in their private journal"""
             }
         }
     
@@ -868,58 +868,7 @@ Focus on natural, empathetic guidance that feels supportive rather than extracti
             'initialized_at': datetime.now().isoformat()
         }
     
-    def get_fallback_response(self, message: str, context: Dict = None) -> str:
-        """Generate empathetic fallback response when AI is unavailable"""
-        
-        # Determine response based on message content and context
-        message_lower = message.lower()
-        
-        # Check for emotional content
-        emotional_words = ['feel', 'feeling', 'emotion', 'hurt', 'sad', 'happy', 'angry', 'anxious', 'scared', 'worried', 'excited', 'frustrated', 'overwhelmed']
-        if any(word in message_lower for word in emotional_words):
-            return "I can sense there are some important feelings behind what you're sharing. What would help you explore this experience a bit more? What stands out most to you about how you're feeling?"
-        
-        # Check for relationship content
-        relationship_words = ['relationship', 'family', 'friend', 'partner', 'spouse', 'colleague', 'boss', 'mother', 'father', 'sister', 'brother']
-        if any(word in message_lower for word in relationship_words):
-            return "Relationships can be such meaningful sources of insight about ourselves. What is this relationship teaching you? What patterns do you notice in how you connect with others?"
-        
-        # Check for growth/reflection content
-        growth_words = ['learn', 'realize', 'understand', 'grow', 'change', 'insight', 'pattern', 'notice', 'discover']
-        if any(word in message_lower for word in growth_words):
-            return "It sounds like you're in a space of discovery and growth. That's beautiful. What feels most significant about what you're noticing? What does this reveal about who you're becoming?"
-        
-        # Check for storytelling indicators
-        story_words = ['happened', 'experience', 'remember', 'time when', 'yesterday', 'recently', 'ago', 'moment']
-        if any(word in message_lower for word in story_words):
-            return "Thank you for sharing that experience with me. What made this moment meaningful to you? What were you feeling during this experience, and what insights is it giving you about yourself?"
-        
-        # Check for questions or uncertainty
-        if '?' in message or any(word in message_lower for word in ['wonder', 'unsure', 'confused', 'not sure', 'maybe', 'perhaps']):
-            return "I appreciate you bringing your questions and uncertainties here. Sometimes the most important insights come from sitting with what we don't know. What would it be like to explore this uncertainty with curiosity rather than trying to solve it right away?"
-        
-        # Default empathetic response
-        responses = [
-            "I'm here to listen and explore whatever you'd like to share. What's been on your mind lately?",
-            "Thank you for sharing that with me. What feels most important about what you've said? What would you like to explore further?",
-            "I can sense this matters to you. What draws you to reflect on this? What are you hoping to understand better?",
-            "That's really meaningful. What stands out most to you about this? What emotions or insights are coming up for you?",
-            "I appreciate your openness in sharing this. What would help you explore this experience more deeply? What questions are you holding?"
-        ]
-        
-        # Use different responses based on context
-        if context and context.get('total_interactions', 0) == 0:
-            return "Welcome to this space of exploration. I'm here to help you understand yourself better through our conversation. What would you like to explore today?"
-        
-        # Cycle through responses to avoid repetition
-        import random
-        return random.choice(responses)
-    
-    def should_use_fallback(self, openai_available: bool = True) -> bool:
-        """
-        Determine whether to use fallback responses
-        """
-        return not openai_available
+
 
 class AIProviderManager:
     """

@@ -23,30 +23,8 @@
     <meta name="apple-mobile-web-app-title" content="Sentimental">
     <link rel="apple-touch-icon" href="/static/icons/icon-192x192.png">
     
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        purple: {
-                            50: '#faf5ff',
-                            100: '#f3e8ff',
-                            200: '#e9d5ff',
-                            300: '#d8b4fe',
-                            400: '#c084fc',
-                            500: '#a855f7',
-                            600: '#8639E8',
-                            700: '#7c3aed',
-                            800: '#6b21a8',
-                            900: '#581c87',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Tailwind CSS (Production Build) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
     
     <!-- React -->
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
@@ -283,10 +261,10 @@
     -->
 
     <!-- Load React Component -->
-    <script type="text/babel" src="/static/js/sentimental-app.jsx?v={{ cache_bust }}"></script>
+    <script type="text/babel" src="{{ url_for('static', filename='js/sentimental-app.jsx') }}?v={{ cache_bust }}"></script>
     
     <!-- Load 3D Inner Space Component -->
-<script type="text/babel" src="/static/js/inner-space-3d.jsx"></script>
+<script type="text/babel" src="{{ url_for('static', filename='js/inner-space-3d.jsx') }}"></script>
     
     <!-- Firebase Configuration -->
     <script>

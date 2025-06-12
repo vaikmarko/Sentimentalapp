@@ -9,16 +9,27 @@
       "*.py",
       "requirements.txt"
     ],
-    "redirects": [
+    "rewrites": [
       {
-        "source": "/app/**",
-        "destination": "https://sentimentalapp-test-319737737925.europe-west1.run.app/app/**",
-        "type": 301
+        "source": "/",
+        "run": {
+          "serviceId": "sentimentalapp",
+          "region": "europe-west1"
+        }
       },
       {
-        "source": "/**",
-        "destination": "https://sentimentalapp-test-319737737925.europe-west1.run.app/**",
-        "type": 301
+        "source": "/app",
+        "run": {
+          "serviceId": "sentimentalapp",
+          "region": "europe-west1"
+        }
+      },
+      {
+        "source": "/api/**",
+        "run": {
+          "serviceId": "sentimentalapp",
+          "region": "europe-west1"
+        }
       }
     ]
   },

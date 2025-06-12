@@ -48,7 +48,7 @@ class FormatsGenerationEngine:
         
         # Format specifications for consistent output
         self.format_specs = {
-            FormatType.TWITTER: {
+            FormatType.X: {
                 'max_length': 280,
                 'tone': 'engaging',
                 'include_hashtags': True,
@@ -247,7 +247,7 @@ class FormatsGenerationEngine:
     def _get_max_tokens_for_format(self, format_type: FormatType) -> int:
         """Get appropriate token limit for format"""
         token_limits = {
-            FormatType.TWITTER: 100,
+            FormatType.X: 100,
             FormatType.LINKEDIN: 400,
             FormatType.INSTAGRAM: 600,
             FormatType.POEM: 300,
@@ -270,7 +270,7 @@ class FormatsGenerationEngine:
         
         system_prompts = {
             # Social Media Formats
-            FormatType.TWITTER: "You are a social media expert who creates viral, authentic content that resonates emotionally with readers while staying within character limits.",
+            FormatType.X: "You are a social media expert who creates viral, authentic content that resonates emotionally with readers while staying within character limits.",
             FormatType.LINKEDIN: "You are a professional content creator who helps people share meaningful insights in a way that builds genuine connections and encourages professional dialogue.",
             FormatType.INSTAGRAM: "You are an Instagram content specialist who creates visually-oriented, engaging posts that tell stories through authentic, relatable content with strong visual appeal.",
             FormatType.FACEBOOK: "You are a community-focused social media specialist who creates content that brings people together through shared experiences and meaningful conversations.",
@@ -279,7 +279,7 @@ class FormatsGenerationEngine:
             FormatType.POEM: "You are a poet who transforms personal experiences into beautiful, moving verse that captures the essence of human emotion and universal truths.",
             FormatType.SONG: "You are a songwriter who creates emotionally resonant lyrics that capture life experiences in musical, memorable language that people can connect with.",
             FormatType.REEL: "You are a viral content creator who transforms personal stories into engaging short-form video scripts for social media reels, with hooks, visual cues, and compelling narratives.",
-            FormatType.SHORT_STORY: "You are a skilled fairytale writer who expands personal experiences into magical, enchanting fairytales with whimsical characters, imaginative settings, and narrative depth.",
+            FormatType.FAIRYTALE: "You are a skilled fairytale writer who expands personal experiences into magical, enchanting fairytales with whimsical characters, imaginative settings, and narrative depth.",
             
             # Professional Formats
             FormatType.ARTICLE: "You are a skilled writer who creates compelling personal essays that blend storytelling with universal insights and actionable wisdom.",

@@ -1,5 +1,10 @@
 const { useState, useEffect, useRef } = React;
 
+// API Base URL Configuration
+const getApiBaseUrl = () => {
+  return window.API_BASE_URL || '';
+};
+
 // Lucide icons as inline SVG components since we can't import them directly
 const Search = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -113,7 +118,7 @@ const getFormatIcon = (formatType) => {
     // Content Formats
     article: '📝',
     blog_post: '✍️',
-    short_story: '📚',
+    fairytale: '📚',
     presentation: '📊',
     newsletter: '📰',
     
@@ -237,7 +242,7 @@ const SentimentalApp = () => {
           if (firebaseUser) {
             // Sync with backend to get proper user ID
             try {
-              const syncResponse = await fetch('/api/auth/firebase-sync', {
+              const syncResponse = await fetch(`${getApiBaseUrl()}/api/auth/firebase-sync`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -327,7 +332,7 @@ const SentimentalApp = () => {
 
   const fetchStories = async () => {
     try {
-      const response = await fetch('/api/stories');
+      const response = await fetch(`${getApiBaseUrl()}/api/stories`);
       if (response.ok) {
         const data = await response.json();
         setStories(data);
@@ -340,7 +345,7 @@ const SentimentalApp = () => {
   const fetchSupportedFormats = async () => {
     try {
       setLoadingFormats(true);
-      const response = await fetch(`/api/formats/supported?t=${Date.now()}`);
+      const response = await fetch(`${getApiBaseUrl()}/api/formats/supported?t=${Date.now()}`);
       if (response.ok) {
         const data = await response.json();
         setSupportedFormats(data.supported_formats || []);
@@ -350,7 +355,7 @@ const SentimentalApp = () => {
         // Fallback to formats that are actually supported by prompts engine
         setSupportedFormats([
           'x', 'linkedin', 'instagram', 'facebook',
-          'poem', 'song', 'reel', 'short_story', 
+          'poem', 'song', 'reel', 'fairytale', 
           'article', 'blog_post', 'presentation', 'newsletter', 'podcast',
           'insights', 'growth_summary', 'journal_entry'
         ]);
@@ -395,7 +400,7 @@ const SentimentalApp = () => {
         }
         
         // Fallback: Register new user locally
-        const registerResponse = await fetch('/api/auth/register', {
+        const registerResponse = await fetch(`${getApiBaseUrl()}/api/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -446,7 +451,7 @@ const SentimentalApp = () => {
         }
         
         // Fallback: Login existing user locally
-        const loginResponse = await fetch('/api/auth/login', {
+        const loginResponse = await fetch(`${getApiBaseUrl()}/api/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -572,7 +577,7 @@ const SentimentalApp = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/chat/message', {
+      const response = await fetch(`${getApiBaseUrl()}/api/chat/message`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -629,7 +634,7 @@ const SentimentalApp = () => {
     }]);
     
     try {
-      const response = await fetch('/api/stories/generate', {
+      const response = await fetch(`${getApiBaseUrl()}/api/stories/generate`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -727,13 +732,21 @@ const SentimentalApp = () => {
 
   // Audio upload function
   const uploadAudio = async (file, storyId, formatType) => {
+    // Require authentication for file uploads
+    if (!user || !user.id || user.id === 'anonymous' || user.id === 'anonymous_user' || user.id === '' || user.id === 'null' || user.id === 'undefined') {
+      throw new Error('Authentication required for file uploads');
+    }
+    
     const formData = new FormData();
     formData.append('file', file);
     formData.append('story_id', storyId);
     formData.append('format_type', formatType);
     
-    const response = await fetch('/api/upload/audio', {
+          const response = await fetch(`${getApiBaseUrl()}/api/upload/audio`, {
       method: 'POST',
+      headers: {
+        'X-User-ID': user.id  // Add authentication header
+      },
       body: formData
     });
     
@@ -785,7 +798,7 @@ const SentimentalApp = () => {
       }
 
       // Otherwise fetch from API
-      const response = await fetch(`/api/stories/${story.id}/formats/${formatType}`);
+      const response = await fetch(`${getApiBaseUrl()}/api/stories/${story.id}/formats/${formatType}`);
       if (response.ok) {
         const data = await response.json();
         setFormatContent(data.content);
@@ -835,7 +848,7 @@ const SentimentalApp = () => {
         console.log('User ID being sent:', user.id);
         console.log('Format type:', formatType);
         
-        const generateResponse = await fetch(`/api/stories/${story.id}/generate-format`, {
+        const generateResponse = await fetch(`${getApiBaseUrl()}/api/stories/${story.id}/generate-format`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
@@ -913,7 +926,7 @@ const SentimentalApp = () => {
     }
     
     try {
-      const response = await fetch(`/api/stories/${storyId}/privacy`, {
+      const response = await fetch(`${getApiBaseUrl()}/api/stories/${storyId}/privacy`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
@@ -971,7 +984,7 @@ const SentimentalApp = () => {
     setIsUpdatingStory(true);
 
     try {
-      const response = await fetch(`/api/stories/${editingStory.id}`, {
+              const response = await fetch(`${getApiBaseUrl()}/api/stories/${editingStory.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -1033,7 +1046,7 @@ const SentimentalApp = () => {
 
     setIsUpdatingFormat(true);
     try {
-      const response = await fetch(`/api/stories/${currentFormat.story.id}/formats/${editingFormat.formatType}`, {
+              const response = await fetch(`${getApiBaseUrl()}/api/stories/${currentFormat.story.id}/formats/${editingFormat.formatType}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -2085,7 +2098,7 @@ const SentimentalApp = () => {
       poem: 'Poem',
       song: 'Song',
       reel: 'Reel',
-      short_story: 'Fairytale',
+      fairytale: 'Fairytale',
       article: 'Article',
       blog_post: 'Blog Post',
       presentation: 'Presentation',

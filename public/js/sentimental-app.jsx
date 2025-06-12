@@ -100,7 +100,7 @@ const getFormatIcon = (formatType) => {
     poem: '🎭',
     song: '🎵',
     reel: '📄',
-    short_story: '📚',
+    fairytale: '📚',
     
     // Professional Formats (5)
     article: '📝',
@@ -316,7 +316,7 @@ const SentimentalApp = () => {
         // Fallback to formats that are actually supported by prompts engine
         setSupportedFormats([
           'x', 'linkedin', 'instagram', 'facebook',
-          'poem', 'song', 'reel', 'short_story', 
+          'poem', 'song', 'reel', 'fairytale', 
           'article', 'blog_post', 'presentation', 'newsletter', 'podcast',
           'insights', 'growth_summary', 'journal_entry'
         ]);
@@ -693,6 +693,11 @@ const SentimentalApp = () => {
 
   // Audio upload function
   const uploadAudio = async (file, storyId, formatType) => {
+    // Require authentication for file uploads
+    if (!user || !user.id || user.id === 'anonymous' || user.id === 'anonymous_user' || user.id === '' || user.id === 'null' || user.id === 'undefined') {
+      throw new Error('Authentication required for file uploads');
+    }
+    
     const formData = new FormData();
     formData.append('file', file);
     formData.append('story_id', storyId);
@@ -700,6 +705,9 @@ const SentimentalApp = () => {
     
     const response = await fetch('/api/upload/audio', {
       method: 'POST',
+      headers: {
+        'X-User-ID': user.id  // Add authentication header
+      },
       body: formData
     });
     
@@ -2029,7 +2037,7 @@ const SentimentalApp = () => {
       poem: 'Poem',
       song: 'Song',
       reel: 'Reel',
-      short_story: 'Fairytale',
+      fairytale: 'Fairytale',
       article: 'Article',
       blog_post: 'Blog Post',
       presentation: 'Presentation',

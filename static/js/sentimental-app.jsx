@@ -62,7 +62,7 @@ const InnerSpace = () => (
 
 const Globe = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 12.79A9 9 0 1 1 12 3a9 9 0 0 1 9 9 9.71 9.71 0 0 1-.79 4.7 8.38 8.38 0 0 1-.3.59 8.6 8.6 0 0 1-2.6 2.6 8.11 8.11 0 0 1-1.33.5c-1.24.18-2.5.28-3.76.28s-2.52-.1-3.76-.28a8.11 8.11 0 0 1-1.33-.5 8.6 8.6 0 0 1-2.6-2.6 8.38 8.38 0 0 1-.3-.59 9.71 9.71 0 0 1-.79-4.7 9 9 0 0 1 9-9m0 2c-3.87 0-7 1.5-9.37 3.87A9.1 9.1 0 0 0 2 12s3.87 7 9.37 7 9.37-3.87 9.37-7c0-3.87-3.13-7-7-7zm0 2c2.21 0 4 1.79 4 4s-1.79 4-4 4-4-1.79-4-4 1.79-4 4-4zm0 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2z"/>
+    <path d="M21 12.79A9 9 0 1 1 12 3a9 9 0 0 1 9 9 9.71 9.71 0 0 1-.79 4.21M17 21H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5z"/>
   </svg>
 );
 
@@ -87,55 +87,67 @@ const Lock = ({ size = 16 }) => (
   </svg>
 );
 
-// Utility function to format dates
-const formatDate = (dateString) => {
-  if (!dateString) return 'Recently';
-  
-  try {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now - date);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 1) return '1 day ago';
-    if (diffDays < 7) return `${diffDays} days ago`;
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-    if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
-    
-    return date.toLocaleDateString();
-  } catch (e) {
-    return 'Recently';
-  }
-};
-
 // Format icons
 const getFormatIcon = (formatType) => {
   const icons = {
-    // Social Media Formats (4)
+    // Social Media Formats
     x: '🐦',
-    linkedin: '💼',
+    linkedin: '💼', 
     instagram: '📸',
     facebook: '👥',
+    tweet: '🐦',
     
-    // Creative Formats (4)
-    poem: '🎭',
+    // Creative Formats
     song: '🎵',
-    reel: '📄',
-    short_story: '📚',
+    poem: '🎭',
+    video: '🎬',
+    script: '🎬',
     
-    // Professional Formats (5)
+    // Modern Viral Formats
+    tiktok_script: '📱',
+    instagram_reel: '🎬',
+    x_thread: '🧵',
+    youtube_short: '▶️',
+    instagram_story: '📸',
+    
+    // Content Formats
     article: '📝',
     blog_post: '✍️',
+    fairytale: '📚',
     presentation: '📊',
     newsletter: '📰',
-    podcast: '📄',
     
-    // Therapeutic Formats (3)
+    // Reflection Formats
     insights: '💡',
+    reflection: '🤔',
     growth_summary: '🌱',
-    journal_entry: '📔'
+    journal_entry: '📔',
+    diary_entry: '📔',
+    
+    // Professional Formats
+    podcast_segment: '🎧',
+    email: '✉️',
+    letter: '💌'
   };
   return icons[formatType] || '📄';
+};
+
+// Date formatting function
+const formatDate = (dateString) => {
+  if (!dateString) return 'Unknown date';
+  
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Invalid date';
+    
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  } catch (e) {
+    return 'Invalid date';
+  }
 };
 
 // Main App Component
@@ -150,6 +162,7 @@ const SentimentalApp = () => {
   const [stories, setStories] = useState([]);
   const [userStories, setUserStories] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isPasswordResetLoading, setIsPasswordResetLoading] = useState(false);
   const [user, setUser] = useState(null);
   const [showLogin, setShowLogin] = useState(false);
   const [supportedFormats, setSupportedFormats] = useState({});
@@ -165,14 +178,12 @@ const SentimentalApp = () => {
   const [editFormatContent, setEditFormatContent] = useState('');
   const [isUpdatingFormat, setIsUpdatingFormat] = useState(false);
 
-  // Additional app state
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState('');
   const [isSignupMode, setIsSignupMode] = useState(false);
   const [loginForm, setLoginForm] = useState({ name: '', email: '', password: '' });
   const [appInitialized, setAppInitialized] = useState(false);
 
-  // Format viewing state
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [uploadingAudio, setUploadingAudio] = useState(false);
   const [loadingFormats, setLoadingFormats] = useState(true);
@@ -329,7 +340,6 @@ const SentimentalApp = () => {
   const fetchSupportedFormats = async () => {
     try {
       setLoadingFormats(true);
-      // Add cache-busting parameter to force fresh data
       const response = await fetch(`/api/formats/supported?t=${Date.now()}`);
       if (response.ok) {
         const data = await response.json();
@@ -340,7 +350,7 @@ const SentimentalApp = () => {
         // Fallback to formats that are actually supported by prompts engine
         setSupportedFormats([
           'x', 'linkedin', 'instagram', 'facebook',
-          'poem', 'song', 'reel', 'short_story', 
+          'poem', 'song', 'reel', 'fairytale', 
           'article', 'blog_post', 'presentation', 'newsletter', 'podcast',
           'insights', 'growth_summary', 'journal_entry'
         ]);
@@ -499,7 +509,7 @@ const SentimentalApp = () => {
       return;
     }
 
-    setIsLoading(true);
+    setIsPasswordResetLoading(true);
     try {
       if (window.firebaseAuth) {
         await window.firebaseAuth.sendPasswordResetEmail(loginForm.email);
@@ -518,7 +528,7 @@ const SentimentalApp = () => {
         alert('Failed to send password reset email. Please try again or contact support.');
       }
     }
-    setIsLoading(false);
+    setIsPasswordResetLoading(false);
   };
 
   const handleLogout = async () => {
@@ -717,6 +727,11 @@ const SentimentalApp = () => {
 
   // Audio upload function
   const uploadAudio = async (file, storyId, formatType) => {
+    // Require authentication for file uploads
+    if (!user || !user.id || user.id === 'anonymous' || user.id === 'anonymous_user' || user.id === '' || user.id === 'null' || user.id === 'undefined') {
+      throw new Error('Authentication required for file uploads');
+    }
+    
     const formData = new FormData();
     formData.append('file', file);
     formData.append('story_id', storyId);
@@ -724,6 +739,9 @@ const SentimentalApp = () => {
     
     const response = await fetch('/api/upload/audio', {
       method: 'POST',
+      headers: {
+        'X-User-ID': user.id  // Add authentication header
+      },
       body: formData
     });
     
@@ -1276,10 +1294,10 @@ const SentimentalApp = () => {
             {!isSignupMode && (
               <button
                 onClick={handleForgotPassword}
-                disabled={isLoading}
+                disabled={isPasswordResetLoading}
                 className="text-gray-500 hover:text-gray-700 text-sm font-medium disabled:opacity-50"
               >
-                Forgot your password?
+                {isPasswordResetLoading ? 'Sending reset email...' : 'Forgot your password?'}
               </button>
             )}
           </div>
@@ -1677,6 +1695,34 @@ const SentimentalApp = () => {
         
         {/* Input - Fixed at bottom */}
         <div className="border-t bg-white p-4 flex-shrink-0">
+          {/* Mobile Create Story Button - appears when there are messages */}
+          {messages.length > 0 && user && user.id && user.id !== 'anonymous' && user.id !== 'anonymous_user' && user.id !== '' && user.id !== 'null' && user.id !== 'undefined' && (
+            <div className="md:hidden mb-3">
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
+                <p className="text-sm text-purple-700 mb-2">
+                  ✨ Ready to turn this conversation into a story?
+                </p>
+                <button
+                  onClick={createStoryFromConversation}
+                  disabled={isLoading}
+                  className="text-sm px-3 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {isLoading ? (
+                    <>
+                      <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Creating...
+                    </>
+                  ) : (
+                    <>
+                      <Plus size={14} />
+                      Create Story
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+          
           {user && user.id && user.id !== 'anonymous' && user.id !== 'anonymous_user' && user.id !== '' && user.id !== 'null' && user.id !== 'undefined' && (
             // Show normal chat input for authenticated users
             <div className="flex gap-3">
@@ -2047,7 +2093,7 @@ const SentimentalApp = () => {
       poem: 'Poem',
       song: 'Song',
       reel: 'Reel',
-      short_story: 'Fairytale',
+      fairytale: 'Fairytale',
       article: 'Article',
       blog_post: 'Blog Post',
       presentation: 'Presentation',
@@ -2665,6 +2711,11 @@ const SentimentalApp = () => {
 
 
 
+  // Don't render anything until app is initialized to prevent flashing
+  if (!appInitialized) {
+    return null;
+  }
+
   // Edit Story Modal
   const renderEditStoryModal = () => {
     if (!editingStory) return null;
@@ -2818,11 +2869,6 @@ const SentimentalApp = () => {
       </div>
     );
   };
-
-  // Don't render anything until app is initialized to prevent flashing
-  if (!appInitialized) {
-    return null;
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -10,17 +10,15 @@ from enum import Enum
 class FormatType(Enum):
     # Social Media Formats
     X = "x"  # X (formerly Twitter)
-    X_THREAD = "x_thread"
     LINKEDIN = "linkedin" 
     INSTAGRAM = "instagram"
-    REEL = "reel"
     FACEBOOK = "facebook"
-    TIKTOK_SCRIPT = "tiktok_script"
     
     # Creative Formats
     POEM = "poem"
     SONG = "song"
-    SHORT_STORY = "short_story"
+    REEL = "reel"
+    FAIRYTALE = "fairytale"
     
     # Professional Formats
     ARTICLE = "article"

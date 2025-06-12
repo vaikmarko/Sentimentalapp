@@ -8,7 +8,7 @@ from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.sentiment import SentimentIntensityAnalyzer
 import firebase_admin
-from firebase_admin import credentials, firestore
+from firebase_admin import credentials, firestore, storage
 import os
 import logging
 import requests
@@ -30,7 +30,23 @@ from knowledge_engine import KnowledgeEngine
 from formats_generation_engine import FormatsGenerationEngine
 from format_types import FormatType
 from prompts_engine import PromptsEngine, PromptType, AIProviderManager
-from utils import is_anonymous_user, allowed_file, is_valid_access_code, is_demo_user
+# Utils functions (moved inline to avoid import issues)
+def is_anonymous_user(user_id):
+    """Check if user is anonymous"""
+    return user_id and (user_id.startswith('anon_') or user_id == 'anonymous')
+
+def allowed_file(filename):
+    """Check if file extension is allowed"""
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def is_valid_access_code(code):
+    """Check if access code is valid"""
+    valid_codes = ['ALPHA2024', 'BETA2024', 'DEMO2024']
+    return code in valid_codes
+
+def is_demo_user(user_id):
+    """Check if user is demo user"""
+    return user_id and user_id.startswith('demo_')
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -80,12 +96,22 @@ try:
     logger.info("Firebase initialized successfully")
     if db is None:
         db = firestore.client()
+    
+    # Initialize Firebase Storage with fallback
+    try:
+        bucket = storage.bucket('sentimental-audio-uploads')
+        logger.info("Firebase Storage initialized successfully")
+    except Exception as storage_error:
+        logger.warning(f"Firebase Storage initialization failed: {storage_error}")
+        bucket = None
+    
 except Exception as e:
     logger.error(f"Error initializing Firebase: {str(e)}")
     # In demo mode, we can continue without Firebase since we use mock data
     if IS_DEMO:
         logger.info("Demo mode: continuing without Firebase connection")
         db = None
+        bucket = None
     else:
         raise
 
@@ -104,7 +130,7 @@ except LookupError:
     nltk.download('vader_lexicon')
 
 # Add after app configuration
-app.config['UPLOAD_FOLDER'] = 'static/uploads'
+app.config['UPLOAD_FOLDER'] = 'public/static/uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 ALLOWED_EXTENSIONS = {'mp3', 'wav', 'ogg', 'm4a'}
 
@@ -1386,6 +1412,9 @@ def process_chat_message():
         
         logger.info(f"Processing chat message for user {user_id}")
         
+        # Calculate conversation length (needed for both OpenAI and fallback paths)
+        conversation_length = len(conversation_history)
+        
         # Generate AI response
         if openai.api_key:
             try:
@@ -1397,7 +1426,6 @@ def process_chat_message():
                 max_context_tokens = 2000  # Reserve tokens for system prompt and response
                 context_messages = []
                 current_tokens = 0
-                conversation_length = len(conversation_history)
                 
                 # Estimate tokens (rough: 1 token ≈ 4 characters)
                 def estimate_tokens(text):
@@ -1505,9 +1533,9 @@ Keep the summary conversational and preserve the user's voice. Focus on continui
                 
             except Exception as e:
                 logger.error(f"OpenAI API error: {e}")
-                ai_response = prompts_engine.get_fallback_response(message, {})
+                return jsonify({'error': 'Sorry, I cannot connect to the AI system right now. Please try again later.'}), 500
         else:
-            ai_response = prompts_engine.get_fallback_response(message, {})
+            return jsonify({'error': 'AI system is not available. Please try again later.'}), 500
         
         # Check if this conversation is ready for story generation
         full_conversation = conversation_history + [
@@ -2318,11 +2346,12 @@ def get_ai_providers():
 def get_supported_formats():
     """Get formats that are actually supported by the prompts engine"""
     try:
+        # CACHE BUSTER: 2025-06-12 14:37 - Fixing Twitter->X issue
         # Only return formats that have prompts defined in prompts_engine
         # These are the formats that can actually be generated
         prompts_engine_formats = [
             'x', 'linkedin', 'instagram', 'facebook',
-            'poem', 'song', 'reel', 'short_story', 
+            'poem', 'song', 'reel', 'fairytale', 
             'article', 'blog_post', 'presentation', 'newsletter', 'podcast',
             'insights', 'growth_summary', 'journal_entry'
         ]
@@ -2331,7 +2360,7 @@ def get_supported_formats():
             'supported_formats': prompts_engine_formats,
             'total_count': len(prompts_engine_formats),
             'engine_available': bool(formats_generation_engine),
-            'source': 'prompts_engine',
+            'source': 'prompts_engine_FIXED',  # Cache buster
             'updated_at': datetime.now().isoformat()
         }), 200
         
@@ -2397,7 +2426,7 @@ def fix_reflection_order():
 
 @app.route('/api/upload/audio', methods=['POST'])
 def upload_audio():
-    """Upload an audio file (MP3) for a song"""
+    """Upload an audio file (MP3) to Firebase Storage"""
     try:
         if 'file' not in request.files:
             return jsonify({'error': 'No file provided'}), 400
@@ -2409,6 +2438,14 @@ def upload_audio():
         if not allowed_file(file.filename):
             return jsonify({'error': 'Invalid file type. Allowed: MP3, WAV, OGG, M4A'}), 400
         
+        # Get user authentication
+        user_id = request.headers.get('X-User-ID')
+        if is_anonymous_user(user_id):
+            return jsonify({
+                'error': 'Authentication required',
+                'message': 'Please sign in to upload audio files.'
+            }), 401
+        
         # Get story_id and format_type from form data
         story_id = request.form.get('story_id')
         format_type = request.form.get('format_type', 'song')
@@ -2416,59 +2453,122 @@ def upload_audio():
         if not story_id:
             return jsonify({'error': 'Story ID required'}), 400
         
-        # Generate unique filename
-        unique_id = str(uuid.uuid4())
-        original_extension = file.filename.rsplit('.', 1)[1].lower()
-        filename = f"{story_id}_{format_type}_{unique_id}.{original_extension}"
-        
-        # Save file
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(filepath)
-        
-        # Update story format with audio URL
+        # Validate user owns this story
         stories_ref = db.collection('stories')
         story_doc = stories_ref.document(story_id).get()
         
-        if story_doc.exists:
-            story_data = story_doc.to_dict()
-            formats = story_data.get('formats', {})
+        if not story_doc.exists:
+            return jsonify({'error': 'Story not found'}), 404
             
-            if format_type in formats:
-                # Handle both string and dict format storage
-                if isinstance(formats[format_type], str):
-                    # Convert string format to dict format
-                    formats[format_type] = {
-                        'content': formats[format_type],
-                        'audio_url': f'/static/uploads/{filename}',
-                        'created_at': firestore.SERVER_TIMESTAMP
-                    }
-                else:
-                    # Format is already a dict, just add audio_url
-                    formats[format_type]['audio_url'] = f'/static/uploads/{filename}'
+        story_data = story_doc.to_dict()
+        
+        # Check if user owns this story
+        if story_data.get('user_id') != user_id and story_data.get('author_id') != user_id:
+            return jsonify({'error': 'Permission denied - you can only upload audio to your own stories'}), 403
+        
+        # Generate unique filename with proper story ID
+        unique_id = str(uuid.uuid4())
+        original_extension = file.filename.rsplit('.', 1)[1].lower()
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f"{story_id}_{format_type}_{timestamp}_{unique_id}.{original_extension}"
+        
+        # Upload to Firebase Storage (with fallback to local)
+        try:
+            if bucket is not None:
+                # Firebase Storage upload
+                blob = bucket.blob(f"audio/{filename}")
                 
-                stories_ref.document(story_id).update({
-                    'formats': formats
-                })
+                # Upload file content
+                file.seek(0)  # Reset file pointer to beginning
+                blob.upload_from_file(file, content_type=f'audio/{original_extension}')
+                
+                # Make the blob publicly readable
+                blob.make_public()
+                
+                # Get the public URL
+                audio_url = blob.public_url
+                storage_type = 'firebase'
+                
+                logger.info(f"Audio uploaded to Firebase Storage: {filename} by user {user_id} for story {story_id}")
+                logger.info(f"Public URL: {audio_url}")
             else:
-                # Format doesn't exist yet, create it with audio URL
+                # Fallback to local storage
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.seek(0)  # Reset file pointer to beginning
+                file.save(filepath)
+                audio_url = f'/static/uploads/{filename}'
+                storage_type = 'local'
+                
+                logger.info(f"Audio uploaded to local storage (Firebase unavailable): {filename}")
+            
+        except Exception as storage_error:
+            logger.error(f"Storage upload failed: {storage_error}")
+            return jsonify({
+                'error': 'Storage upload failed',
+                'details': str(storage_error)
+            }), 500
+        
+        # Update story format with Firebase Storage URL
+        formats = story_data.get('formats', {})
+        
+        if format_type in formats:
+            # Handle both string and dict format storage
+            if isinstance(formats[format_type], str):
+                # Convert string format to dict format
                 formats[format_type] = {
-                    'content': f'Generated {format_type} content',
-                    'audio_url': f'/static/uploads/{filename}',
+                    'content': formats[format_type],
+                    'audio_url': audio_url,
+                    'audio_filename': filename,
+                    'audio_uploaded_at': datetime.now().isoformat(),
+                    'audio_uploaded_by': user_id,
+                    'storage_type': storage_type,
                     'created_at': firestore.SERVER_TIMESTAMP
                 }
-                stories_ref.document(story_id).update({
-                    'formats': formats
-                })
+            else:
+                # Format is already a dict, update audio info
+                formats[format_type]['audio_url'] = audio_url
+                formats[format_type]['audio_filename'] = filename
+                formats[format_type]['audio_uploaded_at'] = datetime.now().isoformat()
+                formats[format_type]['audio_uploaded_by'] = user_id
+                formats[format_type]['storage_type'] = storage_type
+            
+            # Update with user tracking
+            update_data = {
+                'formats': formats,
+                'updated_at': datetime.now().isoformat(),
+                'updated_by': user_id
+            }
+            stories_ref.document(story_id).update(update_data)
+        else:
+            # Format doesn't exist yet, create it with audio URL
+            formats[format_type] = {
+                'content': f'Generated {format_type} content',
+                'audio_url': audio_url,
+                'audio_filename': filename,
+                'audio_uploaded_at': datetime.now().isoformat(),
+                'audio_uploaded_by': user_id,
+                'storage_type': storage_type,
+                'created_at': firestore.SERVER_TIMESTAMP
+            }
+            
+            update_data = {
+                'formats': formats,
+                'updated_at': datetime.now().isoformat(),
+                'updated_by': user_id
+            }
+            stories_ref.document(story_id).update(update_data)
         
         return jsonify({
             'success': True,
-            'audio_url': f'/static/uploads/{filename}',
-            'filename': filename
+            'audio_url': audio_url,
+            'filename': filename,
+            'storage_type': storage_type,
+            'message': f'Audio uploaded successfully to {storage_type.title()} Storage for {story_data.get("title", "story")}'
         })
         
     except Exception as e:
         logger.error(f"Error uploading audio: {str(e)}")
-        return jsonify({'error': 'Upload failed'}), 500
+        return jsonify({'error': 'Upload failed', 'details': str(e)}), 500
 
 @app.route('/api/stories/<string:story_id>/privacy', methods=['PUT'])
 def update_story_privacy(story_id):
@@ -2688,6 +2788,11 @@ def fix_marko_user():
 def debug_page():
     """Debug page to test user authentication"""
     return send_from_directory('.', 'debug_user_state.html')
+
+@app.route('/static/uploads/<filename>')
+def uploaded_file(filename):
+    """Serve uploaded audio files"""
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080))) 
