@@ -111,44 +111,29 @@ const formatDate = (dateString) => {
 // Format icons
 const getFormatIcon = (formatType) => {
   const icons = {
-    // Social Media Formats
-    twitter: '🐦',
-    linkedin: '💼', 
+    // Social Media Formats (4)
+    x: '🐦',
+    linkedin: '💼',
     instagram: '📸',
     facebook: '👥',
-    tweet: '🐦',
     
-    // Creative Formats
-    song: '🎵',
+    // Creative Formats (4)
     poem: '🎭',
-    video: '🎬',
-    script: '🎬',
+    song: '🎵',
+    reel: '📄',
+    short_story: '📚',
     
-    // Modern Viral Formats
-    tiktok_script: '📱',
-    instagram_reel: '🎬',
-    twitter_thread: '🧵',
-    youtube_short: '▶️',
-    instagram_story: '📸',
-    
-    // Content Formats
+    // Professional Formats (5)
     article: '📝',
     blog_post: '✍️',
-    short_story: '📚',
     presentation: '📊',
     newsletter: '📰',
+    podcast: '📄',
     
-    // Reflection Formats
+    // Therapeutic Formats (3)
     insights: '💡',
-    reflection: '🤔',
     growth_summary: '🌱',
-    journal_entry: '📔',
-    diary_entry: '📔',
-    
-    // Professional Formats
-    podcast_segment: '🎧',
-    email: '✉️',
-    letter: '💌'
+    journal_entry: '📔'
   };
   return icons[formatType] || '📄';
 };
@@ -344,7 +329,8 @@ const SentimentalApp = () => {
   const fetchSupportedFormats = async () => {
     try {
       setLoadingFormats(true);
-      const response = await fetch('/api/formats/supported');
+      // Add cache-busting parameter to force fresh data
+      const response = await fetch(`/api/formats/supported?t=${Date.now()}`);
       if (response.ok) {
         const data = await response.json();
         setSupportedFormats(data.supported_formats || []);
@@ -353,9 +339,9 @@ const SentimentalApp = () => {
         console.error('Failed to fetch supported formats, using fallback');
         // Fallback to formats that are actually supported by prompts engine
         setSupportedFormats([
-          'twitter', 'linkedin', 'instagram', 'facebook',
-          'poem', 'song', 'script', 'short_story', 
-          'article', 'blog_post', 'presentation', 'newsletter',
+          'x', 'linkedin', 'instagram', 'facebook',
+          'poem', 'song', 'reel', 'short_story', 
+          'article', 'blog_post', 'presentation', 'newsletter', 'podcast',
           'insights', 'growth_summary', 'journal_entry'
         ]);
       }
@@ -363,7 +349,7 @@ const SentimentalApp = () => {
       console.error('Error fetching supported formats:', error);
       // Fallback to core formats that definitely work
       setSupportedFormats([
-        'twitter', 'linkedin', 'instagram', 'poem', 'song', 'article', 'insights'
+        'x', 'linkedin', 'instagram', 'poem', 'song', 'article', 'insights'
       ]);
     } finally {
       setLoadingFormats(false);
@@ -1699,7 +1685,7 @@ const SentimentalApp = () => {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                placeholder="Type your message... (Say 'turn this into a story' when you want to save our chat)"
+                placeholder="Type your message..."
                 className="flex-1 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 disabled={isLoading}
               />
@@ -2018,33 +2004,29 @@ const SentimentalApp = () => {
               </div>
             )}
 
-            {/* Transform Into - Only show for story author */}
-            {user && selectedStory.user_id === user.id && (
+            {/* Transform Into - Only show for story author AND when there are formats available */}
+            {user && selectedStory.user_id === user.id && 
+             !loadingFormats && 
+             supportedFormats.filter(format => !selectedStory.createdFormats?.includes(format)).length > 0 && (
               <div className="mt-8 p-4 bg-green-50 rounded-xl">
                 <div className="flex items-center gap-2 mb-3">
                   <Plus />
                   <span className="font-medium text-green-700">Transform Into:</span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {loadingFormats ? (
-                    <div className="col-span-full flex items-center justify-center py-4">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
-                      <span className="ml-2 text-sm text-gray-600">Loading formats...</span>
-                    </div>
-                  ) : (
-                                         supportedFormats
-                       .filter(format => !selectedStory.createdFormats?.includes(format))
-                       .map(format => (
-                         <button 
-                           key={format} 
-                           onClick={() => viewFormat(selectedStory, format)}
-                           className="bg-green-100 text-green-700 rounded-lg p-3 text-center hover:bg-green-200 transition-colors cursor-pointer border-none"
-                         >
-                           <div className="text-2xl mb-1">{getFormatIcon(format)}</div>
-                           <div className="text-sm font-medium">{getFormatDisplayName(format)}</div>
-                         </button>
-                       ))
-                   )}
+                  {supportedFormats
+                     .filter(format => !selectedStory.createdFormats?.includes(format))
+                     .map(format => (
+                       <button 
+                         key={format} 
+                         onClick={() => viewFormat(selectedStory, format)}
+                         className="bg-green-100 text-green-700 rounded-lg p-3 text-center hover:bg-green-200 transition-colors cursor-pointer border-none"
+                       >
+                         <div className="text-2xl mb-1">{getFormatIcon(format)}</div>
+                         <div className="text-sm font-medium">{getFormatDisplayName(format)}</div>
+                       </button>
+                     ))
+                   }
                 </div>
               </div>
             )}
@@ -2057,13 +2039,23 @@ const SentimentalApp = () => {
   // Get format display name
   const getFormatDisplayName = (formatType) => {
     const displayNames = {
-      script: 'Reel',
-      video: 'Reel', 
-      tiktok_script: 'TikTok Reel',
-      instagram_reel: 'Instagram Reel',
+      // Match the exact format names from your list
+      x: 'X',
+      linkedin: 'Linkedin',
+      instagram: 'Instagram',
+      facebook: 'Facebook',
+      poem: 'Poem',
+      song: 'Song',
+      reel: 'Reel',
       short_story: 'Fairytale',
+      article: 'Article',
+      blog_post: 'Blog Post',
+      presentation: 'Presentation',
+      newsletter: 'Newsletter',
+      podcast: 'Podcast',
       insights: 'Therapeutic Feedback',
-      // Add other custom names as needed
+      growth_summary: 'Growth Summary',
+      journal_entry: 'Journal Entry'
     };
     
     const displayName = displayNames[formatType] || formatType.replace('_', ' ');

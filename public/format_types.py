@@ -9,13 +9,10 @@ from enum import Enum
 
 class FormatType(Enum):
     # Social Media Formats
-    TWITTER = "twitter"
-    TWITTER_THREAD = "twitter_thread"
+    X = "x"  # X (formerly Twitter)
     LINKEDIN = "linkedin" 
     INSTAGRAM = "instagram"
-    INSTAGRAM_REEL = "instagram_reel"
     FACEBOOK = "facebook"
-    TIKTOK_SCRIPT = "tiktok_script"
     
     # Creative Formats
     POEM = "poem"

@@ -2216,7 +2216,7 @@ def get_supported_formats():
         # Only return formats that have prompts defined in prompts_engine
         # These are the formats that can actually be generated
         prompts_engine_formats = [
-            'twitter', 'linkedin', 'instagram', 'facebook',
+            'x', 'linkedin', 'instagram', 'facebook',
             'poem', 'song', 'reel', 'short_story', 
             'article', 'blog_post', 'presentation', 'newsletter', 'podcast',
             'insights', 'growth_summary', 'journal_entry'

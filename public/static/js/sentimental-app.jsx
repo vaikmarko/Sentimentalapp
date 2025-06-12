@@ -90,31 +90,64 @@ const Lock = ({ size = 16 }) => (
 // Format icons
 const getFormatIcon = (formatType) => {
   const icons = {
-    // Social Media Formats (4)
+    // Social Media Formats
     x: '🐦',
     linkedin: '💼', 
     instagram: '📸',
     facebook: '👥',
+    tweet: '🐦',
     
-    // Creative Formats (4)
-    poem: '🎭',
+    // Creative Formats
     song: '🎵',
-    reel: '📄',
-    short_story: '📚',
+    poem: '🎭',
+    video: '🎬',
+    script: '🎬',
     
-    // Professional Formats (5)
+    // Modern Viral Formats
+    tiktok_script: '📱',
+    instagram_reel: '🎬',
+    x_thread: '🧵',
+    youtube_short: '▶️',
+    instagram_story: '📸',
+    
+    // Content Formats
     article: '📝',
     blog_post: '✍️',
+    short_story: '📚',
     presentation: '📊',
     newsletter: '📰',
-    podcast: '📄',
     
-    // Therapeutic Formats (3)
+    // Reflection Formats
     insights: '💡',
+    reflection: '🤔',
     growth_summary: '🌱',
-    journal_entry: '📔'
+    journal_entry: '📔',
+    diary_entry: '📔',
+    
+    // Professional Formats
+    podcast_segment: '🎧',
+    email: '✉️',
+    letter: '💌'
   };
   return icons[formatType] || '📄';
+};
+
+// Date formatting function
+const formatDate = (dateString) => {
+  if (!dateString) return 'Unknown date';
+  
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Invalid date';
+    
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  } catch (e) {
+    return 'Invalid date';
+  }
 };
 
 // Main App Component
@@ -129,6 +162,7 @@ const SentimentalApp = () => {
   const [stories, setStories] = useState([]);
   const [userStories, setUserStories] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isPasswordResetLoading, setIsPasswordResetLoading] = useState(false);
   const [user, setUser] = useState(null);
   const [showLogin, setShowLogin] = useState(false);
   const [supportedFormats, setSupportedFormats] = useState({});
@@ -475,7 +509,7 @@ const SentimentalApp = () => {
       return;
     }
 
-    setIsLoading(true);
+    setIsPasswordResetLoading(true);
     try {
       if (window.firebaseAuth) {
         await window.firebaseAuth.sendPasswordResetEmail(loginForm.email);
@@ -494,7 +528,7 @@ const SentimentalApp = () => {
         alert('Failed to send password reset email. Please try again or contact support.');
       }
     }
-    setIsLoading(false);
+    setIsPasswordResetLoading(false);
   };
 
   const handleLogout = async () => {
@@ -1252,10 +1286,10 @@ const SentimentalApp = () => {
             {!isSignupMode && (
               <button
                 onClick={handleForgotPassword}
-                disabled={isLoading}
+                disabled={isPasswordResetLoading}
                 className="text-gray-500 hover:text-gray-700 text-sm font-medium disabled:opacity-50"
               >
-                Forgot your password?
+                {isPasswordResetLoading ? 'Sending reset email...' : 'Forgot your password?'}
               </button>
             )}
           </div>
@@ -1653,6 +1687,34 @@ const SentimentalApp = () => {
         
         {/* Input - Fixed at bottom */}
         <div className="border-t bg-white p-4 flex-shrink-0">
+          {/* Mobile Create Story Button - appears when there are messages */}
+          {messages.length > 0 && user && user.id && user.id !== 'anonymous' && user.id !== 'anonymous_user' && user.id !== '' && user.id !== 'null' && user.id !== 'undefined' && (
+            <div className="md:hidden mb-3">
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
+                <p className="text-sm text-purple-700 mb-2">
+                  ✨ Ready to turn this conversation into a story?
+                </p>
+                <button
+                  onClick={createStoryFromConversation}
+                  disabled={isLoading}
+                  className="text-sm px-3 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {isLoading ? (
+                    <>
+                      <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Creating...
+                    </>
+                  ) : (
+                    <>
+                      <Plus size={14} />
+                      Create Story
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+          
           {user && user.id && user.id !== 'anonymous' && user.id !== 'anonymous_user' && user.id !== '' && user.id !== 'null' && user.id !== 'undefined' && (
             // Show normal chat input for authenticated users
             <div className="flex gap-3">
@@ -1661,7 +1723,7 @@ const SentimentalApp = () => {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                placeholder="Type your message... (Say 'turn this into a story' when you want to save our chat)"
+                placeholder="Type your message..."
                 className="flex-1 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 disabled={isLoading}
               />
@@ -1990,25 +2052,19 @@ const SentimentalApp = () => {
                   <span className="font-medium text-green-700">Transform Into:</span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {loadingFormats ? (
-                    <div className="col-span-full flex items-center justify-center py-4">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
-                      <span className="ml-2 text-sm text-gray-600">Loading formats...</span>
-                    </div>
-                  ) : (
-                                         supportedFormats
-                       .filter(format => !selectedStory.createdFormats?.includes(format))
-                       .map(format => (
-                         <button 
-                           key={format} 
-                           onClick={() => viewFormat(selectedStory, format)}
-                           className="bg-green-100 text-green-700 rounded-lg p-3 text-center hover:bg-green-200 transition-colors cursor-pointer border-none"
-                         >
-                           <div className="text-2xl mb-1">{getFormatIcon(format)}</div>
-                           <div className="text-sm font-medium">{getFormatDisplayName(format)}</div>
-                         </button>
-                       ))
-                   )}
+                  {supportedFormats
+                     .filter(format => !selectedStory.createdFormats?.includes(format))
+                     .map(format => (
+                       <button 
+                         key={format} 
+                         onClick={() => viewFormat(selectedStory, format)}
+                         className="bg-green-100 text-green-700 rounded-lg p-3 text-center hover:bg-green-200 transition-colors cursor-pointer border-none"
+                       >
+                         <div className="text-2xl mb-1">{getFormatIcon(format)}</div>
+                         <div className="text-sm font-medium">{getFormatDisplayName(format)}</div>
+                       </button>
+                     ))
+                   }
                 </div>
               </div>
             )}

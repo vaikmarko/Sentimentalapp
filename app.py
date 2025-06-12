@@ -1619,8 +1619,65 @@ def generate_story_from_conversation(user_id, conversation, title_suggestion=Non
             logger.warning(f"User {user_id} not found in database, using fallback")
             user_data = {'name': 'Anonymous User', 'email': 'unknown@example.com'}
         
+        # Filter out meta-instructions and bot feedback from user messages
+        def is_meta_instruction(content):
+            """Detect if a message is instruction to the bot rather than story content"""
+            if not content:
+                return True
+                
+            content_lower = content.lower().strip()
+            
+            # Common meta-instruction patterns
+            meta_patterns = [
+                'don\'t use the same',
+                'don\'t repeat',
+                'stop using',
+                'please don\'t',
+                'can you avoid',
+                'try not to',
+                'don\'t say',
+                'be more specific',
+                'be less',
+                'change your tone',
+                'speak differently',
+                'respond with',
+                'answer in',
+                'use different words',
+                'vary your language',
+                'that sounds too',
+                'make it more',
+                'make it less',
+                'write better',
+                'improve your',
+                'your response',
+                'that response',
+                'rephrase',
+                'rewrite'
+            ]
+            
+            # Check if message is giving feedback about bot behavior
+            for pattern in meta_patterns:
+                if pattern in content_lower:
+                    return True
+            
+            # Very short messages that are likely feedback
+            if len(content.strip()) < 10 and any(word in content_lower for word in ['ok', 'good', 'better', 'yes', 'no', 'thanks']):
+                return True
+                
+            return False
+        
+        # Filter user messages to keep only actual story content
+        story_content_messages = [
+            msg for msg in user_messages 
+            if not is_meta_instruction(msg.get('content', ''))
+        ]
+        
+        # If we filtered out too much, fall back to all messages
+        if len(story_content_messages) < len(user_messages) * 0.3:  # Keep at least 30% of messages
+            story_content_messages = user_messages
+        
         # Prepare conversation data for sophisticated analysis
-        conversation_text = "\n".join([f"User: {msg.get('content', '')}" for msg in user_messages])
+        conversation_text = "\n".join([f"User: {msg.get('content', '')}" for msg in story_content_messages])
         
         # Get user context using PersonalContextMapper
         user_context = {}
@@ -1661,21 +1718,25 @@ USER CONTEXT:
 - Themes: {', '.join(domain_insights.get('themes', ['growth']))}
 - Style: Natural, conversational, authentic
 
-INSTRUCTIONS:
-1. Write in first person ("I", "my", "me")
-2. Use natural, conversational language - never flowery or poetic
-3. Include specific details and emotions from the conversation
-4. Show growth or insight, but don't force a "lesson"
-5. Make it feel like something a real Gen Z person would write
-6. Keep it between 200-400 words
-7. Structure: situation → challenge/conflict → reflection/insight
+CRITICAL INSTRUCTIONS:
+1. ONLY use the actual life experiences, emotions, and events mentioned
+2. IGNORE any instructions the user gave to a chatbot (like "don't use the same words", "be more specific", etc.)
+3. IGNORE any feedback about conversation quality or bot responses
+4. Focus on the real experiences, feelings, and situations the person shared
+5. Write in first person ("I", "my", "me")
+6. Use natural, conversational language - never flowery or poetic
+7. Include specific details and emotions from the actual experiences
+8. Show growth or insight, but don't force a "lesson"
+9. Make it feel like something a real Gen Z person would write
+10. Keep it between 200-400 words
+11. Structure: situation → challenge/conflict → reflection/insight
 
 EXAMPLES OF GOOD TONE:
 - "I remember thinking I had everything figured out..."
 - "The weird thing about this whole experience was..."
 - "Looking back, I realize I was just scared of..."
 
-Generate a story that feels authentic and relatable:"""
+Generate a story that feels authentic and relatable, focusing ONLY on the real life experiences shared:"""
                 
                 # Generate story with natural, authentic tone
                 story_response = openai.ChatCompletion.create(
@@ -2099,7 +2160,7 @@ def register_user():
 
 @app.route('/api/auth/login', methods=['POST'])
 def login_user():
-    """Login user in test environment"""
+    """Login user in test environment - DEPRECATED, use Firebase authentication"""
     if not IS_TEST:
         return jsonify({'error': 'Login only available in test environment'}), 403
     
@@ -2111,35 +2172,12 @@ def login_user():
         if not email:
             return jsonify({'error': 'Email is required'}), 400
         
-        if db is None:
-            return jsonify({'error': 'Database not available'}), 500
-        
-        # Find user
-        users = db.collection('test_users').where('email', '==', email).limit(1).get()
-        users_list = list(users)
-        
-        if len(users_list) == 0:
-            return jsonify({'error': 'User not found'}), 404
-        
-        user_doc = users_list[0]
-        user_data = user_doc.to_dict()
-        
-        # Simple password check for testing - skip for demo users
-        if email != 'demo@sentimental.app':
-            if password and str(hash(password)) != user_data.get('password_hash'):
-                return jsonify({'error': 'Invalid password'}), 401
-        else:
-            # Demo user - accept any password for easy testing
-            pass
-        
+        # This endpoint is deprecated - redirect to Firebase authentication
         return jsonify({
-            'message': 'Login successful',
-            'user_id': user_doc.id,
-            'email': user_data['email'],
-            'name': user_data['name'],
-            'stories_created': user_data.get('stories_created', 0),
-            'formats_generated': user_data.get('formats_generated', 0)
-        }), 200
+            'error': 'Local authentication disabled', 
+            'message': 'Please use Firebase authentication. If you have an existing account, it has been migrated to Firebase.',
+            'firebase_login_required': True
+        }), 403
         
     except Exception as e:
         logger.error(f"Error in user login: {str(e)}")
@@ -2283,7 +2321,7 @@ def get_supported_formats():
         # Only return formats that have prompts defined in prompts_engine
         # These are the formats that can actually be generated
         prompts_engine_formats = [
-            'twitter', 'linkedin', 'instagram', 'facebook',
+            'x', 'linkedin', 'instagram', 'facebook',
             'poem', 'song', 'reel', 'short_story', 
             'article', 'blog_post', 'presentation', 'newsletter', 'podcast',
             'insights', 'growth_summary', 'journal_entry'
