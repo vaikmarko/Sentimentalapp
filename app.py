@@ -370,9 +370,14 @@ def index():
 
 @app.route('/app')
 def app_view():
-    # Only allow app access in demo and test environments
-    if ENVIRONMENT == 'production':
-        return render_template('index.html', environment=ENVIRONMENT)
+    """Render the main React-powered application shell.
+
+    Historically we showed a marketing landing page in production and only
+    served the full app in testing. Now the app itself is the product, so we
+    always return the compiled `app.html` template regardless of environment.
+    A cache-busting query string is appended to force browsers to pull the
+    latest static assets after each deploy.
+    """
     import time
     return render_template('app.html', environment=ENVIRONMENT, cache_bust=int(time.time()))
 

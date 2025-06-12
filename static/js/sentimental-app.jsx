@@ -2130,10 +2130,13 @@ const SentimentalApp = () => {
         
         // Clean content: remove TITLE: line since we show it separately
         let cleanContent = contentText;
-        if (cleanContent) {
+        if (typeof cleanContent === 'string' && cleanContent) {
           cleanContent = cleanContent.replace(/^TITLE:\s*['""]([^'""]+)['""]?\s*\n?/i, '');
           cleanContent = cleanContent.replace(/^TITLE:\s*([^\n]+)\s*\n?/i, '');
           cleanContent = cleanContent.trim();
+        } else if (cleanContent && typeof cleanContent !== 'string') {
+          // Ensure we always render a string to avoid React crashing
+          cleanContent = JSON.stringify(cleanContent, null, 2);
         }
         
         // Try to get audio URL from multiple sources
