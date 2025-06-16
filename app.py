@@ -142,7 +142,16 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 def analyze_text(text):
     """Analyzes text and finds themes, emotions and connections"""
     # Tokenize text
-    tokens = word_tokenize(text.lower())
+    try:
+        tokens = word_tokenize(text.lower())
+    except LookupError:
+        # Attempt to download punkt on the fly once, then retry
+        try:
+            nltk.download('punkt', quiet=True)
+            tokens = word_tokenize(text.lower())
+        except Exception:
+            # Fallback to simple split if tokenizer still unavailable
+            tokens = text.lower().split()
     
     # Remove stopwords - use English as fallback if Estonian not available
     try:
@@ -597,7 +606,7 @@ def delete_story(story_id):
 
 @app.route('/api/stories/<string:story_id>', methods=['PUT'])
 def update_story(story_id):
-    """Update an existing story"""
+    """Update an existing story (partial update)"""
     if IS_DEMO:
         return jsonify({
             'error': 'Cannot update stories in demo environment',
@@ -607,6 +616,7 @@ def update_story(story_id):
     # In test environment, require authentication
     if IS_TEST:
         user_id = request.headers.get('X-User-ID')
+        user_email = request.headers.get('X-User-Email', '')
         if not user_id:
             return jsonify({
                 'error': 'Authentication required',
@@ -618,59 +628,78 @@ def update_story(story_id):
             user_doc = db.collection('test_users').document(user_id).get()
             if not user_doc.exists:
                 return jsonify({'error': 'Invalid user'}), 401
-        except Exception as e:
+        except Exception:
             return jsonify({'error': 'Authentication failed'}), 401
+    else:
+        # In production environment we still grab the headers for potential super-user bypass
+        user_id = request.headers.get('X-User-ID')
+        user_email = request.headers.get('X-User-Email', '')
     
     if db is None:
         return jsonify({'error': 'Database not available'}), 500
     
     try:
-        # Get the story to check if it exists
         story_ref = db.collection('stories').document(story_id)
-        story = story_ref.get()
+        story_doc = story_ref.get()
         
-        if not story.exists:
+        if not story_doc.exists:
             return jsonify({'error': 'Story not found'}), 404
         
-        story_data = story.to_dict()
+        story_data = story_doc.to_dict()
+        story_owner_id = story_data.get('user_id') or story_data.get('author_id')
         
-        # In test environment, verify user owns the story (optional security check)
-        if IS_TEST and 'user_id' in locals():
-            story_user_id = story_data.get('user_id')
-            if story_user_id and story_user_id != user_id:
-                return jsonify({
-                    'error': 'Permission denied',
-                    'message': 'You can only update your own stories.'
-                }), 403
+        # Permission check (test env or otherwise) – allow super user override
+        if story_owner_id and user_id and story_owner_id != user_id and not is_super_user(user_id, user_email):
+            return jsonify({
+                'error': 'Permission denied',
+                'message': 'You can only update your own stories.'
+            }), 403
         
-        # Get update data from request
-        update_data = request.json
-        if not update_data:
+        # Validate payload
+        update_payload = request.get_json() or {}
+        if not update_payload:
             return jsonify({'error': 'No update data provided'}), 400
         
-        # Update allowed fields
-        allowed_fields = ['title', 'content', 'author', 'public', 'format', 'analysis', 'emotional_intensity']
-        for field in allowed_fields:
-            if field in update_data:
-                story_data[field] = update_data[field]
+        # Only allow specific fields to be updated
+        allowed_fields = ['title', 'content', 'author', 'public', 'format']
+        update_fields = {field: update_payload[field] for field in allowed_fields if field in update_payload}
         
-        # Always update timestamp when story is modified
-        story_data['updated_at'] = datetime.now().isoformat()
+        # If content was updated, re-compute analysis and emotional intensity
+        if 'content' in update_fields:
+            try:
+                analysis = analyze_text(update_fields['content'])
+            except LookupError as le:
+                # Likely missing NLTK data in local dev; log and fallback
+                logger.warning(f"NLTK resource missing while analyzing text: {le}. Using fallback analysis.")
+                analysis = {
+                    'themes': [],
+                    'emotions': [],
+                    'sentiment_score': 0
+                }
+            except Exception as e:
+                logger.error(f"Unexpected error in analyze_text: {e}")
+                analysis = {
+                    'themes': [],
+                    'emotions': [],
+                    'sentiment_score': 0
+                }
+            update_fields['analysis'] = analysis
+            update_fields['emotional_intensity'] = abs(analysis.get('sentiment_score', 0))
         
-        # If content was updated, re-analyze the story
-        if 'content' in update_data:
-            analysis = analyze_text(story_data['content'])
-            story_data['emotional_intensity'] = abs(analysis['sentiment_score'])
-            story_data['analysis'] = analysis
+        # Always update the timestamp
+        update_fields['updated_at'] = datetime.now().isoformat()
         
-        # Update the story in database
-        story_ref.set(story_data)
+        if not update_fields:
+            return jsonify({'error': 'Nothing to update'}), 400
         
-        # Add the document ID back to the response
-        story_data['id'] = story_id
+        # Perform partial update (avoids large document rewrite & keeps firestore limits)
+        story_ref.update(update_fields)
         
-        logger.info(f"Story {story_id} updated successfully")
-        return jsonify(story_data), 200
+        # Build response (merge existing data with updates for the client)
+        updated_story = {**story_data, **update_fields, 'id': story_id}
+        
+        logger.info(f"Story {story_id} updated successfully by {user_id or 'unknown user'}")
+        return jsonify(updated_story), 200
         
     except Exception as e:
         logger.error(f"Error updating story {story_id}: {str(e)}")
@@ -2616,7 +2645,7 @@ def update_story_privacy(story_id):
         story_data = story_doc.to_dict()
         
         # Check if user owns this story
-        if story_data.get('user_id') != user_id and story_data.get('author_id') != user_id:
+        if story_data.get('user_id') != user_id and story_data.get('author_id') != user_id and not is_super_user(user_id, request.headers.get('X-User-Email','')):
             return jsonify({'error': 'Permission denied'}), 403
         
         # Update privacy settings

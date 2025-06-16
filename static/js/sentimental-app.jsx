@@ -199,7 +199,7 @@ const SentimentalApp = () => {
   const [isGeneratingChapter, setIsGeneratingChapter] = useState(false);
 
   // Format grouping & progressive disclosure
-  const PRIMARY_FORMATS = ['reflection', 'song', 'reel'];
+  const PRIMARY_FORMATS = ['reflection', 'song', 'reel', 'podcast'];
   const [showAllFormats, setShowAllFormats] = useState(false);
   const [showAllUserStories, setShowAllUserStories] = useState(false);
   const [showFullChat, setShowFullChat] = useState(false);
@@ -386,7 +386,10 @@ const SentimentalApp = () => {
 
   const fetchStories = async () => {
     try {
-      setLoadingStories(true);
+      // Only show loader when we have no cached stories (first fetch)
+      if (stories.length === 0) {
+        setLoadingStories(true);
+      }
       const response = await fetch('/api/stories');
       if (response.ok) {
         const data = await response.json();
@@ -848,12 +851,12 @@ const SentimentalApp = () => {
           }
         }
         
-        // Extract title for song format from local data
-        if (formatType === 'song') {
+        // Extract title for audio formats (song/podcast) from local data
+        if (formatType === 'song' || formatType === 'podcast') {
           const contentText = typeof story.formats[formatType] === 'object' ? story.formats[formatType].content || '' : story.formats[formatType] || '';
           // Prioritize database title over extraction
           const databaseTitle = typeof story.formats[formatType] === 'object' ? story.formats[formatType].title : null;
-          const title = databaseTitle || extractSongTitle(contentText);
+          const title = databaseTitle || (formatType === 'song' ? extractSongTitle(contentText) : (story.title || 'Podcast'));
           const audioUrl = typeof story.formats[formatType] === 'object' ? story.formats[formatType].audio_url : null;
           setCurrentFormat(prev => ({...prev, title, audio_url: audioUrl}));
         }
@@ -893,10 +896,10 @@ const SentimentalApp = () => {
           }));
         }
         
-        // Extract title for song format
-        if (formatType === 'song') {
+        // Extract title for audio formats after fetching
+        if (formatType === 'song' || formatType === 'podcast') {
           const contentText = typeof data.content === 'object' ? data.content.content || '' : data.content || '';
-          const title = data.title || extractSongTitle(contentText);
+          const title = data.title || (formatType === 'song' ? extractSongTitle(contentText) : (story.title || 'Podcast'));
           const audioUrl = data.audio_url || (typeof data.content === 'object' ? data.content.audio_url : null);
           setCurrentFormat(prev => ({...prev, title, audio_url: audioUrl}));
         }
@@ -952,8 +955,8 @@ const SentimentalApp = () => {
             }));
           }
           
-          // Extract title for song format
-          if (formatType === 'song' && generateData.title) {
+          // Extract title for audio formats (song/podcast)
+          if ((formatType === 'song' || formatType === 'podcast') && generateData.title) {
             setCurrentFormat(prev => ({...prev, title: generateData.title}));
           }
         } else {
@@ -1444,42 +1447,11 @@ const SentimentalApp = () => {
       </div>
       
       {/* Welcome Section */}
-      <div className="bg-gradient-to-br from-purple-50 to-indigo-50 border-b border-gray-100 p-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-3">
-            Discover Your True Self ✨
-          </h1>
-          <p className="text-lg text-gray-600 mb-6">
-            A space for deep conversations about life, emotions, relationships, and everything that matters to you. 
-            Reflect, understand, and express your authentic self.
-          </p>
-          
-          {!user ? (
-            <div className="flex justify-center mb-6">
-              <button
-                onClick={() => setCurrentView('share')}
-                className="bg-purple-600 text-white px-8 py-4 rounded-full font-medium text-lg hover:bg-purple-700 transition-colors"
-              >
-                Begin Expressing Yourself
-              </button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
-              {[
-                { type: 'reflection', icon: '🤔', label: 'Reflection', desc: 'Deep thoughts' },
-                { type: 'reel', icon: '🎬', label: 'Reel', desc: 'Short video script' },
-                { type: 'poem', icon: '📝', label: 'Poem', desc: 'Poetic expression' },
-                { type: 'short_story', icon: '📚', label: 'Fairytale', desc: 'Magic short story' },
-              ].map((format) => (
-                <div key={format.type} className="bg-white/70 backdrop-blur-sm rounded-lg p-4 text-center border border-white/20">
-                  <div className="text-2xl mb-2">{format.icon}</div>
-                  <div className="font-medium text-gray-800">{format.label}</div>
-                  <div className="text-xs text-gray-600">{format.desc}</div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+      <div className="bg-gradient-to-br from-purple-50 to-indigo-50 border-b border-gray-100 px-4 py-3">
+        <p className="max-w-3xl mx-auto text-center text-sm md:text-base text-gray-700 font-medium flex items-center justify-center gap-1">
+          <span>Discover new perspectives. Tap a story to explore.</span>
+          <span role="img" aria-label="sparkles">✨</span>
+        </p>
       </div>
 
       {/* Story Cards */}
@@ -1534,7 +1506,7 @@ const SentimentalApp = () => {
                       {(() => {
                         const unique = Array.from(new Set(story.createdFormats.map(normalizeFormat)));
                         const sorted = sortFormats(unique);
-                        const primary = sorted.slice(0, 3);
+                        const primary = sorted.slice(0, 4);
                         const extraCount = sorted.length - primary.length;
                         return (
                           <div className="flex flex-wrap gap-2 items-center">
@@ -1718,9 +1690,6 @@ const SentimentalApp = () => {
                     <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium">✨ Poems</span>
                     <span className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm font-medium">📝 Letters</span>
                   </div>
-                  <p className="text-gray-600 mb-6 max-w-lg mx-auto text-sm">
-                    Tell me what's on your mind - your dreams, challenges, relationships, or anything that matters to you.
-                  </p>
                 </>
               )}
             </div>
@@ -2129,8 +2098,8 @@ const SentimentalApp = () => {
                 </div>
                 {(() => {
                     const all = sortFormats(Array.from(new Set(selectedStory.createdFormats.map(normalizeFormat))));
-                    const primary = all.slice(0, 3);
-                    const secondary = all.slice(3);
+                    const primary = all.slice(0, 4);
+                    const secondary = all.slice(4);
 
                     const renderButton = (format) => (
                       <button
@@ -2264,18 +2233,20 @@ const SentimentalApp = () => {
 
     // Special designs for different format types
     const renderFormatContent = () => {
-      if (currentFormat.formatType === 'song') {
+      if (currentFormat.formatType === 'song' || currentFormat.formatType === 'podcast') {
         const contentText = typeof formatContent === 'object' ? formatContent.content || '' : formatContent || '';
         
         // Priority: database title > extracted title > generic fallback
-        let songTitle = 'Generated Song';
+        let audioTitle = currentFormat.formatType === 'podcast' ? 'Podcast Episode' : 'Generated Song';
         if (currentFormat.title && currentFormat.title !== 'Default Title') {
-          songTitle = currentFormat.title;
-        } else {
+          audioTitle = currentFormat.title;
+        } else if (currentFormat.formatType === 'song') {
           const extractedTitle = extractSongTitle(contentText);
           if (extractedTitle && extractedTitle !== 'Generated Song') {
-            songTitle = extractedTitle;
+            audioTitle = extractedTitle;
           }
+        } else if (currentFormat.formatType === 'podcast') {
+          audioTitle = currentFormat.story.title || 'Podcast Episode';
         }
         
         // Clean content: remove TITLE: line since we show it separately
@@ -2300,12 +2271,12 @@ const SentimentalApp = () => {
         const hasAudio = audioUrl;
         
         return (
-          <div className="bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl p-6 text-white">
+          <div className={`bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl p-6 text-white`}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="text-3xl">🎵</div>
+                <div className="text-3xl">{currentFormat.formatType === 'podcast' ? '🎧' : '🎵'}</div>
                 <div>
-                  <h2 className="text-xl font-semibold">{songTitle}</h2>
+                  <h2 className="text-xl font-semibold">{audioTitle}</h2>
                   <p className="text-sm opacity-90">Based on: {currentFormat.story.title}</p>
                 </div>
               </div>
@@ -2316,7 +2287,7 @@ const SentimentalApp = () => {
                   onClick={() => setShowUploadModal(true)}
                   className="mr-2 px-3 py-1 bg-white/20 rounded-lg text-xs hover:bg-white/30 transition-colors"
                 >
-                  Upload MP3
+                  Upload Audio
                 </button>
               )}
             </div>
@@ -2330,20 +2301,20 @@ const SentimentalApp = () => {
                   onError={(e) => console.error('Audio error:', e, 'URL:', audioUrl)}
                   onCanPlay={() => console.log('Audio can play:', audioUrl)}
                 >
-                  <source src={audioUrl} type="audio/mpeg" />
+                  <source src={audioUrl} />
                   Your browser does not support the audio element.
                 </audio>
               </div>
             ) : (
               <div className="bg-black/20 rounded-lg p-4 mb-4">
                 <div className="flex items-center justify-between text-sm mb-2">
-                  <span>🎧 Music Player</span>
+                  <span>{currentFormat.formatType === 'podcast' ? '🎙️ Podcast Player' : '🎧 Music Player'}</span>
                   {user && (currentFormat.story.user_id === user.id || isSuperUser) && (
                     <button 
                       onClick={() => setShowUploadModal(true)}
                       className="bg-white/20 hover:bg-white/30 px-2 py-1 rounded text-xs transition-colors"
                     >
-                      Upload MP3
+                      Upload Audio
                     </button>
                   )}
                 </div>
@@ -2351,9 +2322,9 @@ const SentimentalApp = () => {
                   <div className="bg-white/50 h-2 rounded-full w-0"></div>
                 </div>
                 {user && (currentFormat.story.user_id === user.id || isSuperUser) ? (
-                  <div className="text-xs text-center mt-2 opacity-75">Click "Upload MP3" to add audio</div>
+                  <div className="text-xs text-center mt-2 opacity-75">Click "Upload Audio" to add audio</div>
                 ) : (
-                  <div className="text-xs text-center mt-2 opacity-50">Music player ready</div>
+                  <div className="text-xs text-center mt-2 opacity-50">{currentFormat.formatType === 'podcast' ? 'Podcast player ready' : 'Music player ready'}</div>
                 )}
               </div>
             )}
@@ -2366,8 +2337,8 @@ const SentimentalApp = () => {
             
             <div className="mt-4 text-xs opacity-75">
               {hasAudio ? 
-                '🎵 Music ready to play!' : 
-                '🎧 Upload MP3 file to enable playback'
+                (currentFormat.formatType === 'podcast' ? '🎙️ Podcast ready to play!' : '🎵 Music ready to play!') : 
+                '🎧 Upload audio file to enable playback'
               }
             </div>
           </div>
@@ -2520,7 +2491,7 @@ const SentimentalApp = () => {
           // Update current format with audio URL
           setCurrentFormat(prev => ({...prev, audio_url: result.audio_url}));
           setShowUploadModal(false);
-          alert('Audio uploaded successfully! 🎵');
+          alert('Audio uploaded successfully!');
         } else {
           alert('Upload failed: ' + (result.error || 'Unknown error'));
         }
@@ -2546,7 +2517,7 @@ const SentimentalApp = () => {
           
           <div className="mb-4">
             <p className="text-sm text-gray-600 mb-2">
-              Upload an MP3 file for: <strong>{currentFormat?.title || 'Song'}</strong>
+              Upload an audio file for: <strong>{currentFormat?.title || (currentFormat?.formatType === 'podcast' ? 'Podcast' : 'Song')}</strong>
             </p>
             <p className="text-xs text-gray-500">
               Supported formats: MP3, WAV, OGG, M4A (Max 16MB)
@@ -2561,7 +2532,7 @@ const SentimentalApp = () => {
               </div>
             ) : (
               <>
-                <div className="text-4xl mb-2">🎵</div>
+                <div className="text-4xl mb-2">{currentFormat?.formatType === 'podcast' ? '🎧' : '🎵'}</div>
                 <p className="text-gray-600 mb-2">Choose audio file</p>
                 <input
                   type="file"
