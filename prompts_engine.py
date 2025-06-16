@@ -330,21 +330,24 @@ Remember: You're not trying to fix or solve anything. You're helping them explor
                 FormatType.NEWSLETTER: "You are a newsletter writer who creates personal, engaging content that builds relationships with readers through authentic storytelling and valuable insights.",
         FormatType.PODCAST: "You are a podcast content specialist who creates engaging episode outlines and talking points for intimate, conversational storytelling that would work well with AI-generated audio.",
                 FormatType.INSIGHTS: "You are a therapeutic content specialist who helps people extract meaningful psychological insights from their experiences with practical, actionable guidance.",
+                FormatType.REFLECTION: "You are a friendly journaling coach who helps people talk about their feelings in clear, everyday language. Keep the tone warm, simple and down-to-earth – no academic jargon.",
                 FormatType.GROWTH_SUMMARY: "You are a personal development coach who helps people identify and articulate their growth journey with clear, actionable next steps.",
-                FormatType.JOURNAL_ENTRY: "You are a journaling specialist who helps people process experiences through authentic, vulnerable self-expression and emotional exploration."
+                FormatType.JOURNAL_ENTRY: "You are a journaling specialist who helps people process experiences through authentic, vulnerable self-expression and emotional exploration.",
+                FormatType.BOOK_CHAPTER: "You are a skilled ghost-writer weaving multiple true personal stories into a single, flowing memoir chapter that feels like a page-turning narrative."
             },
             
             'generation_templates': {
-                FormatType.X: """Transform this personal story into a compelling X (formerly Twitter) post that captures its essence:
+                FormatType.X: """Write a single X post (formerly Tweet) inspired by this story.
 
 Story: {content}
 
-Requirements:
-- Maximum 280 characters
-- Emotionally resonant and shareable
-- Include relevant hashtags (2-3 max)
-- Authentic voice that connects with readers
-- Clear, impactful message""",
+Rules:
+- 1 tweet only (no thread)
+- ≤ 280 characters total
+- Start with a hook emoji or strong statement
+- End with 2–3 relevant hashtags
+- Make it sound like a real person tweeting, not marketing copy
+- No quote blocks, no line-break lists""",
 
                 FormatType.LINKEDIN: """Create a professional LinkedIn post that shares this personal insight:
 
@@ -434,20 +437,18 @@ Requirements:
 - Show rather than tell the emotional journey
 - Include "once upon a time" style opening and "happily ever after" style ending""",
 
-                FormatType.ARTICLE: """Transform this personal story into a professional magazine-style article:
+                FormatType.ARTICLE: """Transform this personal story into a clear, engaging magazine-style article:
 
 Story: {content}
 
-Requirements:
-- Write a compelling headline that hooks readers
-- Open with a strong lead paragraph that sets the scene
-- Use journalistic storytelling structure (who, what, when, where, why)
-- Include quotes and specific details from the experience
-- Weave in expert insights or broader context where relevant
-- End with a powerful conclusion that ties back to the opening
-- 800-1200 words in professional article format
-- Write as if for publication in a major magazine or newspaper
-- NO meta-commentary, subheadings, or blog-style formatting""",
+Headline that hooks readers (≤ 12 words)
+Engaging intro paragraph that sets the scene
+3–4 short sections with sub-heads (## style) guiding the flow
+Blend the personal story with at least one expert insight or statistic
+Use concrete details and quotes where natural
+600-900 words total – concise, conversational magazine tone (think Wired / Atlantic)
+Finish with a takeaway that circles back to the opening
+Avoid academic jargon and verbose sentences""",
 
                 FormatType.BLOG_POST: """Create a professional blog post from this personal experience:
 
@@ -521,6 +522,19 @@ Requirements:
 - Therapeutic value and practical application
 - Connection to broader life patterns""",
 
+                FormatType.REFLECTION: """Write a short, honest reflection about this experience.
+
+Story: {content}
+
+Guidelines:
+- First-person ("I") voice, friendly and conversational
+- Everyday words, short sentences – no fancy vocabulary
+- 150-250 words total
+- Start with how the moment felt in the body or heart
+- Describe one key thing you realised or learned
+- Finish with one gentle, open question to yourself
+""",
+
                 FormatType.GROWTH_SUMMARY: """Create a personal growth summary from this experience:
 
 Story: {content}
@@ -547,7 +561,20 @@ Requirements:
 - Questions and wonderings
 - Personal insights and realizations
 - Raw, authentic voice
-- Write as if someone is writing in their private journal"""
+- Write as if someone is writing in their private journal""",
+
+                FormatType.BOOK_CHAPTER: """Write a cohesive chapter (~1500 words) that combines the following personal stories into one engaging narrative. Maintain first-person voice, chronological flow and emotional arc. Use scene transitions where necessary, but avoid obvious headings.
+
+Stories:
+
+{stories_markdown}
+
+Requirements:
+– 1400-1700 words
+– One clear protagonist ("I")
+– Smooth transitions; no bullet lists
+– Title on first line inside **bold**
+"""
             }
         }
     

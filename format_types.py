@@ -26,8 +26,13 @@ class FormatType(Enum):
     PRESENTATION = "presentation"
     NEWSLETTER = "newsletter"
     PODCAST = "podcast"
+    LETTER = "letter"
     
     # Therapeutic Formats
+    REFLECTION = "reflection"
     INSIGHTS = "insights"
     GROWTH_SUMMARY = "growth_summary"
-    JOURNAL_ENTRY = "journal_entry" 
+    JOURNAL_ENTRY = "journal_entry"
+    
+    # Compilation format
+    BOOK_CHAPTER = "book_chapter"

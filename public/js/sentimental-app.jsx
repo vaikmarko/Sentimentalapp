@@ -112,7 +112,14 @@ const getFormatIcon = (formatType) => {
     // Therapeutic Formats (3)
     insights: '💡',
     growth_summary: '🌱',
-    journal_entry: '📔'
+    journal_entry: '📔',
+    
+    // Modern Viral Formats
+    tiktok_script: '📱',
+    instagram_reel: '🎬',
+    x_thread: '🧵',
+    youtube_short: '▶️',
+    instagram_story: '📸',
   };
   return icons[formatType] || '📄';
 };
@@ -160,11 +167,11 @@ const SentimentalApp = () => {
     const initializeApp = async () => {
       try {
         // Check if user has access - if not, redirect to landing page
-        const storedAccess = localStorage.getItem('sentimental_access');
-        if (storedAccess !== 'granted') {
-          window.location.href = '/';
-          return;
-        }
+        // const storedAccess = localStorage.getItem('sentimental_access');
+        // if (storedAccess !== 'granted') {
+        //   window.location.href = '/';
+        //   return;
+        // }
         
         // Load initial data
         await Promise.all([
@@ -1383,10 +1390,10 @@ const SentimentalApp = () => {
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
               {[
-                { type: 'reflection', icon: '🌟', label: 'Reflection', desc: 'Deep thoughts' },
-                { type: 'song', icon: '🎵', label: 'Song', desc: 'Your story in music' },
+                { type: 'reflection', icon: '🤔', label: 'Reflection', desc: 'Deep thoughts' },
+                { type: 'reel', icon: '🎬', label: 'Reel', desc: 'Short video script' },
                 { type: 'poem', icon: '📝', label: 'Poem', desc: 'Poetic expression' },
-                { type: 'script', icon: '🎬', label: 'Story', desc: 'Life moments' }
+                { type: 'fairytale', icon: '📚', label: 'Fairytale', desc: 'Magic short story' }
               ].map((format) => (
                 <div key={format.type} className="bg-white/70 backdrop-blur-sm rounded-lg p-4 text-center border border-white/20">
                   <div className="text-2xl mb-2">{format.icon}</div>
@@ -2045,7 +2052,14 @@ const SentimentalApp = () => {
       podcast: 'Podcast',
       insights: 'Therapeutic Feedback',
       growth_summary: 'Growth Summary',
-      journal_entry: 'Journal Entry'
+      journal_entry: 'Journal Entry',
+      
+      // Modern Viral Formats
+      tiktok_script: '📱',
+      instagram_reel: '🎬',
+      x_thread: '🧵',
+      youtube_short: '▶️',
+      instagram_story: '📸',
     };
     
     const displayName = displayNames[formatType] || formatType.replace('_', ' ');

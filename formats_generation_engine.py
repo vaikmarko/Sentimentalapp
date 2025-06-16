@@ -187,12 +187,21 @@ class FormatsGenerationEngine:
                 logger.warning(f"System prompt failed, using basic system prompt: {e}")
                 system_prompt = "You are a skilled content creator who transforms personal stories into engaging formats while preserving their authentic emotional core."
             
+            # Use specialized system prompt when available, with song-specific override
+            if format_type == FormatType.SONG:
+                system_prompt_overridden = (
+                    "You are a professional songwriter. Follow the user's instructions exactly. "
+                    "Never add section labels like [Verse] or [Chorus] to lyrics unless explicitly requested."
+                )
+            else:
+                system_prompt_overridden = system_prompt
+            
             # Make API call using chat format for better instruction following
             try:
                 completion = self.openai_client.ChatCompletion.create(
                     model="gpt-3.5-turbo",
                     messages=[
-                        {"role": "system", "content": "You are a professional songwriter. Follow the user's instructions exactly. Never add section labels like [Verse] or [Chorus] to lyrics unless explicitly requested."},
+                        {"role": "system", "content": system_prompt_overridden},
                         {"role": "user", "content": prompt}
                     ],
                     max_tokens=1500,
@@ -237,7 +246,7 @@ class FormatsGenerationEngine:
         """Select appropriate OpenAI model based on format complexity"""
         
         # Use GPT-4 for complex creative formats
-        complex_formats = [FormatType.ARTICLE, FormatType.REEL, FormatType.POEM, FormatType.INSIGHTS, FormatType.PODCAST]
+        complex_formats = [FormatType.ARTICLE, FormatType.REEL, FormatType.POEM, FormatType.INSIGHTS, FormatType.PODCAST, FormatType.LETTER]
         
         if format_type in complex_formats:
             return "gpt-4"
@@ -287,11 +296,13 @@ class FormatsGenerationEngine:
             FormatType.PRESENTATION: "You are a presentation specialist who transforms stories into compelling, structured presentations that engage audiences and deliver clear takeaways.",
                           FormatType.NEWSLETTER: "You are a newsletter writer who creates personal, engaging content that builds relationships with readers through authentic storytelling and valuable insights.",
               FormatType.PODCAST: "You are a podcast content specialist who creates engaging episode outlines and talking points for intimate, conversational storytelling that would work well with AI-generated audio.",
+            FormatType.LETTER: "You are a heartfelt letter writer who crafts warm, personal letters that capture the writer's authentic feelings and nurture meaningful human connections.",
             
             # Therapeutic Formats
             FormatType.INSIGHTS: "You are a therapeutic content specialist who helps people extract meaningful psychological insights from their experiences with practical, actionable guidance.",
             FormatType.GROWTH_SUMMARY: "You are a personal development coach who helps people identify and articulate their growth journey with clear, actionable next steps.",
-            FormatType.JOURNAL_ENTRY: "You are a journaling specialist who helps people process experiences through authentic, vulnerable self-expression and emotional exploration."
+            FormatType.JOURNAL_ENTRY: "You are a journaling specialist who helps people process experiences through authentic, vulnerable self-expression and emotional exploration.",
+            FormatType.REFLECTION: "You are a reflective writing coach guiding individuals to explore their experiences through thoughtful introspection and meaningful insights.",
         }
         
         return system_prompts.get(format_type, "You are a content creation expert who transforms personal stories into engaging formats while preserving their authentic emotional core.")
@@ -360,4 +371,26 @@ class FormatsGenerationEngine:
         # Implement your logic to extract title based on the format type
         # This is a placeholder and should be replaced with the actual implementation
         return "Default Title"
+    
+    # Special compilation format uses list of stories
+    def _generate_book_chapter(self, stories_markdown: str) -> Dict[str, Any]:
+        try:
+            prompt = self.prompts_engine.get_prompt(PromptType.BOOK_CHAPTER, stories_markdown=stories_markdown)
+            response = self.openai_client.ChatCompletion.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": self.prompts_engine.get_system_prompt(PromptType.BOOK_CHAPTER)},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.7,
+                max_tokens=2048
+            )
+            content = response.choices[0].message.content.strip()
+            return {
+                "success": True,
+                "content": content,
+                "generation_method": "openai_gpt4o"
+            }
+        except Exception as e:
+            return {"success": False, "error": str(e)}
     

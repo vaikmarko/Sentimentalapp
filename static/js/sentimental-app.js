@@ -306,11 +306,11 @@ const SentimentalApp = () => {
     const initializeApp = async () => {
       try {
         // Check if user has access - if not, redirect to landing page
-        const storedAccess = localStorage.getItem('sentimental_access');
-        if (storedAccess !== 'granted') {
-          window.location.href = '/';
-          return;
-        }
+        // const storedAccess = localStorage.getItem('sentimental_access');
+        // if (storedAccess !== 'granted') {
+        //   window.location.href = '/';
+        //   return;
+        // }
 
         // Load initial data
         await Promise.all([fetchStories(), fetchSupportedFormats()]);

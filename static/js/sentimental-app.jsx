@@ -104,18 +104,23 @@ const getFormatIcon = (formatType) => {
     script: '🎬',
     
     // Modern Viral Formats
+    reel: '🎬',
     tiktok_script: '📱',
     instagram_reel: '🎬',
     x_thread: '🧵',
     youtube_short: '▶️',
     instagram_story: '📸',
+    short_story: '📚',
     
     // Content Formats
     article: '📝',
     blog_post: '✍️',
-    fairytale: '📚',
     presentation: '📊',
     newsletter: '📰',
+    podcast: '🎧',
+    
+    // Compilation Formats
+    book_chapter: '📖',
     
     // Reflection Formats
     insights: '💡',
@@ -127,7 +132,8 @@ const getFormatIcon = (formatType) => {
     // Professional Formats
     podcast_segment: '🎧',
     email: '✉️',
-    letter: '💌'
+    letter: '💌',
+    fairytale: 'Fairytale', // legacy alias
   };
   return icons[formatType] || '📄';
 };
@@ -160,6 +166,8 @@ const SentimentalApp = () => {
   const [formatContent, setFormatContent] = useState('');
   const [loadingFormat, setLoadingFormat] = useState(false);
   const [stories, setStories] = useState([]);
+  // Loading state for stories list (Discover view)
+  const [loadingStories, setLoadingStories] = useState(true);
   const [userStories, setUserStories] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isPasswordResetLoading, setIsPasswordResetLoading] = useState(false);
@@ -188,17 +196,51 @@ const SentimentalApp = () => {
   const [uploadingAudio, setUploadingAudio] = useState(false);
   const [loadingFormats, setLoadingFormats] = useState(true);
   const [showSpaceModal, setShowSpaceModal] = useState(false);
+  const [isGeneratingChapter, setIsGeneratingChapter] = useState(false);
+
+  // Format grouping & progressive disclosure
+  const PRIMARY_FORMATS = ['reflection', 'song', 'reel'];
+  const [showAllFormats, setShowAllFormats] = useState(false);
+  const [showAllUserStories, setShowAllUserStories] = useState(false);
+  const [showFullChat, setShowFullChat] = useState(false);
+
+  // Super admin helper – Marko can edit any story
+  const isSuperUser = user && (user.email === 'vaikmarko@gmail.com' || user.id === 'TCoWwyV0sMlNiFQgLuXR');
+
+  // Helper: safe timestamp → milliseconds (fallback 0)
+  const toMillis = (val) => {
+    if (!val) return 0;
+    // If already Date or numeric string
+    const dateObj = new Date(val);
+    if (!Number.isNaN(dateObj.getTime())) return dateObj.getTime();
+
+    // Try to parse relative strings like "5h ago", "2d ago"
+    if (typeof val === 'string' && /ago$/.test(val)) {
+      const parts = val.trim().split(/\s+/);
+      if (parts.length >= 2) {
+        const num = parseInt(parts[0], 10);
+        const unit = parts[1][0]; // h, d, m
+        if (!Number.isNaN(num)) {
+          const now = Date.now();
+          if (unit === 'h') return now - num * 60 * 60 * 1000;
+          if (unit === 'd') return now - num * 24 * 60 * 60 * 1000;
+          if (unit === 'm') return now - num * 60 * 1000;
+        }
+      }
+    }
+    return 0; // Fallback
+  };
 
   // Initialize
   useEffect(() => {
     const initializeApp = async () => {
       try {
         // Check if user has access - if not, redirect to landing page
-        const storedAccess = localStorage.getItem('sentimental_access');
-        if (storedAccess !== 'granted') {
-          window.location.href = '/';
-          return;
-        }
+        // const storedAccess = localStorage.getItem('sentimental_access');
+        // if (storedAccess !== 'granted') {
+        //   window.location.href = '/';
+        //   return;
+        // }
         
         // Load initial data
         await Promise.all([
@@ -325,8 +367,26 @@ const SentimentalApp = () => {
     initializeApp();
   }, []);
 
+  // Keep userStories in sync whenever stories or user change
+  useEffect(() => {
+    if (user) {
+      const mine = stories.filter(
+        (s) => s.user_id === user.id || s.author_id === user.id
+      );
+      setUserStories(mine);
+    } else {
+      setUserStories([]);
+    }
+  }, [stories, user]);
+
+  // Reset expanded formats when switching stories
+  useEffect(() => {
+    setShowAllFormats(false);
+  }, [selectedStory]);
+
   const fetchStories = async () => {
     try {
+      setLoadingStories(true);
       const response = await fetch('/api/stories');
       if (response.ok) {
         const data = await response.json();
@@ -334,6 +394,8 @@ const SentimentalApp = () => {
       }
     } catch (error) {
       console.error('Error fetching stories:', error);
+    } finally {
+      setLoadingStories(false);
     }
   };
 
@@ -350,16 +412,20 @@ const SentimentalApp = () => {
         // Fallback to formats that are actually supported by prompts engine
         setSupportedFormats([
           'x', 'linkedin', 'instagram', 'facebook',
-          'poem', 'song', 'reel', 'fairytale', 
+          'song', 'poem', 'reel', 'short_story', 
           'article', 'blog_post', 'presentation', 'newsletter', 'podcast',
-          'insights', 'growth_summary', 'journal_entry'
+          'insights', 'growth_summary', 'journal_entry',
+          'reflection', 'letter'
         ]);
       }
     } catch (error) {
       console.error('Error fetching supported formats:', error);
       // Fallback to core formats that definitely work
       setSupportedFormats([
-        'x', 'linkedin', 'instagram', 'poem', 'song', 'article', 'insights'
+        'x', 'linkedin', 'instagram', 'song', 'poem', 'article',
+        'reflection',
+        'insights',
+        'short_story', 'letter'
       ]);
     } finally {
       setLoadingFormats(false);
@@ -576,7 +642,8 @@ const SentimentalApp = () => {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'X-User-ID': user.id
+          'X-User-ID': user.id,
+          'X-User-Email': user.email || ''
         },
         body: JSON.stringify({
           message: userMessage,
@@ -633,7 +700,8 @@ const SentimentalApp = () => {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'X-User-ID': user.id // Add authentication header
+          'X-User-ID': user.id, // Add authentication header
+          'X-User-Email': user.email || ''
         },
         body: JSON.stringify({
           conversation: messages,
@@ -740,7 +808,8 @@ const SentimentalApp = () => {
     const response = await fetch('/api/upload/audio', {
       method: 'POST',
       headers: {
-        'X-User-ID': user.id  // Add authentication header
+        'X-User-ID': user.id,  // Add authentication header
+        'X-User-Email': user.email || ''
       },
       body: formData
     });
@@ -847,7 +916,8 @@ const SentimentalApp = () => {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
-            'X-User-ID': user.id || 'undefined' // Add authentication header with fallback
+            'X-User-ID': user.id || 'undefined', // Add authentication header with fallback
+            'X-User-Email': user.email || ''
           },
           body: JSON.stringify({ format_type: formatType })
         });
@@ -925,7 +995,8 @@ const SentimentalApp = () => {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
-          'X-User-ID': user.id
+          'X-User-ID': user.id,
+          'X-User-Email': user.email || ''
         },
         body: JSON.stringify({
           is_public: !currentIsPublic
@@ -983,7 +1054,8 @@ const SentimentalApp = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'X-User-ID': user.id
+          'X-User-ID': user.id,
+          'X-User-Email': user.email || ''
         },
         body: JSON.stringify({
           title: editTitle.trim(),
@@ -1045,6 +1117,8 @@ const SentimentalApp = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'X-User-ID': user.id,
+          'X-User-Email': user.email || ''
         },
         body: JSON.stringify({
           content: editFormatContent,
@@ -1103,34 +1177,19 @@ const SentimentalApp = () => {
     <nav className="hidden md:block bg-white border-b border-gray-200 px-4 py-2 sticky top-0 z-50">
       <div className="max-w-6xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <button 
-            onClick={() => {
-              setCurrentView('discover');
-              setSelectedStory(null);
-              setCurrentFormat(null);
-              setFormatContent('');
-              setPreviousView('discover');
-            }}
+          <a
+            href="/"
             className="text-xl font-bold text-purple-600 no-underline hover:text-purple-700 transition-colors"
           >
             Sentimental
-          </button>
+          </a>
           
           <div className="hidden md:flex items-center gap-1">
             {[
               { id: 'discover', label: 'Discover', icon: Search },
               { id: 'share', label: 'Chat', icon: MessageCircle },
               { id: 'stories', label: 'Stories', icon: BookOpen },
-              { 
-                id: 'inner-space', 
-                label: 'Space', 
-                icon: () => (
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88"/>
-                  </svg>
-                )
-              }
+              // Space tab temporarily hidden until feature is production-ready
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -1340,18 +1399,12 @@ const SentimentalApp = () => {
     <div className="h-full flex flex-col">
       {/* Mobile Header - Only show on mobile */}
       <div className="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-        <button 
-          onClick={() => {
-            setCurrentView('discover');
-            setSelectedStory(null);
-            setCurrentFormat(null);
-            setFormatContent('');
-            setPreviousView('discover');
-          }}
+        <a
+          href="/"
           className="text-lg font-bold text-purple-600 hover:text-purple-700 transition-colors"
         >
           Sentimental
-        </button>
+        </a>
         
         {user ? (
           <div className="flex items-center gap-3">
@@ -1402,25 +1455,21 @@ const SentimentalApp = () => {
           </p>
           
           {!user ? (
-            <div className="bg-white/70 backdrop-blur-sm rounded-xl p-6 mb-6 border border-white/20">
-              <h3 className="text-xl font-semibold text-gray-800 mb-3">Start Your Journey</h3>
-              <p className="text-gray-600 mb-4">
-                Join a community where your thoughts matter and your story becomes something beautiful.
-              </p>
+            <div className="flex justify-center mb-6">
               <button
-                onClick={() => setShowLogin(true)}
-                className="bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors"
+                onClick={() => setCurrentView('share')}
+                className="bg-purple-600 text-white px-8 py-4 rounded-full font-medium text-lg hover:bg-purple-700 transition-colors"
               >
-                Begin Discovering Yourself
+                Begin Expressing Yourself
               </button>
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
               {[
-                { type: 'reflection', icon: '🌟', label: 'Reflection', desc: 'Deep thoughts' },
-                { type: 'song', icon: '🎵', label: 'Song', desc: 'Your story in music' },
+                { type: 'reflection', icon: '🤔', label: 'Reflection', desc: 'Deep thoughts' },
+                { type: 'reel', icon: '🎬', label: 'Reel', desc: 'Short video script' },
                 { type: 'poem', icon: '📝', label: 'Poem', desc: 'Poetic expression' },
-                { type: 'script', icon: '🎬', label: 'Story', desc: 'Life moments' }
+                { type: 'short_story', icon: '📚', label: 'Fairytale', desc: 'Magic short story' },
               ].map((format) => (
                 <div key={format.type} className="bg-white/70 backdrop-blur-sm rounded-lg p-4 text-center border border-white/20">
                   <div className="text-2xl mb-2">{format.icon}</div>
@@ -1435,13 +1484,18 @@ const SentimentalApp = () => {
 
       {/* Story Cards */}
       <div className="flex-1 overflow-y-auto p-6">
-        {loadingFormat ? (
-          <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+        {loadingStories ? (
+          <div className="grid grid-cols-1 gap-6" data-testid="discover-skeleton">
+            {[1,2,3].map(i => (
+              <div key={i} className="bg-white rounded-2xl border border-gray-200 p-6 animate-pulse h-48"></div>
+            ))}
           </div>
         ) : (
-          <div className="grid gap-6">
-            {stories.filter(story => story.public === true).map(story => (
+          <div className="grid grid-cols-1 gap-6">
+            {stories
+              .filter(story => story.public === true)
+              .sort((a, b) => toMillis(b.created_at || b.timestamp) - toMillis(a.created_at || a.timestamp))
+              .map(story => (
               <div key={story.id} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-200">
                 {/* Story Header */}
                 <div className="p-6 pb-4">
@@ -1477,17 +1531,28 @@ const SentimentalApp = () => {
                           {user && story.user_id === user.id ? 'Your Transformations:' : 'Available Transformations:'}
                         </span>
                       </div>
-                      <div className="flex flex-wrap gap-2">
-                        {story.createdFormats.map(format => (
-                          <span key={format} className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 rounded-md text-xs font-medium">
-                            {getFormatIcon(format)} {getFormatDisplayName(format)}
-                          </span>
-                        ))}
-                      </div>
+                      {(() => {
+                        const unique = Array.from(new Set(story.createdFormats.map(normalizeFormat)));
+                        const sorted = sortFormats(unique);
+                        const primary = sorted.slice(0, 3);
+                        const extraCount = sorted.length - primary.length;
+                        return (
+                          <div className="flex flex-wrap gap-2 items-center">
+                            {primary.map(format => (
+                              <span key={format} title={getFormatDisplayName(format)} className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 rounded-md text-xs font-medium">
+                                {getFormatIcon(format)} {getFormatDisplayName(format)}
+                              </span>
+                            ))}
+                            {extraCount > 0 && (
+                              <span className="text-xs text-gray-500">+{extraCount} more</span>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </div>
                   )}
 
-                  <div className="flex items-center justify-end pt-4 border-t border-gray-100">
+                  <div className="flex flex-wrap items-start sm:items-center justify-between gap-3 pt-4 border-t border-gray-100">
                     <button 
                       onClick={() => {
                         setSelectedStory(story);
@@ -1527,18 +1592,12 @@ const SentimentalApp = () => {
     <div className="flex flex-col min-h-[calc(100vh-4rem)] md:min-h-[calc(100vh-5rem)]">
       {/* Mobile Header */}
       <div className="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-        <button 
-          onClick={() => {
-            setCurrentView('discover');
-            setSelectedStory(null);
-            setCurrentFormat(null);
-            setFormatContent('');
-            setPreviousView('discover');
-          }}
+        <a
+          href="/"
           className="text-lg font-bold text-purple-600 hover:text-purple-700 transition-colors"
         >
           Sentimental
-        </button>
+        </a>
         
         {user ? (
           <div className="flex items-center gap-3">
@@ -1657,6 +1716,7 @@ const SentimentalApp = () => {
                     <span className="bg-pink-100 text-pink-700 px-3 py-1 rounded-full text-sm font-medium">🎵 Songs</span>
                     <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">📖 Stories</span>
                     <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium">✨ Poems</span>
+                    <span className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm font-medium">📝 Letters</span>
                   </div>
                   <p className="text-gray-600 mb-6 max-w-lg mx-auto text-sm">
                     Tell me what's on your mind - your dreams, challenges, relationships, or anything that matters to you.
@@ -1666,7 +1726,7 @@ const SentimentalApp = () => {
             </div>
           ) : (
             <>
-              {messages.map((msg, index) => (
+              {(showFullChat ? messages : messages.slice(-5)).map((msg, index) => (
                 <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   <div className={`max-w-[80%] p-4 rounded-2xl ${
                     msg.role === 'user' 
@@ -1688,6 +1748,14 @@ const SentimentalApp = () => {
                     </div>
                   </div>
                 </div>
+              )}
+              {!showFullChat && messages.length > 5 && (
+                <button
+                  onClick={() => setShowFullChat(true)}
+                  className="text-xs text-purple-600 mt-4 underline mx-auto block"
+                >
+                  Show full history ({messages.length})
+                </button>
               )}
             </>
           )}
@@ -1761,14 +1829,14 @@ const SentimentalApp = () => {
           </div>
           
           <div className="text-center py-12">
-            <div className="text-6xl mb-4">👤</div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Sign in to see your personal stories</h3>
-            <p className="text-gray-600 mb-6">Sign in to save your stories and continue your journey of personal growth and self-discovery.</p>
+            <div className="text-6xl mb-6">📖</div>
+            <h3 className="text-xl font-bold text-gray-900 mb-3">Your stories will live here</h3>
+            <p className="text-gray-600 mb-8 max-w-md mx-auto">Start a chat to create your first story and begin your journey of self-discovery.</p>
             <button
-              onClick={() => setShowLogin(true)}
+              onClick={() => setCurrentView('share')}
               className="bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors"
             >
-              Sign In
+              Start Chatting
             </button>
           </div>
         </div>
@@ -1776,24 +1844,21 @@ const SentimentalApp = () => {
     }
 
     // Filter stories for authenticated user only
-    const userStories = stories.filter(story => story.user_id === user.id);
+    const userStories = [...stories.filter(story => story.user_id === user.id)]
+      .sort((a, b) => toMillis(b.created_at || b.timestamp) - toMillis(a.created_at || a.timestamp));
+
+    const visibleStories = showAllUserStories ? userStories : userStories.slice(0, 3);
 
     return (
       <div>
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-          <button 
-            onClick={() => {
-              setCurrentView('discover');
-              setSelectedStory(null);
-              setCurrentFormat(null);
-              setFormatContent('');
-              setPreviousView('discover');
-            }}
+          <a
+            href="/"
             className="text-lg font-bold text-purple-600 hover:text-purple-700 transition-colors"
           >
             Sentimental
-          </button>
+          </a>
           
           {user ? (
             <div className="flex items-center gap-3">
@@ -1839,8 +1904,27 @@ const SentimentalApp = () => {
           </div>
 
         {userStories.length > 0 ? (
-          <div className="grid gap-6">
-            {userStories.map((story) => (
+          <div className="grid grid-cols-1 gap-6">
+            {/* Book Chapter compilation tile (user-level) */}
+            <div className="bg-white rounded-xl shadow-sm p-6 flex flex-col items-center justify-center border border-gray-100">
+              <button
+                onClick={() => {
+                  if (userStories.length >= 5 && !isGeneratingChapter) generateBookChapter();
+                }}
+                disabled={userStories.length < 5 || isGeneratingChapter}
+                className={`flex flex-col items-center justify-center w-full h-full gap-2 ${userStories.length >= 5 ? 'text-indigo-700 hover:text-indigo-800' : 'text-gray-400 cursor-not-allowed'}`}
+                style={{ minHeight: '120px' }}
+              >
+                <div className="text-4xl">{getFormatIcon('book_chapter')}</div>
+                <div className="text-sm font-medium">
+                  {isGeneratingChapter ? 'Generating…' : 'Book Chapter'}
+                </div>
+                {userStories.length < 5 && !isGeneratingChapter && (
+                  <div className="text-[11px] text-gray-500">Need 5 stories</div>
+                )}
+              </button>
+            </div>
+            {visibleStories.map((story) => (
               <div
                 key={story.id}
                 className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 cursor-pointer border border-gray-100 p-6 group"
@@ -1869,8 +1953,8 @@ const SentimentalApp = () => {
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    {/* Edit Button - Only show for story owner */}
-                    {user && (story.user_id === user.id || story.author_id === user.id) && (
+                    {/* Edit Button - Only show for story owner or super user */}
+                    {user && (story.user_id === user.id || story.author_id === user.id || isSuperUser) && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -1893,12 +1977,12 @@ const SentimentalApp = () => {
                 </div>
 
                 {/* Privacy and formats - exact original style */}
-                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                <div className="flex flex-wrap items-start sm:items-center justify-between gap-3 pt-4 border-t border-gray-100">
                   <div className="flex items-center gap-3 text-sm text-gray-500">
                     <span className="text-gray-600">
                       {story.public ? 'Public' : 'Private'}
                     </span>
-                    {user && (story.user_id === user.id || story.author_id === user.id) && (
+                    {user && (story.user_id === user.id || story.author_id === user.id || isSuperUser) && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -1922,7 +2006,7 @@ const SentimentalApp = () => {
                     {story.createdFormats && story.createdFormats.length > 0 && (
                       <>
                         <span className="text-xs text-purple-600 font-medium">•</span>
-                        {story.createdFormats.slice(0, 2).map(format => (
+                        {sortFormats(story.createdFormats.map(normalizeFormat)).slice(0, 2).map(format => (
                           <span key={format} className="bg-purple-100 text-purple-700 px-2 py-1 rounded-full text-xs">
                             {getFormatDisplayName(format)}
                           </span>
@@ -1943,6 +2027,14 @@ const SentimentalApp = () => {
                 </div>
               </div>
             ))}
+            {!showAllUserStories && userStories.length > 3 && (
+              <button
+                onClick={() => setShowAllUserStories(true)}
+                className="btn-secondary mx-auto mt-4"
+              >
+                View All Stories ({userStories.length})
+              </button>
+            )}
           </div>
         ) : (
           <div className="text-center py-12">
@@ -1994,8 +2086,8 @@ const SentimentalApp = () => {
                 </div>
               </div>
               
-              {/* Edit Button - Only show for story owner */}
-              {user && (selectedStory.user_id === user.id || selectedStory.author_id === user.id) && (
+              {/* Edit Button - Only show for story owner or super user */}
+              {user && (selectedStory.user_id === user.id || selectedStory.author_id === user.id || isSuperUser) && (
                 <button
                   onClick={() => startEditingStory(selectedStory)}
                   className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
@@ -2035,18 +2127,46 @@ const SentimentalApp = () => {
                   {user && selectedStory.user_id === user.id ? 'Your Transformations:' : 'Available Transformations:'}
                 </span>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {selectedStory.createdFormats.map(format => (
-                    <button 
-                      key={format} 
-                      onClick={() => viewFormat(selectedStory, format)}
-                      className="bg-purple-100 text-purple-700 rounded-lg p-3 text-center hover:bg-purple-200 transition-colors cursor-pointer border-none"
-                    >
-                      <div className="text-2xl mb-1">{getFormatIcon(format)}</div>
-                      <div className="text-sm font-medium">{getFormatDisplayName(format)}</div>
-                    </button>
-                  ))}
-                </div>
+                {(() => {
+                    const all = sortFormats(Array.from(new Set(selectedStory.createdFormats.map(normalizeFormat))));
+                    const primary = all.slice(0, 3);
+                    const secondary = all.slice(3);
+
+                    const renderButton = (format) => (
+                      <button
+                        key={format}
+                        onClick={() => viewFormat(selectedStory, format)}
+                        className="bg-purple-100 text-purple-700 rounded-lg p-3 text-center hover:bg-purple-200 transition-colors cursor-pointer border-none flex-shrink-0 w-24 snap-start"
+                      >
+                        <div className="text-2xl mb-1" title={getFormatDisplayName(format)}>{getFormatIcon(format)}</div>
+                        <div className="text-sm font-medium">{getFormatDisplayName(format)}</div>
+                      </button>
+                    );
+
+                    return (
+                      <>
+                        <div className="grid grid-flow-col auto-cols-max gap-3 overflow-x-auto snap-x snap-mandatory lg:grid-flow-row lg:auto-cols-fr lg:grid-cols-4 lg:overflow-x-visible">
+                          {(showAllFormats ? all : primary).map(format => renderButton(format))}
+                          {!showAllFormats && secondary.length > 0 && (
+                            <button
+                              onClick={() => setShowAllFormats(true)}
+                              className="bg-purple-50 text-purple-700 rounded-lg p-3 text-center hover:bg-purple-100 transition-colors cursor-pointer border-dashed border-2 border-purple-300 flex flex-col items-center justify-center flex-shrink-0 w-24 snap-start"
+                            >
+                              <div className="text-lg font-semibold">+{secondary.length}</div>
+                              <div className="text-xs font-medium">More formats</div>
+                            </button>
+                          )}
+                        </div>
+                        {showAllFormats && secondary.length > 0 && (
+                          <div className="hidden">
+                            <div className="mt-3 flex gap-3 overflow-x-auto flex-nowrap lg:grid lg:grid-cols-4">
+                              {secondary.map(format => renderButton(format))}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
               </div>
             )}
 
@@ -2060,19 +2180,44 @@ const SentimentalApp = () => {
                   <span className="font-medium text-green-700">Transform Into:</span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {supportedFormats
-                     .filter(format => !selectedStory.createdFormats?.includes(format))
-                     .map(format => (
-                       <button 
-                         key={format} 
-                         onClick={() => viewFormat(selectedStory, format)}
-                         className="bg-green-100 text-green-700 rounded-lg p-3 text-center hover:bg-green-200 transition-colors cursor-pointer border-none"
-                       >
-                         <div className="text-2xl mb-1">{getFormatIcon(format)}</div>
-                         <div className="text-sm font-medium">{getFormatDisplayName(format)}</div>
-                       </button>
-                     ))
-                   }
+                  {(() => {
+                    const available = supportedFormats.filter(f => !selectedStory.createdFormats?.includes(f));
+                    const primary = available.filter(f => PRIMARY_FORMATS.includes(f));
+                    const secondary = available.filter(f => !PRIMARY_FORMATS.includes(f));
+                    return (
+                      <>
+                        {primary.map(format => (
+                          <button 
+                            key={format} 
+                            onClick={() => viewFormat(selectedStory, format)}
+                            className="bg-green-100 text-green-700 rounded-lg p-3 text-center hover:bg-green-200 transition-colors cursor-pointer border-none flex-shrink-0 w-24 snap-start"
+                          >
+                            <div className="text-2xl mb-1" title={getFormatDisplayName(format)}>{getFormatIcon(format)}</div>
+                            <div className="text-sm font-medium">{getFormatDisplayName(format)}</div>
+                          </button>
+                        ))}
+                        {!showAllFormats && secondary.length > 0 && (
+                          <button
+                            onClick={() => setShowAllFormats(true)}
+                            className="bg-green-50 text-green-700 rounded-lg p-3 text-center hover:bg-green-100 transition-colors cursor-pointer border-dashed border-2 border-green-300 flex flex-col items-center justify-center"
+                          >
+                            <div className="text-lg font-semibold">+{secondary.length}</div>
+                            <div className="text-xs font-medium">More formats</div>
+                          </button>
+                        )}
+                        {showAllFormats && secondary.map(format => (
+                          <button 
+                            key={format} 
+                            onClick={() => viewFormat(selectedStory, format)}
+                            className="bg-green-100 text-green-700 rounded-lg p-3 text-center hover:bg-green-200 transition-colors cursor-pointer border-none flex-shrink-0 w-24 snap-start"
+                          >
+                            <div className="text-2xl mb-1" title={getFormatDisplayName(format)}>{getFormatIcon(format)}</div>
+                            <div className="text-sm font-medium">{getFormatDisplayName(format)}</div>
+                          </button>
+                        ))}
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
             )}
@@ -2093,15 +2238,17 @@ const SentimentalApp = () => {
       poem: 'Poem',
       song: 'Song',
       reel: 'Reel',
-      fairytale: 'Fairytale',
+      short_story: 'Fairytale',
       article: 'Article',
       blog_post: 'Blog Post',
       presentation: 'Presentation',
       newsletter: 'Newsletter',
       podcast: 'Podcast',
-      insights: 'Therapeutic Feedback',
+      reflection: 'Reflection',
       growth_summary: 'Growth Summary',
-      journal_entry: 'Journal Entry'
+      journal_entry: 'Journal Entry',
+      book_chapter: 'Book Chapter',
+      letter: 'Letter'
     };
     
     const displayName = displayNames[formatType] || formatType.replace('_', ' ');
@@ -2111,6 +2258,9 @@ const SentimentalApp = () => {
   // Format Detail View
   const renderFormatDetail = () => {
     if (!currentFormat) return null;
+
+    // Determine if logged-in user is the super admin (Marko)
+    const isSuperUser = user && (user.email === 'vaikmarko@gmail.com' || user.id === 'TCoWwyV0sMlNiFQgLuXR');
 
     // Special designs for different format types
     const renderFormatContent = () => {
@@ -2130,13 +2280,19 @@ const SentimentalApp = () => {
         
         // Clean content: remove TITLE: line since we show it separately
         let cleanContent = contentText;
-        if (typeof cleanContent === 'string' && cleanContent) {
+
+        // If nested content itself is an object, stringify for safe display
+        if (typeof cleanContent === 'object') {
+          cleanContent = JSON.stringify(cleanContent, null, 2);
+        }
+
+        // Ensure plain string
+        cleanContent = String(cleanContent);
+
+        if (cleanContent && typeof cleanContent.replace === 'function') {
           cleanContent = cleanContent.replace(/^TITLE:\s*['""]([^'""]+)['""]?\s*\n?/i, '');
           cleanContent = cleanContent.replace(/^TITLE:\s*([^\n]+)\s*\n?/i, '');
           cleanContent = cleanContent.trim();
-        } else if (cleanContent && typeof cleanContent !== 'string') {
-          // Ensure we always render a string to avoid React crashing
-          cleanContent = JSON.stringify(cleanContent, null, 2);
         }
         
         // Try to get audio URL from multiple sources
@@ -2154,13 +2310,15 @@ const SentimentalApp = () => {
                 </div>
               </div>
               
-              {/* Upload Button */}
-              <button
-                onClick={() => setShowUploadModal(true)}
-                className="mr-2 px-3 py-1 bg-white/20 rounded-lg text-xs hover:bg-white/30 transition-colors"
-              >
-                Upload MP3
-              </button>
+              {/* Upload Button - show only for story owner or super user */}
+              {user && (currentFormat.story.user_id === user.id || isSuperUser) && (
+                <button
+                  onClick={() => setShowUploadModal(true)}
+                  className="mr-2 px-3 py-1 bg-white/20 rounded-lg text-xs hover:bg-white/30 transition-colors"
+                >
+                  Upload MP3
+                </button>
+              )}
             </div>
             
             {/* Audio Player */}
@@ -2180,17 +2338,23 @@ const SentimentalApp = () => {
               <div className="bg-black/20 rounded-lg p-4 mb-4">
                 <div className="flex items-center justify-between text-sm mb-2">
                   <span>🎧 Music Player</span>
-                  <button 
-                    onClick={() => setShowUploadModal(true)}
-                    className="bg-white/20 hover:bg-white/30 px-2 py-1 rounded text-xs transition-colors"
-                  >
-                    Upload MP3
-                  </button>
+                  {user && (currentFormat.story.user_id === user.id || isSuperUser) && (
+                    <button 
+                      onClick={() => setShowUploadModal(true)}
+                      className="bg-white/20 hover:bg-white/30 px-2 py-1 rounded text-xs transition-colors"
+                    >
+                      Upload MP3
+                    </button>
+                  )}
                 </div>
                 <div className="w-full bg-white/20 rounded-full h-2">
                   <div className="bg-white/50 h-2 rounded-full w-0"></div>
                 </div>
-                <div className="text-xs text-center mt-2 opacity-75">Click "Upload MP3" to add audio</div>
+                {user && (currentFormat.story.user_id === user.id || isSuperUser) ? (
+                  <div className="text-xs text-center mt-2 opacity-75">Click "Upload MP3" to add audio</div>
+                ) : (
+                  <div className="text-xs text-center mt-2 opacity-50">Music player ready</div>
+                )}
               </div>
             )}
 
@@ -2229,7 +2393,14 @@ const SentimentalApp = () => {
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Video Script</h3>
               <div className="prose max-w-none">
                 <pre className="whitespace-pre-wrap font-sans text-gray-700 leading-relaxed text-sm">
-                  {typeof formatContent === 'object' ? formatContent.content || JSON.stringify(formatContent, null, 2) : formatContent}
+                  {(() => {
+                    if (typeof formatContent === 'object') {
+                      const inner = formatContent.content;
+                      if (typeof inner === 'string') return inner;
+                      return JSON.stringify(formatContent, null, 2);
+                    }
+                    return formatContent;
+                  })()}
                 </pre>
               </div>
               <div className="mt-4 text-xs text-gray-500">
@@ -2240,11 +2411,24 @@ const SentimentalApp = () => {
         );
       }
 
-      // Default format display
+      // Prepare safe display text
+      let displayText;
+      if (typeof formatContent === 'object') {
+        if (formatContent.content) {
+          displayText = formatContent.content;
+        } else if (formatContent.error) {
+          displayText = `⚠️ ${formatContent.error}`;
+        } else {
+          displayText = JSON.stringify(formatContent, null, 2);
+        }
+      } else {
+        displayText = formatContent;
+      }
+
       return (
         <div className="prose max-w-none">
           <pre className="whitespace-pre-wrap font-sans text-gray-700 leading-relaxed text-lg">
-            {typeof formatContent === 'object' ? formatContent.content || JSON.stringify(formatContent, null, 2) : formatContent}
+            {displayText}
           </pre>
         </div>
       );
@@ -2255,10 +2439,13 @@ const SentimentalApp = () => {
         <div className="mb-6">
           <button
             onClick={() => {
-              setCurrentView('story-detail');
+              if (selectedStory) {
+                setCurrentView('story-detail');
+              } else {
+                setCurrentView(previousView || 'stories');
+              }
               setCurrentFormat(null);
               setFormatContent('');
-              // Keep the selected story but clear format state
             }}
             className="flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-4"
           >
@@ -2283,8 +2470,8 @@ const SentimentalApp = () => {
                   </div>
                 </div>
                 
-                {/* Edit Button - Only show for story owner */}
-                {user && currentFormat.story.user_id === user.id && (
+                {/* Edit Button - Only show for story owner or super user */}
+                {user && (currentFormat.story.user_id === user.id || isSuperUser) && (
                   <button
                     onClick={() => startEditingFormat(currentFormat, formatContent)}
                     className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
@@ -2661,16 +2848,7 @@ const SentimentalApp = () => {
               </svg>
             )
           },
-          { 
-            id: 'inner-space', 
-            label: 'Space', 
-            icon: () => (
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88"/>
-              </svg>
-            )
-          }
+          // Space tab hidden until ready for production
         ].map((tab) => (
           <button
             key={tab.id}
@@ -2711,13 +2889,6 @@ const SentimentalApp = () => {
       </div>
     </div>
   );
-
-
-
-  // Don't render anything until app is initialized to prevent flashing
-  if (!appInitialized) {
-    return null;
-  }
 
   // Edit Story Modal
   const renderEditStoryModal = () => {
@@ -2872,6 +3043,69 @@ const SentimentalApp = () => {
       </div>
     );
   };
+
+  // Generate Book Chapter compilation (requires at least 5 stories)
+  const generateBookChapter = async () => {
+    if (!user || !user.id) {
+      setShowLogin(true);
+      return;
+    }
+
+    setIsGeneratingChapter(true);
+    try {
+      const response = await fetch(`/api/users/${user.id}/generate-book-chapter`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-ID': user.id,
+          'X-User-Email': user.email || ''
+        }
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (response.ok) {
+        const chapterContent = data.content || data.chapter || data.book_chapter || JSON.stringify(data, null, 2);
+        setCurrentFormat({ 
+          formatType: 'book_chapter', 
+          title: data.title || 'Book Chapter', 
+          story: { title: 'Compilation', user_id: user.id }
+        });
+        setFormatContent(chapterContent);
+        setPreviousView('stories');
+        setCurrentView('format-detail');
+      } else {
+        alert(data.message || 'Failed to generate Book Chapter.');
+      }
+    } catch (error) {
+      console.error('Error generating Book Chapter:', error);
+      alert('Error generating Book Chapter. Please try again.');
+    } finally {
+      setIsGeneratingChapter(false);
+    }
+  };
+
+  // Utility: sort formats so Song appears first
+  const sortFormats = (formatsArray) => {
+    if (!Array.isArray(formatsArray)) return [];
+    const priority = PRIMARY_FORMATS;
+    return [...formatsArray].sort((a, b) => {
+      const aIndex = priority.indexOf(a);
+      const bIndex = priority.indexOf(b);
+      if (aIndex === -1 && bIndex === -1) return 0;
+      if (aIndex === -1) return 1;
+      if (bIndex === -1) return -1;
+      return aIndex - bIndex;
+    });
+  };
+
+  // Utility: map legacy names to current ones
+  const normalizeFormat = (fmt) => (fmt === 'fairytale' ? 'short_story' : fmt);
+
+  // Don't render anything until app is initialized to prevent flashing
+  if (!appInitialized) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

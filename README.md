@@ -202,6 +202,40 @@ Previously there was an outdated copy of these files under `public/` used for a 
 
 If you encounter any references to `public/app.py` in deployment scripts, update them to point to the root `app.py`.
 
+## ⚠️ Front-end Bundle Sync & Deployment Checklist (June 2025)
+
+Sentimental currently ships *two* copies of the main React bundle:
+
+| Location | Used by | When it matters |
+|----------|---------|-----------------|
+| `static/js/sentimental-app.jsx` | Flask server (local development, Cloud Run) | Authenticated (\`/app\`) traffic routed through the backend |
+| `public/static/js/sentimental-app.jsx` | Firebase Hosting | Anonymous visitors and all traffic hitting the root domain (\`sentimentalapp.com\`) |
+
+Because of this split **any UI change must be applied to **both** files** or the live site can get out of sync (e.g. missing tiles, wrong icons).
+
+### Recommended workflow
+
+1. Implement your change in **`static/js/sentimental-app.jsx`** (the copy that hot-reloads locally).
+2. Copy it over:
+   ```bash
+   cp static/js/sentimental-app.jsx public/static/js/sentimental-app.jsx
+   ```
+   Or create a symlink if you prefer (`ln -sf`)—just make sure it ends up in the `public/` folder that Firebase serves.
+3. Deploy **Cloud Run** *and* **Firebase Hosting** every time:
+   ```bash
+   # Backend + /static/js (Flask)
+   gcloud run deploy sentimentalapp \
+     --source . \
+     --region europe-west1 \
+     --allow-unauthenticated --quiet
+
+   # Front-end static assets
+   firebase deploy --only hosting --project sentimental-f95e6 --non-interactive --force
+   ```
+4. Verify the version bump: Flask app adds `?v=<timestamp>` to the JS URL, so browsers pull the new bundle automatically; Firebase visitors may need a hard reload only if they were on the site within the last minute of deployment.
+
+> **Long-term fix**: Replace the duplicate file with a single shared build artifact (e.g. Webpack + CI) or serve everything through Cloud Run. Until then, follow the checklist above to avoid "works locally but not in prod" surprises.
+
 ---
 
 **Clean, focused, and ready for users! 🎉** 

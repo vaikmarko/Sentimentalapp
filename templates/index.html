@@ -15,6 +15,7 @@ gtag('config', 'G-GHR6MC542E');
 <title>Sentimental - Your Life, Your Story</title>
 <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="stylesheet" href="/static/css/components.css">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -55,14 +56,13 @@ transform: translateY(-5px);
 </head>
 <body class="bg-gray-50">
 <!-- Navigation -->
-<nav class="bg-white sticky top-0 z-50 shadow-sm py-0 px-6">
+<nav id="mainNav" class="bg-white sticky top-0 z-50 shadow-sm py-3 px-6 transition-transform duration-300 ease-in-out">
 <div class="max-w-6xl mx-auto flex justify-between items-center">
 <a href="/" class="text-3xl font-bold text-purple-600">Sentimental</a>
 <div class="hidden md:flex space-x-8 items-center">
 <a href="#how-it-works" class="hover:text-purple-600 transition">How It Works</a>
 <a href="#examples" class="hover:text-purple-600 transition">Examples</a>
-<a href="#team" class="hover:text-purple-600 transition">Team</a>
-<button onclick="openWaitlist()" class="btn-primary">Join Waitlist</button>
+<button onclick="openEarlyAccess()" class="btn-primary">Early Access</button>
 </div>
 <button class="md:hidden">
 <i class="fas fa-bars text-2xl"></i>
@@ -71,7 +71,7 @@ transform: translateY(-5px);
 </nav>
 
 <!-- Hero Section -->
-<section class="pt-0 pb-20 px-6 gradient-bg text-white">
+<section class="px-6 gradient-bg text-white flex items-center justify-center min-h-screen">
 <div class="container mx-auto">
 <div class="max-w-4xl mx-auto text-center">
 <h1 class="text-5xl md:text-6xl font-bold mb-8 leading-tight">
@@ -81,12 +81,9 @@ Your Life as a Netflix Series or Spotify Hit
                     Sentimental uses AI to transform your personal moments into cinematic stories, music, and meaningful content with therapeutic insights that help you understand your life's journey.
                     Everyone has a story — but few have a place to truly tell it.
 </p>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <div class="flex justify-center">
                     <button onclick="openEarlyAccess()" class="btn-primary text-center px-8 py-4 text-lg">
                         🦄 Early Access
-                    </button>
-                    <button onclick="openWaitlist()" class="bg-white text-purple-600 px-8 py-4 text-lg rounded-full font-semibold hover:bg-gray-100 transition-colors">
-                        Join Waitlist
                     </button>
                 </div>
 </div>
@@ -261,69 +258,6 @@ Your personal growth journey with beautiful visuals and insights
 </div>
 </section>
 
-<!-- Team Section -->
-<section id="team" class="py-20 px-6 bg-gray-50">
-<div class="container mx-auto">
-<div class="max-w-5xl mx-auto">
-<div class="text-center mb-16">
-<h2 class="text-4xl font-bold mb-6">Meet the Team</h2>
-<p class="text-xl text-gray-600 max-w-3xl mx-auto">
-Blending expertise in storytelling, technology, and human experience.
-</p>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-<!-- Founder 1 -->
-<div class="bg-white rounded-xl shadow-md overflow-hidden">
-<div class="h-48 bg-purple-600 flex items-center justify-center">
-<div class="w-32 h-32 bg-white rounded-full flex items-center justify-center text-purple-600 text-4xl font-bold">
-MV
-</div>
-</div>
-<div class="p-6">
-<h3 class="text-xl font-bold mb-2">Marko Vaik</h3>
-<p class="text-purple-600 font-semibold mb-4">Founder & CEO</p>
-<p class="text-gray-600">
-Co-founded Estonia's largest mental health platform, Serenity Platform. Marko's vision for user-centered wellbeing technology drives Sentimental's mission to transform personal storytelling.
-</p>
-</div>
-</div>
-
-<!-- Founder 2 -->
-<div class="bg-white rounded-xl shadow-md overflow-hidden">
-<div class="h-48 bg-blue-600 flex items-center justify-center">
-<div class="w-32 h-32 bg-white rounded-full flex items-center justify-center text-blue-600 text-4xl font-bold">
-MS
-</div>
-</div>
-<div class="p-6">
-<h3 class="text-xl font-bold mb-2">Merike Sisask</h3>
-<p class="text-blue-600 font-semibold mb-4">Co-Founder & Chief Scientific Officer</p>
-<p class="text-gray-600">
-Social health professor and member of The Centre of Excellence for Well-Being Sciences. Author of 100+ scientific publications. Merike bridges the gap between personal storytelling and mental wellbeing, giving Sentimental its scientific foundation in meaningful ways.
-</p>
-</div>
-</div>
-
-<!-- Founder 3 -->
-<div class="bg-white rounded-xl shadow-md overflow-hidden">
-<div class="h-48 bg-green-600 flex items-center justify-center">
-<div class="w-32 h-32 bg-white rounded-full flex items-center justify-center text-green-600 text-4xl font-bold">
-LH
-</div>
-</div>
-<div class="p-6">
-<h3 class="text-xl font-bold mb-2">Lars-Erik Hion</h3>
-<p class="text-green-600 font-semibold mb-4">Co-Founder & CTO</p>
-<p class="text-gray-600">
-Digital innovation veteran who's built scalable solutions for SEB, Swedbank, and Telia. Co-founder of Tailwind and founder of Rethink, Lars-Erik creates powerful technology that feels effortlessly simple in meaningful ways.
-</p>
-</div>
-</div>
-</div>
-</div>
-</div>
-</section>
-
 <!-- Try Beta Section (Replacing Waitlist Section) -->
 <section id="try-beta" class="py-20 px-6 gradient-bg text-white">
 <div class="container mx-auto">
@@ -334,8 +268,8 @@ Digital innovation veteran who's built scalable solutions for SEB, Swedbank, and
 </p>
 
 <div class="bg-white bg-opacity-10 backdrop-filter backdrop-blur-md p-8 rounded-xl max-w-xl mx-auto">
-<button onclick="openWaitlist()" class="block w-full bg-white text-purple-600 font-bold py-4 rounded-lg hover:bg-gray-100 transition text-center text-xl">
-    Join Waitlist
+<button onclick="openEarlyAccess()" class="block w-full bg-white text-purple-600 font-bold py-4 rounded-lg hover:bg-gray-100 transition text-center text-xl">
+    Begin Expressing Yourself
 </button>
 <p class="text-sm mt-4 text-white opacity-80">Free to try. Get therapeutic insights and viral-ready content.</p>
 </div>
@@ -346,15 +280,16 @@ Digital innovation veteran who's built scalable solutions for SEB, Swedbank, and
 <!-- Footer -->
 <footer class="bg-gray-900 text-white py-12 px-6">
 <div class="container mx-auto">
-<div class="flex flex-col md:flex-row justify-between items-center">
-<div class="mb-8 md:mb-0">
+<div class="flex flex-col md:flex-row md:justify-between items-center text-center space-y-8 md:space-y-0">
+<div class="mb-8 md:mb-0 flex flex-col items-center md:items-start text-center space-y-1 md:text-left">
 <a href="/" class="text-2xl font-bold">Sentimental</a>
 <p class="mt-2 text-gray-400">Your Life, Your Story.</p>
+<p class="mt-1 text-gray-400">hello@sentimentalapp.com</p>
 </div>
 <div class="flex space-x-6">
 <a href="#" class="hover:text-purple-400 transition"><i class="fab fa-x-twitter text-xl"></i></a>
-<a href="#" class="hover:text-purple-400 transition"><i class="fab fa-instagram text-xl"></i></a>
-<a href="#" class="hover:text-purple-400 transition"><i class="fab fa-linkedin text-xl"></i></a>
+<a href="https://www.instagram.com/sentimentalapp/" target="_blank" rel="noopener" class="hover:text-purple-400 transition"><i class="fab fa-instagram text-xl"></i></a>
+<a href="https://www.linkedin.com/company/sentimentalapp/" target="_blank" rel="noopener" class="hover:text-purple-400 transition"><i class="fab fa-linkedin text-xl"></i></a>
 </div>
 </div>
 <hr class="border-gray-800 my-8">
@@ -385,8 +320,7 @@ Digital innovation veteran who's built scalable solutions for SEB, Swedbank, and
     const navItems = [
       { text: 'How It Works', href: '#how-it-works' },
       { text: 'Examples', href: '#examples' },
-      { text: 'Team', href: '#team' },
-      { text: 'Join Waitlist', onclick: 'openWaitlist()', class: 'bg-purple-600 text-white px-6 py-3 rounded-full' }
+      { text: 'Early Access', onclick: 'openEarlyAccess()', class: 'bg-purple-600 text-white px-6 py-3 rounded-full' }
     ];
     
     navItems.forEach(item => {
@@ -422,141 +356,20 @@ Digital innovation veteran who's built scalable solutions for SEB, Swedbank, and
     });
   });
 
-  // Waitlist functionality
-  function openWaitlist() {
-    document.getElementById('waitlistModal').style.display = 'flex';
-  }
+  // Waitlist removed (June 2025)
 
-  function closeWaitlist() {
-    document.getElementById('waitlistModal').style.display = 'none';
-    document.getElementById('waitlistForm').reset();
-    document.getElementById('waitlistForm').style.display = 'block';
-    document.getElementById('waitlistSuccess').style.display = 'none';
-  }
-
-  // Early Access functionality
   function openEarlyAccess() {
     document.getElementById('earlyAccessModal').style.display = 'flex';
   }
 
   function closeEarlyAccess() {
     document.getElementById('earlyAccessModal').style.display = 'none';
-    document.getElementById('earlyAccessForm').reset();
-    document.getElementById('accessError').style.display = 'none';
   }
 
-  function verifyAccessCode(event) {
-    event.preventDefault();
-    const accessCode = document.getElementById('accessCodeInput').value.trim();
-    const errorDiv = document.getElementById('accessError');
-    
-    if (accessCode.toUpperCase() === 'UNICORN') {
-      // Store access in localStorage
-      localStorage.setItem('sentimental_access', 'granted');
-      // Redirect to app
-      window.location.href = '/app';
-    } else {
-      errorDiv.textContent = 'Invalid access code. Please try again.';
-      errorDiv.style.display = 'block';
-      document.getElementById('accessCodeInput').value = '';
-      document.getElementById('accessCodeInput').focus();
-    }
-  }
-
-  async function submitWaitlist(event) {
-    event.preventDefault();
-    const email = document.getElementById('waitlistEmail').value;
-    const submitBtn = document.getElementById('submitBtn');
-    
-    // Show loading state
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Joining...';
-    
-    try {
-      const response = await fetch('/api/waitlist', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: email })
-      });
-      
-      if (response.ok) {
-        // Show success message
-        document.getElementById('waitlistForm').style.display = 'none';
-        document.getElementById('waitlistSuccess').style.display = 'block';
-      } else {
-        throw new Error('Failed to join waitlist');
-      }
-    } catch (error) {
-      alert('Something went wrong. Please try again.');
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Join Waitlist';
-    }
+  function continueToApp() {
+    window.location.href = '/app';
   }
 </script>
-
-<!-- Waitlist Modal -->
-<div id="waitlistModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style="display: none;">
-  <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 relative">
-    <button onclick="closeWaitlist()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl">
-      ×
-    </button>
-    
-    <!-- Waitlist Form -->
-    <div id="waitlistForm">
-      <div class="text-center mb-6">
-        <h3 class="text-2xl font-bold text-gray-900 mb-2">Join Our Waitlist</h3>
-        <p class="text-gray-600">Be the first to experience Sentimental when we launch. We'll send you early access and updates.</p>
-      </div>
-      
-      <form onsubmit="submitWaitlist(event)">
-        <div class="mb-4">
-          <label for="waitlistEmail" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-          <input 
-            type="email" 
-            id="waitlistEmail" 
-            required 
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            placeholder="your@email.com"
-          >
-        </div>
-        
-        <button 
-          type="submit" 
-          id="submitBtn"
-          class="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors"
-        >
-          Join Waitlist
-        </button>
-      </form>
-      
-      <p class="text-xs text-gray-500 text-center mt-4">
-        We respect your privacy. No spam, just updates about Sentimental.
-      </p>
-    </div>
-    
-    <!-- Success Message -->
-    <div id="waitlistSuccess" class="text-center" style="display: none;">
-      <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-        </svg>
-      </div>
-      <h3 class="text-2xl font-bold text-gray-900 mb-2">Welcome to the Waitlist!</h3>
-      <p class="text-gray-600 mb-6">
-        Thank you for joining! We'll send you early access and updates about Sentimental. 
-        Keep an eye on your inbox for exciting news.
-      </p>
-      <button 
-        onclick="closeWaitlist()" 
-        class="bg-purple-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-purple-700 transition-colors"
-      >
-        Close
-      </button>
-    </div>
-  </div>
-</div>
 
 <!-- Early Access Modal -->
 <div id="earlyAccessModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style="display: none;">
@@ -565,39 +378,31 @@ Digital innovation veteran who's built scalable solutions for SEB, Swedbank, and
       ×
     </button>
     
-    <div id="earlyAccessForm">
-      <div class="text-center mb-6">
-        <div class="text-6xl mb-4">🦄</div>
-        <h3 class="text-2xl font-bold text-gray-900 mb-2">Early Access</h3>
-        <p class="text-gray-600">Enter your access code to test Sentimental</p>
-      </div>
-      
-      <form onsubmit="verifyAccessCode(event)">
-        <div class="mb-4">
-          <label for="accessCodeInput" class="block text-sm font-medium text-gray-700 mb-2">Access Code</label>
-          <input 
-            type="text" 
-            id="accessCodeInput" 
-            required 
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-center text-lg font-mono"
-            placeholder="Enter access code"
-            autocomplete="off"
-          >
-        </div>
-        
-        <div id="accessError" class="mb-4 text-red-600 text-sm text-center" style="display: none;"></div>
-        
-        <button 
-          type="submit"
-          class="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors"
-        >
-          Access App
-        </button>
-      </form>
-      
-      <p class="text-xs text-gray-500 text-center mt-4">
-        Don't have an access code? <button onclick="closeEarlyAccess(); openWaitlist();" class="text-purple-600 hover:underline">Join the waitlist</button>
+    <div class="text-center">
+      <div class="text-6xl mb-4">🚧</div>
+      <h3 class="text-2xl font-bold text-gray-900 mb-4">Welcome to Sentimental 👋</h3>
+      <p class="text-gray-600 mb-6 leading-relaxed max-w-sm mx-auto">
+        We're in active testing — thanks for trying the beta!  Here's what you can do:
       </p>
+
+      <div class="text-left mb-6 space-y-3 max-w-sm mx-auto">
+        <div class="flex items-start gap-3">
+          <span class="text-lg">💬</span>
+          <p class="text-gray-700 text-sm"><span class="font-medium">Chat</span> with your AI companion about a memory, idea or moment.</p>
+        </div>
+        <div class="flex items-start gap-3">
+          <span class="text-lg">📖</span>
+          <p class="text-gray-700 text-sm"><span class="font-medium">Story</span> – your conversation is saved as a polished personal story.</p>
+        </div>
+        <div class="flex items-start gap-3">
+          <span class="text-lg">✨</span>
+          <p class="text-gray-700 text-sm"><span class="font-medium">Transform</span> that story into reflections, songs, reels & more; keep them private or share publicly.</p>
+        </div>
+      </div>
+
+      <p class="text-xs text-gray-500 mb-4">Spot a bug or have feedback?  Email <a href="mailto:hello@sentimentalapp.com" class="text-purple-600 underline">hello@sentimentalapp.com</a>.</p>
+
+      <button onclick="continueToApp()" class="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors">Start Chatting</button>
     </div>
   </div>
 </div>
@@ -611,6 +416,30 @@ Digital innovation veteran who's built scalable solutions for SEB, Swedbank, and
 
 <!-- Main App -->
 <script type="text/babel" src="{{ url_for('static', filename='js/sentimental-app.jsx') }}"></script>
+
+<!-- Hide/Show Navbar on Scroll -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const nav = document.getElementById('mainNav');
+    let lastScroll = 0;
+    window.addEventListener('scroll', () => {
+      const current = window.pageYOffset || document.documentElement.scrollTop;
+      if (current <= 0) {
+        nav.style.transform = 'translateY(0)';
+        lastScroll = 0;
+        return;
+      }
+      if (current > lastScroll) {
+        // Scrolling down
+        nav.style.transform = 'translateY(-100%)';
+      } else {
+        // Scrolling up
+        nav.style.transform = 'translateY(0)';
+      }
+      lastScroll = current;
+    });
+  });
+</script>
 
 </body>
 </html>

@@ -437,7 +437,15 @@ def get_stories():
         return jsonify([])
         
     stories = []
-    for story in db.collection('stories').stream():
+    # Try to fetch ordered by created_at (newest first) when field present
+    try:
+        story_query = db.collection('stories').order_by('created_at', direction=firestore.Query.DESCENDING)
+        story_iter = story_query.stream()
+    except Exception:
+        # Fallback to unordered stream if created_at not indexed / missing
+        story_iter = db.collection('stories').stream()
+
+    for story in story_iter:
         story_data = story.to_dict()
         # Add the Firestore document ID as the story ID
         story_data['id'] = story.id
@@ -1165,8 +1173,9 @@ def update_story_format(story_id, format_type):
         story_data = story.to_dict()
         story_author = story_data.get('user_id')
         
-        # Check if the requesting user is the author of the story
-        if story_author != user_id:
+        user_email = request.headers.get('X-User-Email', '')
+        # Check if the requesting user is the author of the story or super user
+        if story_author != user_id and not is_super_user(user_id, user_email):
             logger.warning(f"Unauthorized format edit attempt:")
             logger.warning(f"  - Story ID: {story_id}")
             logger.warning(f"  - Story author: {story_author}")
@@ -1265,8 +1274,8 @@ def generate_format_for_story(story_id):
         story_content = story_data.get('content', '')
         story_author = story_data.get('user_id')
         
-        # Check if the requesting user is the author of the story
-        if story_author != user_id:
+        # Check if the requesting user is the author of the story or super user
+        if story_author != user_id and not is_super_user(user_id, user_email):
             logger.warning(f"Unauthorized format generation attempt:")
             logger.warning(f"  - Story ID: {story_id}")
             logger.warning(f"  - Story author: {story_author}")
@@ -2356,9 +2365,10 @@ def get_supported_formats():
         # These are the formats that can actually be generated
         prompts_engine_formats = [
             'x', 'linkedin', 'instagram', 'facebook',
-            'poem', 'song', 'reel', 'fairytale', 
+            'song', 'poem', 'reel', 'short_story', 
+            'reflection',
             'article', 'blog_post', 'presentation', 'newsletter', 'podcast',
-            'insights', 'growth_summary', 'journal_entry'
+            'insights', 'growth_summary', 'journal_entry', 'letter'
         ]
         
         return jsonify({
@@ -2445,6 +2455,8 @@ def upload_audio():
         
         # Get user authentication
         user_id = request.headers.get('X-User-ID')
+        user_email = request.headers.get('X-User-Email', '')
+        logger.info(f"Upload audio: user_id={user_id} email={user_email}")
         if is_anonymous_user(user_id):
             return jsonify({
                 'error': 'Authentication required',
@@ -2467,8 +2479,9 @@ def upload_audio():
             
         story_data = story_doc.to_dict()
         
-        # Check if user owns this story
-        if story_data.get('user_id') != user_id and story_data.get('author_id') != user_id:
+        user_email = request.headers.get('X-User-Email', '')
+        # Check if user owns this story or is super user
+        if story_data.get('user_id') != user_id and story_data.get('author_id') != user_id and not is_super_user(user_id, user_email):
             return jsonify({'error': 'Permission denied - you can only upload audio to your own stories'}), 403
         
         # Generate unique filename with proper story ID
@@ -2798,6 +2811,66 @@ def debug_page():
 def uploaded_file(filename):
     """Serve uploaded audio files"""
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+# locate helper functions near line 30 maybe after imports
+SUPER_USER_ID = os.getenv('SUPER_USER_ID', 'TCoWwyV0sMlNiFQgLuXR')
+SUPER_USER_EMAIL = os.getenv('SUPER_USER_EMAIL', 'vaikmarko@gmail.com')
+
+def is_super_user(user_id: str, user_email: str | None = None) -> bool:
+    if user_id == SUPER_USER_ID:
+        return True
+    if user_email and user_email.lower() == SUPER_USER_EMAIL.lower():
+        return True
+    return False
+
+@app.route('/api/users/<string:user_id>/generate-book-chapter', methods=['POST'])
+def generate_book_chapter(user_id):
+    """Generate a book chapter once user has at least 5 stories."""
+    try:
+        requester_id = request.headers.get('X-User-ID')
+        requester_email = request.headers.get('X-User-Email', '')
+
+        if is_anonymous_user(requester_id):
+            return jsonify({'error': 'Authentication required'}), 401
+
+        # Only the user themselves or super user can trigger
+        if requester_id != user_id and not is_super_user(requester_id, requester_email):
+            return jsonify({'error': 'Access denied'}), 403
+
+        if db is None:
+            return jsonify({'error': 'Database unavailable'}), 500
+
+        # Fetch user stories
+        stories_query = db.collection('stories').where('user_id', '==', user_id).order_by('timestamp', direction=firestore.Query.DESCENDING).stream()
+        stories_list = [doc.to_dict() for doc in stories_query]
+
+        if len(stories_list) < 5:
+            return jsonify({'error': 'Need at least 5 stories to unlock'}), 403
+
+        top_stories = stories_list[:5]
+        stories_markdown = "\n\n".join([f"### {s.get('title','Story')}\n{s.get('content','')}" for s in top_stories])
+
+        from format_types import FormatType
+        result = formats_generation_engine.generate_format(
+            story_content='',
+            format_type=FormatType.BOOK_CHAPTER,
+            stories_markdown=stories_markdown
+        )
+
+        if not result.get('success'):
+            return jsonify(result), 500
+
+        # Save into user_compilations collection
+        db.collection('user_compilations').document(user_id).set({
+            'book_chapter': result['content'],
+            'updated_at': datetime.now().isoformat()
+        }, merge=True)
+
+        return jsonify({'success': True, 'content': result['content']}), 200
+
+    except Exception as e:
+        logger.error(f"Error generating book chapter: {e}")
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080))) 
