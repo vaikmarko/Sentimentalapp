@@ -1686,7 +1686,6 @@ const SentimentalApp = () => {
                     <span className="bg-pink-100 text-pink-700 px-3 py-1 rounded-full text-sm font-medium">🎵 Songs</span>
                     <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">📖 Stories</span>
                     <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium">✨ Poems</span>
-                    <span className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm font-medium">📝 Letters</span>
                   </div>
                 </>
               )}
