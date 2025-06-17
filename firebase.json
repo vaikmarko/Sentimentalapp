@@ -7,7 +7,9 @@
       "**/node_modules/**",
       "venv/**",
       "*.py",
-      "requirements.txt"
+      "requirements.txt",
+      "static/js/**",
+      "static/css/**"
     ],
     "rewrites": [
       {
@@ -26,6 +28,13 @@
       },
       {
         "source": "/api/**",
+        "run": {
+          "serviceId": "sentimentalapp",
+          "region": "europe-west1"
+        }
+      },
+      {
+        "source": "/static/**",
         "run": {
           "serviceId": "sentimentalapp",
           "region": "europe-west1"

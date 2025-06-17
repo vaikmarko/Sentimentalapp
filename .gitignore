@@ -45,3 +45,7 @@ firebase-credentials.json
 
 # OS
 Thumbs.db
+
+# Prevent duplicate front-end bundles (served by Cloud Run)
+public/static/js/
+public/static/css/
