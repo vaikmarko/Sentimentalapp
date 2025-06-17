@@ -1874,6 +1874,8 @@ const SentimentalApp = () => {
             <p className="text-lg text-gray-600">Your journey of self-discovery through stories</p>
           </div>
 
+          {renderCuratedTemplates()}
+
         {userStories.length > 0 ? (
           <div className="grid grid-cols-1 gap-6">
             {/* Book Chapter compilation tile (user-level) */}
@@ -3074,6 +3076,48 @@ const SentimentalApp = () => {
 
   // Utility: map legacy names to current ones
   const normalizeFormat = (fmt) => (fmt === 'fairytale' ? 'short_story' : fmt);
+
+  // ────────────────────────────────────────────────
+  // Curated Story Starters
+  // ────────────────────────────────────────────────
+  const curatedTemplates = [
+    { id: 'identity_reflection', title: 'Who Am I?', emoji: '🪞', teaser: 'Reflect on the moments that shaped your identity.', starter: 'Think of a recent moment where you felt truly like yourself. What happened?' },
+    { id: 'purpose_path', title: 'What Drives Me?', emoji: '🧭', teaser: 'Explore the passions and values that guide you.', starter: "What's one passion that makes you lose track of time? Why is it meaningful to you?" },
+    { id: 'simple_joy', title: 'Small Joys', emoji: '🌿', teaser: 'Celebrate the tiny moments that spark happiness.', starter: 'Describe a small, recent moment that made you smile.' },
+    { id: 'gratitude_note', title: 'Gratitude Snapshot', emoji: '💖', teaser: 'Express thanks to someone or something today.', starter: 'Who or what are you grateful for right now, and why?' }
+  ];
+  const [activeTemplate, setActiveTemplate] = useState(null);
+
+  const startTemplate = (template) => {
+    setActiveTemplate(template);
+    setMessages([{ role: 'assistant', content: template.starter }]);
+    setPreviousView('stories');
+    setCurrentView('share');
+    setShowFullChat(false);
+  };
+
+  const renderCuratedTemplates = () => (
+    <div className="mb-10">
+      <h2 className="text-xl font-bold text-gray-900 mb-4">Story Starters ✨</h2>
+      <div className="flex overflow-x-auto gap-4 pb-2">
+        {curatedTemplates.map((tpl) => (
+          <div key={tpl.id} className="min-w-[220px] bg-white border border-gray-100 rounded-xl shadow-sm p-4 flex-shrink-0 flex flex-col justify-between">
+            <div>
+              <div className="text-3xl mb-3">{tpl.emoji}</div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">{tpl.title}</h3>
+              <p className="text-sm text-gray-600">{tpl.teaser}</p>
+            </div>
+            <button
+              onClick={() => startTemplate(tpl)}
+              className="mt-4 bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors"
+            >
+              Start
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
   // Don't render anything until app is initialized to prevent flashing
   if (!appInitialized) {
