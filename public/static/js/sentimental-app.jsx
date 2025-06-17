@@ -87,6 +87,14 @@ const Lock = ({ size = 16 }) => (
   </svg>
 );
 
+const ChevronUp = ({ size = 16 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+);
+
+const ChevronDown = ({ size = 16 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+);
+
 // Format icons
 const getFormatIcon = (formatType) => {
   const icons = {
@@ -386,6 +394,7 @@ const SentimentalApp = () => {
 
   const fetchStories = async () => {
     try {
+      // Only show loader when we have no cached stories (first fetch)
       if (stories.length === 0) {
         setLoadingStories(true);
       }
@@ -850,9 +859,10 @@ const SentimentalApp = () => {
           }
         }
         
-        // Extract title for song format from local data
+        // Extract title for audio formats (song/podcast) from local data
         if (formatType === 'song' || formatType === 'podcast') {
           const contentText = typeof story.formats[formatType] === 'object' ? story.formats[formatType].content || '' : story.formats[formatType] || '';
+          // Prioritize database title over extraction
           const databaseTitle = typeof story.formats[formatType] === 'object' ? story.formats[formatType].title : null;
           const title = databaseTitle || (formatType === 'song' ? extractSongTitle(contentText) : (story.title || 'Podcast'));
           const audioUrl = typeof story.formats[formatType] === 'object' ? story.formats[formatType].audio_url : null;
@@ -894,7 +904,7 @@ const SentimentalApp = () => {
           }));
         }
         
-        // Extract title for song format
+        // Extract title for audio formats after fetching
         if (formatType === 'song' || formatType === 'podcast') {
           const contentText = typeof data.content === 'object' ? data.content.content || '' : data.content || '';
           const title = data.title || (formatType === 'song' ? extractSongTitle(contentText) : (story.title || 'Podcast'));
@@ -953,7 +963,7 @@ const SentimentalApp = () => {
             }));
           }
           
-          // Extract title for song format
+          // Extract title for audio formats (song/podcast)
           if ((formatType === 'song' || formatType === 'podcast') && generateData.title) {
             setCurrentFormat(prev => ({...prev, title: generateData.title}));
           }
@@ -1874,154 +1884,154 @@ const SentimentalApp = () => {
             <p className="text-lg text-gray-600">Your journey of self-discovery through stories</p>
           </div>
 
-          {renderCuratedTemplates()}
+          {renderInspireBanner()}
 
-        {userStories.length > 0 ? (
-          <div className="grid grid-cols-1 gap-6">
-            {/* Book Chapter compilation tile (user-level) */}
-            <div className="bg-white rounded-xl shadow-sm p-6 flex flex-col items-center justify-center border border-gray-100">
-              <button
-                onClick={() => {
-                  if (userStories.length >= 5 && !isGeneratingChapter) generateBookChapter();
-                }}
-                disabled={userStories.length < 5 || isGeneratingChapter}
-                className={`flex flex-col items-center justify-center w-full h-full gap-2 ${userStories.length >= 5 ? 'text-indigo-700 hover:text-indigo-800' : 'text-gray-400 cursor-not-allowed'}`}
-                style={{ minHeight: '120px' }}
-              >
-                <div className="text-4xl">{getFormatIcon('book_chapter')}</div>
-                <div className="text-sm font-medium">
-                  {isGeneratingChapter ? 'Generating…' : 'Book Chapter'}
-                </div>
-                {userStories.length < 5 && !isGeneratingChapter && (
-                  <div className="text-[11px] text-gray-500">Need 5 stories</div>
-                )}
-              </button>
-            </div>
-            {visibleStories.map((story) => (
-              <div
-                key={story.id}
-                className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 cursor-pointer border border-gray-100 p-6 group"
-                onClick={() => {
-                  setSelectedStory(story);
-                  setPreviousView('stories');
-                  setCurrentView('story-detail');
-                }}
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-purple-700 transition-colors">
-                      {story.title}
-                    </h3>
-                    <div className="flex items-center gap-3 text-sm text-gray-500 mb-3">
-                      <span>{formatDate(story.created_at || story.timestamp)}</span>
-                      <span>•</span>
-                      <span className="capitalize">{story.type || 'Story'}</span>
-                      {story.public && (
-                        <>
-                          <span>•</span>
-                          <span className="text-green-600 font-medium">Public</span>
-                        </>
+          {userStories.length > 0 ? (
+            <div className="grid grid-cols-1 gap-6">
+              {/* Book Chapter compilation tile (user-level) */}
+              <div className="bg-white rounded-xl shadow-sm p-6 flex flex-col items-center justify-center border border-gray-100">
+                <button
+                  onClick={() => {
+                    if (userStories.length >= 5 && !isGeneratingChapter) generateBookChapter();
+                  }}
+                  disabled={userStories.length < 5 || isGeneratingChapter}
+                  className={`flex flex-col items-center justify-center w-full h-full gap-2 ${userStories.length >= 5 ? 'text-indigo-700 hover:text-indigo-800' : 'text-gray-400 cursor-not-allowed'}`}
+                  style={{ minHeight: '120px' }}
+                >
+                  <div className="text-4xl">{getFormatIcon('book_chapter')}</div>
+                  <div className="text-sm font-medium">
+                    {isGeneratingChapter ? 'Generating…' : 'Book Chapter'}
+                  </div>
+                  {userStories.length < 5 && !isGeneratingChapter && (
+                    <div className="text-[11px] text-gray-500">Need 5 stories</div>
+                  )}
+                </button>
+              </div>
+              {visibleStories.map((story) => (
+                <div
+                  key={story.id}
+                  className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 cursor-pointer border border-gray-100 p-6 group"
+                  onClick={() => {
+                    setSelectedStory(story);
+                    setPreviousView('stories');
+                    setCurrentView('story-detail');
+                  }}
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-purple-700 transition-colors">
+                        {story.title}
+                      </h3>
+                      <div className="flex items-center gap-3 text-sm text-gray-500 mb-3">
+                        <span>{formatDate(story.created_at || story.timestamp)}</span>
+                        <span>•</span>
+                        <span className="capitalize">{story.type || 'Story'}</span>
+                        {story.public && (
+                          <>
+                            <span>•</span>
+                            <span className="text-green-600 font-medium">Public</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      {/* Edit Button - Only show for story owner or super user */}
+                      {user && (story.user_id === user.id || story.author_id === user.id || isSuperUser) && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            startEditingStory(story);
+                          }}
+                          className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          title="Edit story"
+                        >
+                          <Edit size={16} />
+                        </button>
                       )}
                     </div>
                   </div>
-                  
-                  <div className="flex items-center gap-2">
-                    {/* Edit Button - Only show for story owner or super user */}
-                    {user && (story.user_id === user.id || story.author_id === user.id || isSuperUser) && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          startEditingStory(story);
-                        }}
-                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="Edit story"
-                      >
-                        <Edit size={16} />
-                      </button>
-                    )}
+
+                  {/* Story Preview */}
+                  <div className="mb-4 p-4 bg-gray-50 rounded-xl group-hover:bg-purple-50 transition-colors">
+                    <p className="text-gray-700 text-sm leading-relaxed line-clamp-3">
+                      {story.content?.substring(0, 200) + '...' || 'Click to read your full story...'}
+                    </p>
                   </div>
-                </div>
 
-                {/* Story Preview */}
-                <div className="mb-4 p-4 bg-gray-50 rounded-xl group-hover:bg-purple-50 transition-colors">
-                  <p className="text-gray-700 text-sm leading-relaxed line-clamp-3">
-                    {story.content?.substring(0, 200) + '...' || 'Click to read your full story...'}
-                  </p>
-                </div>
-
-                {/* Privacy and formats - exact original style */}
-                <div className="flex flex-wrap items-start sm:items-center justify-between gap-3 pt-4 border-t border-gray-100">
-                  <div className="flex items-center gap-3 text-sm text-gray-500">
-                    <span className="text-gray-600">
-                      {story.public ? 'Public' : 'Private'}
-                    </span>
-                    {user && (story.user_id === user.id || story.author_id === user.id || isSuperUser) && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleStoryPrivacy(story.id, story.public);
-                        }}
-                        className="relative inline-flex items-center h-6 w-11 bg-gray-200 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-                        style={{
-                          backgroundColor: story.public ? '#10B981' : '#D1D5DB'
-                        }}
-                        title={story.public ? 'Make private' : 'Make public'}
-                      >
-                        <span
-                          className="inline-block w-4 h-4 bg-white rounded-full transition-transform"
-                          style={{
-                            transform: story.public ? 'translateX(24px)' : 'translateX(4px)'
+                  {/* Privacy and formats - exact original style */}
+                  <div className="flex flex-wrap items-start sm:items-center justify-between gap-3 pt-4 border-t border-gray-100">
+                    <div className="flex items-center gap-3 text-sm text-gray-500">
+                      <span className="text-gray-600">
+                        {story.public ? 'Public' : 'Private'}
+                      </span>
+                      {user && (story.user_id === user.id || story.author_id === user.id || isSuperUser) && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleStoryPrivacy(story.id, story.public);
                           }}
-                        />
-                      </button>
-                    )}
+                          className="relative inline-flex items-center h-6 w-11 bg-gray-200 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                          style={{
+                            backgroundColor: story.public ? '#10B981' : '#D1D5DB'
+                          }}
+                          title={story.public ? 'Make private' : 'Make public'}
+                        >
+                          <span
+                            className="inline-block w-4 h-4 bg-white rounded-full transition-transform"
+                            style={{
+                              transform: story.public ? 'translateX(24px)' : 'translateX(4px)'
+                            }}
+                          />
+                        </button>
+                      )}
+                      
+                      {story.createdFormats && story.createdFormats.length > 0 && (
+                        <>
+                          <span className="text-xs text-purple-600 font-medium">•</span>
+                          {sortFormats(story.createdFormats.map(normalizeFormat)).slice(0, 2).map(format => (
+                            <span key={format} className="bg-purple-100 text-purple-700 px-2 py-1 rounded-full text-xs">
+                              {getFormatDisplayName(format)}
+                            </span>
+                          ))}
+                          {story.createdFormats.length > 2 && (
+                            <span className="text-xs text-gray-500">+{story.createdFormats.length - 2} more</span>
+                          )}
+                        </>
+                      )}
+                    </div>
                     
-                    {story.createdFormats && story.createdFormats.length > 0 && (
-                      <>
-                        <span className="text-xs text-purple-600 font-medium">•</span>
-                        {sortFormats(story.createdFormats.map(normalizeFormat)).slice(0, 2).map(format => (
-                          <span key={format} className="bg-purple-100 text-purple-700 px-2 py-1 rounded-full text-xs">
-                            {getFormatDisplayName(format)}
-                          </span>
-                        ))}
-                        {story.createdFormats.length > 2 && (
-                          <span className="text-xs text-gray-500">+{story.createdFormats.length - 2} more</span>
-                        )}
-                      </>
-                    )}
-                  </div>
-                  
-                  {/* Read Full Story Button */}
-                  <div className="flex items-center gap-2 text-purple-600 group-hover:text-purple-700 font-medium text-sm">
-                    <BookOpen size={16} />
-                    <span>Read Full Story</span>
-                    <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                    {/* Read Full Story Button */}
+                    <div className="flex items-center gap-2 text-purple-600 group-hover:text-purple-700 font-medium text-sm">
+                      <BookOpen size={16} />
+                      <span>Read Full Story</span>
+                      <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-            {!showAllUserStories && userStories.length > 3 && (
+              ))}
+              {!showAllUserStories && userStories.length > 3 && (
+                <button
+                  onClick={() => setShowAllUserStories(true)}
+                  className="btn-secondary mx-auto mt-4"
+                >
+                  View All Stories ({userStories.length})
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <BookOpen className="mx-auto mb-4 text-gray-400" size={48} />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No stories yet</h3>
+              <p className="text-gray-600 mb-6">Start conversations with your AI companion to explore your inner world and create meaningful stories about your journey.</p>
               <button
-                onClick={() => setShowAllUserStories(true)}
-                className="btn-secondary mx-auto mt-4"
+                onClick={() => setCurrentView('share')}
+                className="bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors"
               >
-                View All Stories ({userStories.length})
+                Start Chatting
               </button>
-            )}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <BookOpen className="mx-auto mb-4 text-gray-400" size={48} />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No stories yet</h3>
-            <p className="text-gray-600 mb-6">Start conversations with your AI companion to explore your inner world and create meaningful stories about your journey.</p>
-            <button
-              onClick={() => setCurrentView('share')}
-              className="bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors"
-            >
-              Start Chatting
-            </button>
-          </div>
-        )}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -2275,7 +2285,7 @@ const SentimentalApp = () => {
         const hasAudio = audioUrl;
         
         return (
-          <div className="bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl p-6 text-white">
+          <div className={`bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl p-6 text-white`}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="text-3xl">{currentFormat.formatType === 'podcast' ? '🎧' : '🎵'}</div>
@@ -2342,7 +2352,7 @@ const SentimentalApp = () => {
             <div className="mt-4 text-xs opacity-75">
               {hasAudio ? 
                 (currentFormat.formatType === 'podcast' ? '🎙️ Podcast ready to play!' : '🎵 Music ready to play!') : 
-                '🎧 Upload Audio file to enable playback'
+                '🎧 Upload audio file to enable playback'
               }
             </div>
           </div>
@@ -3097,22 +3107,46 @@ const SentimentalApp = () => {
   };
 
   const renderCuratedTemplates = () => (
-    <div className="mb-10">
-      <h2 className="text-xl font-bold text-gray-900 mb-4">Story Starters ✨</h2>
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 overflow-x-auto">
-        <div className="space-y-3">
-            {curatedTemplates.map((tpl) => (
-            <div key={tpl.id} className="bg-gray-50 border border-gray-100 rounded-xl p-4 flex items-start gap-4">
-              <div className="text-2xl">{tpl.emoji}</div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-gray-900">{tpl.title}</h3>
-                <p className="text-sm text-gray-600 mb-2">{tpl.teaser}</p>
-                <button onClick={() => startTemplate(tpl)} className="bg-purple-600 text-white px-3 py-1 rounded-md text-xs font-medium hover:bg-purple-700 transition-colors">Start</button>
-              </div>
-            </div>
-            ))}
+    <div className="space-y-3">
+      {curatedTemplates.map((tpl) => (
+        <div key={tpl.id} className="bg-gray-50 border border-gray-100 rounded-xl p-4 flex items-start gap-4">
+          <div className="text-2xl">{tpl.emoji}</div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-gray-900">{tpl.title}</h3>
+            <p className="text-sm text-gray-600 mb-2">{tpl.teaser}</p>
+            <button
+              onClick={() => startTemplate(tpl)}
+              className="bg-purple-600 text-white px-3 py-1 rounded-md text-xs font-medium hover:bg-purple-700 transition-colors"
+            >Start</button>
+          </div>
         </div>
+      ))}
+    </div>
+  );
+
+  // Collapsible Story Starters panel visibility
+  const [showStarters, setShowStarters] = useState(() => {
+    return localStorage.getItem('sentimental_show_starters') === 'true';
+  });
+
+  const toggleStarters = () => {
+    const next = !showStarters;
+    setShowStarters(next);
+    localStorage.setItem('sentimental_show_starters', next);
+  };
+
+  const renderInspireBanner = () => (
+    <div className="mb-8">
+      <div onClick={toggleStarters} className="cursor-pointer bg-purple-50 border border-purple-100 rounded-full px-4 py-3 flex items-center justify-between gap-3 hover:bg-purple-100">
+        <span className="flex items-center gap-2 text-sm font-medium text-gray-800"><Sparkles /> Need ideas? Tap to get inspired</span>
+        {showStarters ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
       </div>
+      {showStarters && (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mt-4">
+          <h3 className="text-sm font-semibold text-gray-800 mb-3">Story Starters</h3>
+          {renderCuratedTemplates()}
+        </div>
+      )}
     </div>
   );
 
