@@ -158,10 +158,10 @@ const formatDate = (dateString) => {
 
 // Main App Component
 const SentimentalApp = () => {
-  const [currentView, setCurrentView] = useState('chat');
+  const [currentView, setCurrentView] = useState('share');
   const [selectedStory, setSelectedStory] = useState(null);
   const [shareModal, setShareModal] = useState(null);
-  const [previousView, setPreviousView] = useState('chat');
+  const [previousView, setPreviousView] = useState('share');
   const [currentFormat, setCurrentFormat] = useState(null);
   const [formatContent, setFormatContent] = useState('');
   const [loadingFormat, setLoadingFormat] = useState(false);
@@ -1761,13 +1761,18 @@ const SentimentalApp = () => {
           {user && user.id && user.id !== 'anonymous' && user.id !== 'anonymous_user' && user.id !== '' && user.id !== 'null' && user.id !== 'undefined' && (
             // Show normal chat input for authenticated users
             <div className="flex gap-3">
-              <input
-                type="text"
+              <textarea
+                rows={2}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                  }
+                }}
                 placeholder="Type your message..."
-                className="flex-1 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="flex-1 resize-none border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 disabled={isLoading}
               />
               <button
