@@ -3101,10 +3101,10 @@ const SentimentalApp = () => {
   const renderCuratedTemplates = () => (
     <div className="mb-10">
       <h2 className="text-xl font-bold text-gray-900 mb-4">Story Starters ✨</h2>
-      <div className="overflow-hidden">
-        <div className="flex gap-4 overflow-x-auto pb-2 px-4 snap-x snap-mandatory">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 overflow-x-auto">
+        <div className="flex gap-4 snap-x snap-mandatory">
           {curatedTemplates.map((tpl) => (
-            <div key={tpl.id} className="w-56 bg-white border border-gray-100 rounded-xl shadow-sm p-4 flex-shrink-0 flex flex-col justify-between snap-start">
+            <div key={tpl.id} className="w-56 bg-gray-50 border border-gray-100 rounded-xl p-4 flex-shrink-0 flex flex-col justify-between snap-start">
               <div>
                 <div className="text-3xl mb-3">{tpl.emoji}</div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-1">{tpl.title}</h3>
