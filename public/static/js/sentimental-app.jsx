@@ -3100,22 +3100,17 @@ const SentimentalApp = () => {
     <div className="mb-10">
       <h2 className="text-xl font-bold text-gray-900 mb-4">Story Starters ✨</h2>
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 overflow-x-auto">
-        <div className="grid gap-4 sm:flex sm:overflow-x-auto sm:snap-x sm:snap-mandatory">
-          {curatedTemplates.map((tpl) => (
-            <div key={tpl.id} className="w-full sm:w-56 bg-gray-50 border border-gray-100 rounded-xl p-4 flex-shrink-0 flex flex-col justify-between sm:snap-start">
-              <div>
-                <div className="text-3xl mb-3">{tpl.emoji}</div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">{tpl.title}</h3>
-                <p className="text-sm text-gray-600">{tpl.teaser}</p>
+        <div className="space-y-3">
+            {curatedTemplates.map((tpl) => (
+            <div key={tpl.id} className="bg-gray-50 border border-gray-100 rounded-xl p-4 flex items-start gap-4">
+              <div className="text-2xl">{tpl.emoji}</div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-900">{tpl.title}</h3>
+                <p className="text-sm text-gray-600 mb-2">{tpl.teaser}</p>
+                <button onClick={() => startTemplate(tpl)} className="bg-purple-600 text-white px-3 py-1 rounded-md text-xs font-medium hover:bg-purple-700 transition-colors">Start</button>
               </div>
-              <button
-                onClick={() => startTemplate(tpl)}
-                className="mt-4 bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors"
-              >
-                Start
-              </button>
             </div>
-          ))}
+            ))}
         </div>
       </div>
     </div>

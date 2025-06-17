@@ -87,6 +87,14 @@ const Lock = ({ size = 16 }) => (
   </svg>
 );
 
+const ChevronUp = ({ size = 16 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+);
+
+const ChevronDown = ({ size = 16 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+);
+
 // Format icons
 const getFormatIcon = (formatType) => {
   const icons = {
@@ -1876,7 +1884,7 @@ const SentimentalApp = () => {
             <p className="text-lg text-gray-600">Your journey of self-discovery through stories</p>
           </div>
 
-          {renderCuratedTemplates()}
+          {renderInspireBanner()}
 
           {userStories.length > 0 ? (
             <div className="grid grid-cols-1 gap-6">
@@ -3099,27 +3107,46 @@ const SentimentalApp = () => {
   };
 
   const renderCuratedTemplates = () => (
-    <div className="mb-10">
-      <h2 className="text-xl font-bold text-gray-900 mb-4">Story Starters ✨</h2>
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 overflow-x-auto">
-        <div className="grid gap-4 sm:flex sm:overflow-x-auto sm:snap-x sm:snap-mandatory">
-          {curatedTemplates.map((tpl) => (
-            <div key={tpl.id} className="w-full sm:w-56 bg-gray-50 border border-gray-100 rounded-xl p-4 flex-shrink-0 flex flex-col justify-between sm:snap-start">
-              <div>
-                <div className="text-3xl mb-3">{tpl.emoji}</div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">{tpl.title}</h3>
-                <p className="text-sm text-gray-600">{tpl.teaser}</p>
-              </div>
-              <button
-                onClick={() => startTemplate(tpl)}
-                className="mt-4 bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors"
-              >
-                Start
-              </button>
-            </div>
-          ))}
+    <div className="space-y-3">
+      {curatedTemplates.map((tpl) => (
+        <div key={tpl.id} className="bg-gray-50 border border-gray-100 rounded-xl p-4 flex items-start gap-4">
+          <div className="text-2xl">{tpl.emoji}</div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-gray-900">{tpl.title}</h3>
+            <p className="text-sm text-gray-600 mb-2">{tpl.teaser}</p>
+            <button
+              onClick={() => startTemplate(tpl)}
+              className="bg-purple-600 text-white px-3 py-1 rounded-md text-xs font-medium hover:bg-purple-700 transition-colors"
+            >Start</button>
+          </div>
         </div>
+      ))}
+    </div>
+  );
+
+  // Collapsible Story Starters panel visibility
+  const [showStarters, setShowStarters] = useState(() => {
+    return localStorage.getItem('sentimental_show_starters') === 'true';
+  });
+
+  const toggleStarters = () => {
+    const next = !showStarters;
+    setShowStarters(next);
+    localStorage.setItem('sentimental_show_starters', next);
+  };
+
+  const renderInspireBanner = () => (
+    <div className="mb-8">
+      <div onClick={toggleStarters} className="cursor-pointer bg-purple-50 border border-purple-100 rounded-full px-4 py-3 flex items-center justify-between gap-3 hover:bg-purple-100">
+        <span className="flex items-center gap-2 text-sm font-medium text-gray-800"><Sparkles /> Need ideas? Tap to get inspired</span>
+        {showStarters ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
       </div>
+      {showStarters && (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mt-4">
+          <h3 className="text-sm font-semibold text-gray-800 mb-3">Story Starters</h3>
+          {renderCuratedTemplates()}
+        </div>
+      )}
     </div>
   );
 
