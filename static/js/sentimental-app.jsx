@@ -1863,7 +1863,7 @@ const SentimentalApp = () => {
         {/* Input - Fixed at bottom */}
         <div className="border-t bg-white p-4 flex-shrink-0">
           {/* Mobile Create Story Button - appears when there are messages */}
-          {messages.length > 0 && user && user.id && user.id !== 'anonymous' && user.id !== 'anonymous_user' && user.id !== '' && user.id !== 'null' && user.id !== 'undefined' && (
+          {messages.length > 0 && user && (
             <div className="md:hidden mb-3">
               <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
                 <p className="text-sm text-purple-700 mb-2">
@@ -1890,7 +1890,7 @@ const SentimentalApp = () => {
             </div>
           )}
           
-          {user && user.id && user.id !== 'anonymous' && user.id !== 'anonymous_user' && user.id !== '' && user.id !== 'null' && user.id !== 'undefined' && (
+          {user && (
             // Show normal chat input for authenticated users
             <div className="flex gap-3">
               <textarea
