@@ -18,16 +18,16 @@ BASE_URL = os.getenv("BASE_URL", "https://sentimentalapp.com").rstrip("/")
 SESSION = requests.Session()
 SESSION.headers.update({"Content-Type": "application/json"})
 
-def post(path, payload=None):
+def post(path, payload=None, *, headers=None):
     url = f"{BASE_URL}{path}"
-    resp = SESSION.post(url, json=payload or {})
+    resp = SESSION.post(url, json=payload or {}, headers=headers)
     if not resp.ok:
         raise RuntimeError(f"POST {path} -> {resp.status_code}: {resp.text}")
     return resp.json()
 
-def put(path, payload=None):
+def put(path, payload=None, *, headers=None):
     url = f"{BASE_URL}{path}"
-    resp = SESSION.put(url, json=payload or {})
+    resp = SESSION.put(url, json=payload or {}, headers=headers)
     if not resp.ok:
         raise RuntimeError(f"PUT {path} -> {resp.status_code}: {resp.text}")
     return resp.json() if resp.text else {}
@@ -68,17 +68,27 @@ def generate_story(user_id:str, title_hint:str|None=None, conversation:list=None
     if conversation:
         payload["conversation"] = conversation
     data = post("/api/stories/generate", payload)
-    print("Story", data["id"], "created")
-    return data["id"]
+    # API returns {'success': True, 'story': {...}}, or raw fields depending on version
+    story = data.get("story") if isinstance(data, dict) else None
+    story_id = story.get("id") if story else data.get("id") or data.get("story_id")
+    if not story_id:
+        raise RuntimeError(f"Unexpected API response: {data}")
+    print("Story", story_id, "created")
+    return story_id
 
-def generate_formats(story_id:str, formats:list[str]):
+def generate_formats(story_id:str, user_id:str, formats:list[str]):
+    headers = {"X-User-ID": user_id}
     for fmt in formats:
         print("Trigger format", fmt)
-        post(f"/api/stories/{story_id}/generate-format", {"format_type": fmt})
+        try:
+            post(f"/api/stories/{story_id}/generate-format", {"format_type": fmt}, headers=headers)
+        except RuntimeError as e:
+            print("  - format", fmt, "failed:", e)
         time.sleep(0.5)
 
-def make_public(story_id:str):
-    put(f"/api/stories/{story_id}/privacy", {"public": True})
+def make_public(story_id:str, user_id:str):
+    headers = {"X-User-ID": user_id}
+    put(f"/api/stories/{story_id}/privacy", {"is_public": True}, headers=headers)
 
 
 def main():
@@ -105,8 +115,8 @@ def main():
         # Backward-compat: generate_story signature unchanged, so call directly
         story_id = generate_story(user_id, title_hint=lines[0][:50])
 
-    generate_formats(story_id, args.formats.split(","))
-    make_public(story_id)
+    generate_formats(story_id, user_id, args.formats.split(","))
+    make_public(story_id, user_id)
 
     print("Done! Story is public at /app?story=", story_id)
 
