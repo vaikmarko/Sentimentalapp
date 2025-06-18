@@ -61,10 +61,12 @@ def run_conversation(user_id:str, lines:list[str]):
         time.sleep(1)  # give backend a breather
     print("Conversation complete.")
 
-def generate_story(user_id:str, title_hint:str|None=None):
+def generate_story(user_id:str, title_hint:str|None=None, conversation:list=None):
     payload = {"user_id": user_id}
     if title_hint:
         payload["title_suggestion"] = title_hint
+    if conversation:
+        payload["conversation"] = conversation
     data = post("/api/stories/generate", payload)
     print("Story", data["id"], "created")
     return data["id"]
@@ -95,7 +97,14 @@ def main():
     user_id = ensure_user(args.name, args.email)
     run_conversation(user_id, lines)
 
-    story_id = generate_story(user_id, title_hint=lines[0][:50])
+    # Build conversation payload of user messages only
+    conversation = [{'role': 'user', 'content': line} for line in lines]
+    try:
+        story_id = generate_story(user_id, title_hint=lines[0][:50], conversation=conversation)
+    except TypeError:
+        # Backward-compat: generate_story signature unchanged, so call directly
+        story_id = generate_story(user_id, title_hint=lines[0][:50])
+
     generate_formats(story_id, args.formats.split(","))
     make_public(story_id)
 
