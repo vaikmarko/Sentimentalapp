@@ -132,7 +132,8 @@ except LookupError:
 # Add after app configuration
 app.config['UPLOAD_FOLDER'] = 'public/static/uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
-ALLOWED_EXTENSIONS = {'mp3', 'wav', 'ogg', 'm4a'}
+# Extend allowed extensions for image uploads
+ALLOWED_EXTENSIONS = {'mp3', 'wav', 'ogg', 'm4a', 'jpg', 'jpeg', 'png', 'webp'}
 
 # allowed_file function moved to utils.py
 
@@ -2917,6 +2918,88 @@ def short_link(story_id, format_type):
     if format_type:
         target += f"&format={format_type}"
     return redirect(target, code=302)
+
+# ------------------ New Image Upload Endpoint ------------------
+
+@app.route('/api/upload/image', methods=['POST'])
+def upload_image():
+    """Upload an image (JPG/PNG/WEBP) and optionally attach it to an Instagram format."""
+    try:
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file provided'}), 400
+
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'error': 'No file selected'}), 400
+
+        if not allowed_file(file.filename):
+            return jsonify({'error': 'Invalid file type. Allowed: JPG, JPEG, PNG, WEBP'}), 400
+
+        # Auth check
+        user_id = request.headers.get('X-User-ID')
+        user_email = request.headers.get('X-User-Email', '')
+        logger.info(f"Upload image: user_id={user_id} email={user_email}")
+        if is_anonymous_user(user_id):
+            return jsonify({'error': 'Authentication required', 'message': 'Please sign in to upload images.'}), 401
+
+        story_id = request.form.get('story_id')
+        format_type = request.form.get('format_type', 'instagram')
+
+        # Generate filename
+        unique_id = str(uuid.uuid4())
+        original_extension = file.filename.rsplit('.', 1)[1].lower()
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f"{story_id or 'standalone'}_{format_type}_{timestamp}_{unique_id}.{original_extension}"
+
+        # Upload to Firebase Storage or local
+        try:
+            if bucket is not None:
+                blob = bucket.blob(f"images/{filename}")
+                file.seek(0)
+                blob.upload_from_file(file, content_type=f'image/{original_extension}')
+                blob.make_public()
+                image_url = blob.public_url
+                storage_type = 'firebase'
+            else:
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.seek(0)
+                file.save(filepath)
+                image_url = f'/static/uploads/{filename}'
+                storage_type = 'local'
+        except Exception as storage_error:
+            logger.error(f"Image storage failed: {storage_error}")
+            return jsonify({'error': 'Storage upload failed', 'details': str(storage_error)}), 500
+
+        # Optionally attach to story format
+        if story_id:
+            try:
+                story_ref = db.collection('stories').document(story_id)
+                story_doc = story_ref.get()
+                if story_doc.exists:
+                    story_data = story_doc.to_dict()
+
+                    # Permission: owner or super user
+                    if story_data.get('user_id') != user_id and story_data.get('author_id') != user_id and not is_super_user(user_id, user_email):
+                        return jsonify({'error': 'Permission denied - you can only update your own stories'}), 403
+
+                    formats = story_data.get('formats', {})
+                    if format_type not in formats or not isinstance(formats[format_type], dict):
+                        formats[format_type] = {'content': formats.get(format_type, '')}
+
+                    formats[format_type]['cover_url'] = image_url
+                    formats[format_type]['updated_at'] = datetime.now().isoformat()
+
+                    story_ref.update({'formats': formats, 'updated_at': datetime.now().isoformat()})
+                else:
+                    logger.warning(f"Story {story_id} not found while attaching image")
+            except Exception as e:
+                logger.error(f"Failed to attach image to story {story_id}: {e}")
+
+        return jsonify({'success': True, 'image_url': image_url, 'storage_type': storage_type}), 200
+
+    except Exception as e:
+        logger.error(f"Error uploading image: {str(e)}")
+        return jsonify({'error': 'Upload failed', 'details': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080))) 
