@@ -39,6 +39,13 @@
           "serviceId": "sentimentalapp",
           "region": "europe-west1"
         }
+      },
+      {
+        "source": "/s/**",
+        "run": {
+          "serviceId": "sentimentalapp",
+          "region": "europe-west1"
+        }
       }
     ]
   },
