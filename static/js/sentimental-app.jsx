@@ -3209,6 +3209,10 @@ const SentimentalApp = () => {
     </div>
   );
 
+  // refs for chat scrolling & focus
+  const messagesContainerRef = React.useRef(null);
+  const messageInputRef = React.useRef(null);
+
   // Don't render anything until app is initialized to prevent flashing
   if (!appInitialized) {
     return null;
