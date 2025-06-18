@@ -164,6 +164,52 @@ const formatDate = (dateString) => {
   }
 };
 
+// Action helpers (download / share)
+const Download = ({ size = 16 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+);
+const Share2 = ({ size = 16 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+);
+
+const makeBlobUrl = (text, mime='text/markdown') => {
+  try { return URL.createObjectURL(new Blob([text], { type: mime })); } catch { return ''; }
+};
+
+const shareLink = async (title, url, type='text') => {
+  try {
+    if (navigator.share) {
+      await navigator.share({ title: 'Sentimental', text: title, url });
+    } else {
+      await navigator.clipboard.writeText(url);
+      alert('Link copied!');
+    }
+    window.track?.('share_clicked', { type });
+  } catch {}
+};
+
+function renderActions({ slug, content='', mime='text/markdown', url='' }) {
+  const isAudio = mime.startsWith('audio');
+  const downloadUrl = url || makeBlobUrl(content, mime);
+  const ext = isAudio ? (mime.split('/')[1] || 'audio') : 'md';
+  return (
+    <div className="flex gap-3 mt-4">
+      <a
+        href={downloadUrl}
+        download={`${slug}.${ext}`}
+        onClick={() => window.track?.('download', { type: isAudio ? 'audio' : 'text' })}
+        className="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+        title="Download"
+      ><Download size={16}/></a>
+      <button
+        onClick={() => shareLink(slug, downloadUrl, isAudio ? 'audio' : 'text')}
+        className="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+        title="Share link"
+      ><Share2 size={16}/></button>
+    </div>
+);
+}
+
 // Main App Component
 const SentimentalApp = () => {
   const [currentView, setCurrentView] = useState('share');
@@ -211,48 +257,6 @@ const SentimentalApp = () => {
   const [showAllFormats, setShowAllFormats] = useState(false);
   const [showAllUserStories, setShowAllUserStories] = useState(false);
   const [showFullChat, setShowFullChat] = useState(false);
-
-  // Refs for auto-scroll and focus on mobile chat view
-  const messagesContainerRef = useRef(null);
-  const messageInputRef = useRef(null);
-
-  // Track page landing with starter/ref params once
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const starterSlug = params.get('starter');
-    const refId = params.get('ref');
-    if (starterSlug) {
-      window.track?.('starter_landing', { starter: starterSlug, referrer_id: refId || '(none)' });
-    }
-  }, []);
-
-  // Track view transitions
-  useEffect(() => {
-    if (currentView === 'share') {
-      window.track?.('start_chat');
-    } else if (currentView === 'discover') {
-      window.track?.('view_discover');
-    } else if (currentView === 'stories') {
-      window.track?.('view_stories');
-    }
-  }, [currentView]);
-
-  // Identify user to GA once authenticated
-  useEffect(() => {
-    if (user && user.id && user.id !== 'anonymous' && user.id !== 'anonymous_user') {
-      window.setAnalyticsUser?.(user.id);
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (currentView === 'share' && window.innerWidth < 768) {
-      // let layout settle then ensure input visible
-      setTimeout(() => {
-        messagesContainerRef.current?.scrollTo({ top: messagesContainerRef.current.scrollHeight });
-        messageInputRef.current?.focus();
-      }, 300);
-    }
-  }, [currentView]);
 
   // Super admin helper – Marko can edit any story
   const isSuperUser = user && (user.email === 'vaikmarko@gmail.com' || user.id === 'TCoWwyV0sMlNiFQgLuXR');
@@ -715,8 +719,7 @@ const SentimentalApp = () => {
         setShowLogin(true);
       } else if (data.success) {
         setMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
-        setMessage('');
-        window.track?.('message_sent', { length: message.length });
+        window.track?.('message_sent', { length: userMessage.length });
       } else {
         setMessages(prev => [...prev, { 
           role: 'assistant', 
@@ -778,13 +781,13 @@ const SentimentalApp = () => {
           content: '✨ Your story has been created successfully! You can find it in your Stories tab.'
         }]);
         await fetchStories();
+        window.track?.('story_created', {});
         // Clean up any previous story/format state before switching to stories
         setSelectedStory(null);
         setCurrentFormat(null);
         setFormatContent('');
         setPreviousView('share');
         setCurrentView('stories');
-        window.track?.('story_created', { story_id: data.story_id });
       } else {
         alert('Failed to create story. Please try again.');
       }
@@ -2134,6 +2137,11 @@ const SentimentalApp = () => {
               <p className="text-gray-700 leading-relaxed text-lg whitespace-pre-wrap">
                 {selectedStory.content}
               </p>
+              {renderActions({
+                 slug: (selectedStory.title || 'story').replace(/\s+/g,'_').toLowerCase(),
+                 content: selectedStory.content || '',
+                 mime: 'text/markdown'
+              })}
             </div>
 
                          {/* Bottom Back Button - After Story Content */}
@@ -2364,6 +2372,11 @@ const SentimentalApp = () => {
                   <source src={audioUrl} />
                   Your browser does not support the audio element.
                 </audio>
+                {currentFormat.audio_url && renderActions({
+                   slug: audioTitle.replace(/\s+/g,'_').toLowerCase(),
+                   url: currentFormat.audio_url,
+                   mime: currentFormat.formatType === 'podcast' ? 'audio/wav' : 'audio/mpeg'
+                })}
               </div>
             ) : (
               <div className="bg-black/20 rounded-lg p-4 mb-4">
