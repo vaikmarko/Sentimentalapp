@@ -216,6 +216,34 @@ const SentimentalApp = () => {
   const messagesContainerRef = useRef(null);
   const messageInputRef = useRef(null);
 
+  // Track page landing with starter/ref params once
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const starterSlug = params.get('starter');
+    const refId = params.get('ref');
+    if (starterSlug) {
+      window.track?.('starter_landing', { starter: starterSlug, referrer_id: refId || '(none)' });
+    }
+  }, []);
+
+  // Track view transitions
+  useEffect(() => {
+    if (currentView === 'share') {
+      window.track?.('start_chat');
+    } else if (currentView === 'discover') {
+      window.track?.('view_discover');
+    } else if (currentView === 'stories') {
+      window.track?.('view_stories');
+    }
+  }, [currentView]);
+
+  // Identify user to GA once authenticated
+  useEffect(() => {
+    if (user && user.id && user.id !== 'anonymous' && user.id !== 'anonymous_user') {
+      window.setAnalyticsUser?.(user.id);
+    }
+  }, [user]);
+
   useEffect(() => {
     if (currentView === 'share' && window.innerWidth < 768) {
       // let layout settle then ensure input visible
@@ -687,6 +715,8 @@ const SentimentalApp = () => {
         setShowLogin(true);
       } else if (data.success) {
         setMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
+        setMessage('');
+        window.track?.('message_sent', { length: message.length });
       } else {
         setMessages(prev => [...prev, { 
           role: 'assistant', 
@@ -754,6 +784,7 @@ const SentimentalApp = () => {
         setFormatContent('');
         setPreviousView('share');
         setCurrentView('stories');
+        window.track?.('story_created', { story_id: data.story_id });
       } else {
         alert('Failed to create story. Please try again.');
       }
