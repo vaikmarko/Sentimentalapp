@@ -29,7 +29,7 @@ def get_supported_formats():
     except Exception:
         # Fallback to static list
         return [
-            'x','linkedin','instagram','facebook','song','poem','reel','short_story',
+            'x','linkedin','instagram','facebook','song','poem','reel','fairytale',
             'reflection','article','blog_post','presentation','newsletter','podcast',
             'insights','growth_summary','journal_entry','letter'
         ]

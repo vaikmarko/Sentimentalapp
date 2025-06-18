@@ -397,7 +397,16 @@ def landing():
 
 @app.route('/manifest.json')
 def manifest():
-    return send_from_directory('static', 'manifest.json')
+    """Serve web-app manifest.json.
+    Preference order:
+    1. static/manifest.json (production build)
+    2. project-root manifest.json (development fallback)
+    This avoids 404s in local dev when file only exists at repo root.
+    """
+    if os.path.exists(os.path.join('static', 'manifest.json')):
+        return send_from_directory('static', 'manifest.json')
+    # Fallback to project root manifest.json
+    return send_from_directory('.', 'manifest.json')
 
 @app.route('/cosmos')
 def cosmos():
@@ -1154,19 +1163,25 @@ def get_story_format(story_id, format_type):
             content = format_data
             audio_url = None
             title = None
+            cover_url = None
         else:
             content = format_data.get('content', format_data)
             audio_url = format_data.get('audio_url')
             title = format_data.get('title')
+            cover_url = format_data.get('cover_url')
         
-        return jsonify({
+        response_payload = {
             'format_type': format_type,
             'content': content,
             'audio_url': audio_url,
             'title': title,
             'story_id': story_id,
             'created_at': story_data.get('updated_at', story_data.get('created_at'))
-        }), 200
+        }
+        if cover_url:
+            response_payload['cover_url'] = cover_url
+        
+        return jsonify(response_payload), 200
         
     except Exception as e:
         logger.error(f"Error getting format: {e}")
@@ -1257,6 +1272,7 @@ def generate_format_for_story(story_id):
         data = request.json
         format_type_str = data.get('format_type', 'article')
         user_id = request.headers.get('X-User-ID')
+        user_email = request.headers.get('X-User-Email', '')
         
         # Enhanced logging for debugging authentication issues
         logger.info(f"Format generation request for story {story_id}:")
@@ -2395,7 +2411,7 @@ def get_supported_formats():
         # These are the formats that can actually be generated
         prompts_engine_formats = [
             'x', 'linkedin', 'instagram', 'facebook',
-            'song', 'poem', 'reel', 'short_story', 
+            'song', 'poem', 'reel', 'fairytale', 
             'reflection',
             'article', 'blog_post', 'presentation', 'newsletter', 'podcast',
             'insights', 'growth_summary', 'journal_entry', 'letter'

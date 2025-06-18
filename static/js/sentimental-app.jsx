@@ -118,7 +118,7 @@ const getFormatIcon = (formatType) => {
     x_thread: '🧵',
     youtube_short: '▶️',
     instagram_story: '📸',
-    short_story: '📚',
+    fairytale: '📚',
     
     // Content Formats
     article: '📝',
@@ -141,7 +141,7 @@ const getFormatIcon = (formatType) => {
     podcast_segment: '🎧',
     email: '✉️',
     letter: '💌',
-    fairytale: 'Fairytale', // legacy alias
+    short_story: '📚', // legacy alias
   };
   return icons[formatType] || '📄';
 };
@@ -257,7 +257,8 @@ const SentimentalApp = () => {
   const [isGeneratingChapter, setIsGeneratingChapter] = useState(false);
 
   // Format grouping & progressive disclosure
-  const PRIMARY_FORMATS = ['reflection', 'song', 'reel', 'podcast'];
+  // Primary formats order: Reflection → Song → Instagram → Reel
+  const PRIMARY_FORMATS = ['reflection', 'song', 'instagram', 'reel'];
   const [showAllFormats, setShowAllFormats] = useState(false);
   const [showAllUserStories, setShowAllUserStories] = useState(false);
   const [showFullChat, setShowFullChat] = useState(false);
@@ -494,7 +495,7 @@ const SentimentalApp = () => {
         // Fallback to formats that are actually supported by prompts engine
         setSupportedFormats([
           'x', 'linkedin', 'instagram', 'facebook',
-          'song', 'poem', 'reel', 'short_story', 
+          'song', 'poem', 'reel', 'fairytale', 
           'article', 'blog_post', 'presentation', 'newsletter', 'podcast',
           'insights', 'growth_summary', 'journal_entry',
           'reflection', 'letter'
@@ -507,7 +508,7 @@ const SentimentalApp = () => {
         'x', 'linkedin', 'instagram', 'song', 'poem', 'article',
         'reflection',
         'insights',
-        'short_story', 'letter'
+        'fairytale', 'letter'
       ]);
     } finally {
       setLoadingFormats(false);
@@ -901,10 +902,45 @@ const SentimentalApp = () => {
     return response.json();
   };
 
+  // Upload Instagram Image
+  const uploadImage = async (file, storyId) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('story_id', storyId);
+      formData.append('format_type', 'instagram');
+
+      const headers = {};
+      if (user) {
+        headers['X-User-ID']    = user.id;
+        headers['X-User-Email'] = user.email || '';
+      }
+
+      const res = await fetch('/api/upload/image', {
+        method: 'POST',
+        body: formData,
+        headers
+      });
+      return await res.json();
+    } catch (err) {
+      console.error('Image upload error', err);
+      return { success: false, error: String(err) };
+    }
+  };
+
   // Format viewing functions
   const viewFormat = async (story, formatType) => {
     setLoadingFormat(true);
-    setCurrentFormat({ story, formatType, title: null });
+    // Initialize currentFormat (include cover_url if Instagram format already has one)
+    const initialCoverUrl = (formatType === 'instagram' && story.formats && typeof story.formats[formatType] === 'object')
+      ? story.formats[formatType].cover_url
+      : null;
+    setCurrentFormat({
+      story,
+      formatType,
+      title: null,
+      ...(initialCoverUrl ? { cover_url: initialCoverUrl } : {})
+    });
     setCurrentView('format-detail');
     
     try {
@@ -983,6 +1019,11 @@ const SentimentalApp = () => {
           const title = data.title || (formatType === 'song' ? extractSongTitle(contentText) : (story.title || 'Podcast'));
           const audioUrl = data.audio_url || (typeof data.content === 'object' ? data.content.audio_url : null);
           setCurrentFormat(prev => ({...prev, title, audio_url: audioUrl}));
+        }
+
+        // NEW: propagate cover_url from API response
+        if (formatType === 'instagram' && data.cover_url) {
+          setCurrentFormat(prev => ({ ...prev, cover_url: data.cover_url }));
         }
       } else {
         // Format doesn't exist, check authentication before trying to generate it
@@ -2063,13 +2104,13 @@ const SentimentalApp = () => {
                       {story.createdFormats && story.createdFormats.length > 0 && (
                         <>
                           <span className="text-xs text-purple-600 font-medium">•</span>
-                          {sortFormats(story.createdFormats.map(normalizeFormat)).slice(0, 2).map(format => (
+                          {sortFormats(story.createdFormats.map(normalizeFormat)).slice(0, 4).map(format => (
                             <span key={format} className="bg-purple-100 text-purple-700 px-2 py-1 rounded-full text-xs">
                               {getFormatDisplayName(format)}
                             </span>
                           ))}
-                          {story.createdFormats.length > 2 && (
-                            <span className="text-xs text-gray-500">+{story.createdFormats.length - 2} more</span>
+                          {story.createdFormats.length > 4 && (
+                            <span className="text-xs text-gray-500">+{story.createdFormats.length - 4} more</span>
                           )}
                         </>
                       )}
@@ -2300,7 +2341,7 @@ const SentimentalApp = () => {
       poem: 'Poem',
       song: 'Song',
       reel: 'Reel',
-      short_story: 'Fairytale',
+      fairytale: 'Fairytale',
       article: 'Article',
       blog_post: 'Blog Post',
       presentation: 'Presentation',
@@ -2444,6 +2485,54 @@ const SentimentalApp = () => {
         );
       }
       
+      // Instagram format with optional cover image upload
+      if (currentFormat.formatType === 'instagram') {
+        const isOwner = user && (currentFormat.story.user_id === user.id || isSuperUser);
+
+        const handleImageChange = async (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          if (!file.type.startsWith('image/')) {
+            alert('Please select an image (JPG, PNG, WEBP)');
+            return;
+          }
+          const res = await uploadImage(file, currentFormat.story.id);
+          if (res.success) {
+            setCurrentFormat((prev) => ({ ...prev, cover_url: res.image_url }));
+          } else {
+            alert(res.error || 'Upload failed');
+          }
+        };
+
+        return (
+          <div className="space-y-4">
+            {currentFormat.cover_url && (
+              <img
+                src={currentFormat.cover_url}
+                alt="Instagram cover"
+                className="w-full mx-auto rounded-xl"
+                style={{ maxWidth: '420px' }}
+              />
+            )}
+
+            <div className="prose max-w-none">
+              <pre className="whitespace-pre-wrap font-sans text-gray-700 leading-relaxed text-base">
+                {typeof formatContent === 'object' ? formatContent.content || JSON.stringify(formatContent, null, 2) : formatContent}
+              </pre>
+            </div>
+
+            {isOwner && (
+              <div>
+                <input type="file" accept="image/*" id="ig-image-upload" className="hidden" onChange={handleImageChange} />
+                <label htmlFor="ig-image-upload" className="inline-block px-4 py-2 bg-purple-600 text-white rounded-lg cursor-pointer hover:bg-purple-700 text-sm">
+                  {currentFormat.cover_url ? 'Replace Image' : 'Upload Image'}
+                </label>
+              </div>
+            )}
+          </div>
+        );
+      }
+
       if (currentFormat.formatType === 'script' || currentFormat.formatType === 'video' || currentFormat.formatType.includes('reel')) {
         return (
           <div className="bg-gray-900 rounded-xl overflow-hidden">
@@ -3178,7 +3267,7 @@ const SentimentalApp = () => {
   };
 
   // Utility: map legacy names to current ones
-  const normalizeFormat = (fmt) => (fmt === 'fairytale' ? 'short_story' : fmt);
+  const normalizeFormat = (fmt) => (fmt === 'short_story' ? 'fairytale' : fmt);
 
   // ────────────────────────────────────────────────
   // Curated Story Starters

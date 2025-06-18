@@ -87,55 +87,149 @@ const Lock = ({ size = 16 }) => (
   </svg>
 );
 
+const ChevronUp = ({ size = 16 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+);
+
+const ChevronDown = ({ size = 16 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+);
+
 // Format icons
 const getFormatIcon = (formatType) => {
   const icons = {
-    // Social Media Formats (4)
+    // Social Media Formats
     x: '🐦',
     linkedin: '💼', 
     instagram: '📸',
     facebook: '👥',
+    tweet: '🐦',
     
-    // Creative Formats (4)
-    poem: '🎭',
+    // Creative Formats
     song: '🎵',
-    reel: '📄',
-    fairytale: '📚',
-    
-    // Professional Formats (5)
-    article: '📝',
-    blog_post: '✍️',
-    presentation: '📊',
-    newsletter: '📰',
-    podcast: '📄',
-    
-    // Therapeutic Formats (3)
-    insights: '💡',
-    growth_summary: '🌱',
-    journal_entry: '📔',
+    poem: '🎭',
+    video: '🎬',
+    script: '🎬',
     
     // Modern Viral Formats
+    reel: '🎬',
     tiktok_script: '📱',
     instagram_reel: '🎬',
     x_thread: '🧵',
     youtube_short: '▶️',
     instagram_story: '📸',
+    fairytale: 'Fairytale',
+    short_story: 'Fairytale',
+    
+    // Content Formats
+    article: '📝',
+    blog_post: '✍️',
+    presentation: '📊',
+    newsletter: '📰',
+    podcast: '🎧',
+    
+    // Compilation Formats
+    book_chapter: '📖',
+    
+    // Reflection Formats
+    insights: '💡',
+    reflection: '🤔',
+    growth_summary: '🌱',
+    journal_entry: '📔',
+    diary_entry: '📔',
+    
+    // Professional Formats
+    podcast_segment: '🎧',
+    email: '✉️',
+    letter: '💌',
+    // fairytale: 'Fairytale', // legacy alias
   };
   return icons[formatType] || '📄';
 };
 
+// Date formatting function
+const formatDate = (dateString) => {
+  if (!dateString) return 'Unknown date';
+  
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Invalid date';
+    
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  } catch (e) {
+    return 'Invalid date';
+  }
+};
+
+// Action helpers (download / share)
+const Download = ({ size = 16 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+);
+const Share2 = ({ size = 16 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+);
+
+const makeBlobUrl = (text, mime='text/markdown') => {
+  try { return URL.createObjectURL(new Blob([text], { type: mime })); } catch { return ''; }
+};
+
+const shareLink = async (title, url, type='text') => {
+  try {
+    await navigator.clipboard.writeText(url);
+    alert('Link copied!');
+    window.track?.('share_clicked', { type });
+  } catch {}
+};
+
+function renderActions({ slug, storyId=null, formatType='', mime='text/markdown', url='' }) {
+  const isAudio = mime.startsWith('audio');
+
+  // Build URL to share.
+  const shareUrl = url || (() => {
+    try {
+      const base = window.location.origin;
+      if (storyId) {
+        // Prefer dedicated short-link route for cleaner URLs
+        const fmtSegment = formatType ? `/${encodeURIComponent(formatType)}` : '';
+        return `${base}/s/${storyId}${fmtSegment}`;
+      }
+      // Fallback to starter slug via /app
+      const appBase = `${base}/app`;
+      return `${appBase}?starter=${encodeURIComponent(slug)}`;
+    } catch {
+      return '';
+    }
+  })();
+  return (
+    <div className="flex gap-3 mt-4">
+      <button
+        onClick={() => shareLink(slug, shareUrl, isAudio ? 'audio' : 'text')}
+        className="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+        title="Share link"
+      ><Share2 size={16}/></button>
+    </div>
+  );
+}
+
 // Main App Component
 const SentimentalApp = () => {
-  const [currentView, setCurrentView] = useState('chat');
+  const [currentView, setCurrentView] = useState('share');
   const [selectedStory, setSelectedStory] = useState(null);
   const [shareModal, setShareModal] = useState(null);
-  const [previousView, setPreviousView] = useState('chat');
+  const [previousView, setPreviousView] = useState('share');
   const [currentFormat, setCurrentFormat] = useState(null);
   const [formatContent, setFormatContent] = useState('');
   const [loadingFormat, setLoadingFormat] = useState(false);
   const [stories, setStories] = useState([]);
+  // Loading state for stories list (Discover view)
+  const [loadingStories, setLoadingStories] = useState(true);
   const [userStories, setUserStories] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isPasswordResetLoading, setIsPasswordResetLoading] = useState(false);
   const [user, setUser] = useState(null);
   const [showLogin, setShowLogin] = useState(false);
   const [supportedFormats, setSupportedFormats] = useState({});
@@ -161,6 +255,41 @@ const SentimentalApp = () => {
   const [uploadingAudio, setUploadingAudio] = useState(false);
   const [loadingFormats, setLoadingFormats] = useState(true);
   const [showSpaceModal, setShowSpaceModal] = useState(false);
+  const [isGeneratingChapter, setIsGeneratingChapter] = useState(false);
+
+  // Format grouping & progressive disclosure
+  // Primary formats order: Reflection → Song → Instagram → Reel
+  const PRIMARY_FORMATS = ['reflection', 'song', 'instagram', 'reel'];
+  const [showAllFormats, setShowAllFormats] = useState(false);
+  const [showAllUserStories, setShowAllUserStories] = useState(false);
+  const [showFullChat, setShowFullChat] = useState(false);
+
+  // Super admin helper – Marko can edit any story
+  const isSuperUser = user && ['TCoWwyV0sMlNiFQgLuXR'].includes(user.id);
+
+  // Helper: safe timestamp → milliseconds (fallback 0)
+  const toMillis = (val) => {
+    if (!val) return 0;
+    // If already Date or numeric string
+    const dateObj = new Date(val);
+    if (!Number.isNaN(dateObj.getTime())) return dateObj.getTime();
+
+    // Try to parse relative strings like "5h ago", "2d ago"
+    if (typeof val === 'string' && /ago$/.test(val)) {
+      const parts = val.trim().split(/\s+/);
+      if (parts.length >= 2) {
+        const num = parseInt(parts[0], 10);
+        const unit = parts[1][0]; // h, d, m
+        if (!Number.isNaN(num)) {
+          const now = Date.now();
+          if (unit === 'h') return now - num * 60 * 60 * 1000;
+          if (unit === 'd') return now - num * 24 * 60 * 60 * 1000;
+          if (unit === 'm') return now - num * 60 * 1000;
+        }
+      }
+    }
+    return 0; // Fallback
+  };
 
   // Initialize
   useEffect(() => {
@@ -298,15 +427,59 @@ const SentimentalApp = () => {
     initializeApp();
   }, []);
 
+  // Keep userStories in sync whenever stories or user change
+  useEffect(() => {
+    if (user) {
+      const mine = stories.filter(
+        (s) => s.user_id === user.id || s.author_id === user.id
+      );
+      setUserStories(mine);
+    } else {
+      setUserStories([]);
+    }
+  }, [stories, user]);
+
+  // Reset expanded formats when switching stories
+  useEffect(() => {
+    setShowAllFormats(false);
+  }, [selectedStory]);
+
   const fetchStories = async () => {
     try {
+      // Only show loader when we have no cached stories (first fetch)
+      if (stories.length === 0) {
+        setLoadingStories(true);
+      }
       const response = await fetch('/api/stories');
       if (response.ok) {
         const data = await response.json();
         setStories(data);
+
+        // If URL contains ?story=<id> (and optional &format=<type>), auto-open it
+        try {
+          const params = new URLSearchParams(window.location.search);
+          const storyIdParam = params.get('story');
+          if (storyIdParam) {
+            const storyObj = data.find((s) => String(s.id) === String(storyIdParam));
+            if (storyObj) {
+              setSelectedStory(storyObj);
+              setCurrentView('story-detail');
+
+              const formatParam = params.get('format');
+              if (formatParam) {
+                // Delay viewFormat slightly to ensure state updated
+                setTimeout(() => viewFormat(storyObj, formatParam), 100);
+              }
+            }
+          }
+        } catch (e) {
+          console.error('Error processing share link params:', e);
+        }
       }
     } catch (error) {
       console.error('Error fetching stories:', error);
+    } finally {
+      setLoadingStories(false);
     }
   };
 
@@ -323,16 +496,20 @@ const SentimentalApp = () => {
         // Fallback to formats that are actually supported by prompts engine
         setSupportedFormats([
           'x', 'linkedin', 'instagram', 'facebook',
-          'poem', 'song', 'reel', 'fairytale', 
+          'song', 'poem', 'reel', 'short_story', 
           'article', 'blog_post', 'presentation', 'newsletter', 'podcast',
-          'insights', 'growth_summary', 'journal_entry'
+          'insights', 'growth_summary', 'journal_entry',
+          'reflection', 'letter'
         ]);
       }
     } catch (error) {
       console.error('Error fetching supported formats:', error);
       // Fallback to core formats that definitely work
       setSupportedFormats([
-        'x', 'linkedin', 'instagram', 'poem', 'song', 'article', 'insights'
+        'x', 'linkedin', 'instagram', 'song', 'poem', 'article',
+        'reflection',
+        'insights',
+        'short_story', 'letter'
       ]);
     } finally {
       setLoadingFormats(false);
@@ -482,7 +659,7 @@ const SentimentalApp = () => {
       return;
     }
 
-    setIsLoading(true);
+    setIsPasswordResetLoading(true);
     try {
       if (window.firebaseAuth) {
         await window.firebaseAuth.sendPasswordResetEmail(loginForm.email);
@@ -501,7 +678,7 @@ const SentimentalApp = () => {
         alert('Failed to send password reset email. Please try again or contact support.');
       }
     }
-    setIsLoading(false);
+    setIsPasswordResetLoading(false);
   };
 
   const handleLogout = async () => {
@@ -549,7 +726,8 @@ const SentimentalApp = () => {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'X-User-ID': user.id
+          'X-User-ID': user.id,
+          'X-User-Email': user.email || ''
         },
         body: JSON.stringify({
           message: userMessage,
@@ -568,6 +746,7 @@ const SentimentalApp = () => {
         setShowLogin(true);
       } else if (data.success) {
         setMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
+        window.track?.('message_sent', { length: userMessage.length });
       } else {
         setMessages(prev => [...prev, { 
           role: 'assistant', 
@@ -606,7 +785,8 @@ const SentimentalApp = () => {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'X-User-ID': user.id // Add authentication header
+          'X-User-ID': user.id, // Add authentication header
+          'X-User-Email': user.email || ''
         },
         body: JSON.stringify({
           conversation: messages,
@@ -628,6 +808,7 @@ const SentimentalApp = () => {
           content: '✨ Your story has been created successfully! You can find it in your Stories tab.'
         }]);
         await fetchStories();
+        window.track?.('story_created', {});
         // Clean up any previous story/format state before switching to stories
         setSelectedStory(null);
         setCurrentFormat(null);
@@ -713,12 +894,39 @@ const SentimentalApp = () => {
     const response = await fetch('/api/upload/audio', {
       method: 'POST',
       headers: {
-        'X-User-ID': user.id  // Add authentication header
+        'X-User-ID': user.id,  // Add authentication header
+        'X-User-Email': user.email || ''
       },
       body: formData
     });
     
     return response.json();
+  };
+
+  // Upload Instagram Image helper
+  const uploadImage = async (file, storyId) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('story_id', storyId);
+      formData.append('format_type', 'instagram');
+
+      const headers = {};
+      if (user) {
+        headers['X-User-ID'] = user.id;
+        headers['X-User-Email'] = user.email || '';
+      }
+
+      const res = await fetch('/api/upload/image', {
+        method: 'POST',
+        body: formData,
+        headers
+      });
+      return await res.json();
+    } catch (err) {
+      console.error('Image upload error', err);
+      return { success: false, error: String(err) };
+    }
   };
 
   // Format viewing functions
@@ -752,12 +960,12 @@ const SentimentalApp = () => {
           }
         }
         
-        // Extract title for song format from local data
-        if (formatType === 'song') {
+        // Extract title for audio formats (song/podcast) from local data
+        if (formatType === 'song' || formatType === 'podcast') {
           const contentText = typeof story.formats[formatType] === 'object' ? story.formats[formatType].content || '' : story.formats[formatType] || '';
           // Prioritize database title over extraction
           const databaseTitle = typeof story.formats[formatType] === 'object' ? story.formats[formatType].title : null;
-          const title = databaseTitle || extractSongTitle(contentText);
+          const title = databaseTitle || (formatType === 'song' ? extractSongTitle(contentText) : (story.title || 'Podcast'));
           const audioUrl = typeof story.formats[formatType] === 'object' ? story.formats[formatType].audio_url : null;
           setCurrentFormat(prev => ({...prev, title, audio_url: audioUrl}));
         }
@@ -797,10 +1005,10 @@ const SentimentalApp = () => {
           }));
         }
         
-        // Extract title for song format
-        if (formatType === 'song') {
+        // Extract title for audio formats after fetching
+        if (formatType === 'song' || formatType === 'podcast') {
           const contentText = typeof data.content === 'object' ? data.content.content || '' : data.content || '';
-          const title = data.title || extractSongTitle(contentText);
+          const title = data.title || (formatType === 'song' ? extractSongTitle(contentText) : (story.title || 'Podcast'));
           const audioUrl = data.audio_url || (typeof data.content === 'object' ? data.content.audio_url : null);
           setCurrentFormat(prev => ({...prev, title, audio_url: audioUrl}));
         }
@@ -820,7 +1028,8 @@ const SentimentalApp = () => {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
-            'X-User-ID': user.id || 'undefined' // Add authentication header with fallback
+            'X-User-ID': user.id || 'undefined', // Add authentication header with fallback
+            'X-User-Email': user.email || ''
           },
           body: JSON.stringify({ format_type: formatType })
         });
@@ -855,8 +1064,8 @@ const SentimentalApp = () => {
             }));
           }
           
-          // Extract title for song format
-          if (formatType === 'song' && generateData.title) {
+          // Extract title for audio formats (song/podcast)
+          if ((formatType === 'song' || formatType === 'podcast') && generateData.title) {
             setCurrentFormat(prev => ({...prev, title: generateData.title}));
           }
         } else {
@@ -898,7 +1107,8 @@ const SentimentalApp = () => {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
-          'X-User-ID': user.id
+          'X-User-ID': user.id,
+          'X-User-Email': user.email || ''
         },
         body: JSON.stringify({
           is_public: !currentIsPublic
@@ -956,7 +1166,8 @@ const SentimentalApp = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'X-User-ID': user.id
+          'X-User-ID': user.id,
+          'X-User-Email': user.email || ''
         },
         body: JSON.stringify({
           title: editTitle.trim(),
@@ -1018,6 +1229,8 @@ const SentimentalApp = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'X-User-ID': user.id,
+          'X-User-Email': user.email || ''
         },
         body: JSON.stringify({
           content: editFormatContent,
@@ -1076,34 +1289,19 @@ const SentimentalApp = () => {
     <nav className="hidden md:block bg-white border-b border-gray-200 px-4 py-2 sticky top-0 z-50">
       <div className="max-w-6xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <button 
-            onClick={() => {
-              setCurrentView('discover');
-              setSelectedStory(null);
-              setCurrentFormat(null);
-              setFormatContent('');
-              setPreviousView('discover');
-            }}
+          <a
+            href="/"
             className="text-xl font-bold text-purple-600 no-underline hover:text-purple-700 transition-colors"
           >
             Sentimental
-          </button>
+          </a>
           
           <div className="hidden md:flex items-center gap-1">
             {[
               { id: 'discover', label: 'Discover', icon: Search },
               { id: 'share', label: 'Chat', icon: MessageCircle },
               { id: 'stories', label: 'Stories', icon: BookOpen },
-              { 
-                id: 'inner-space', 
-                label: 'Space', 
-                icon: () => (
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88"/>
-                  </svg>
-                )
-              }
+              // Space tab temporarily hidden until feature is production-ready
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -1267,10 +1465,10 @@ const SentimentalApp = () => {
             {!isSignupMode && (
               <button
                 onClick={handleForgotPassword}
-                disabled={isLoading}
+                disabled={isPasswordResetLoading}
                 className="text-gray-500 hover:text-gray-700 text-sm font-medium disabled:opacity-50"
               >
-                Forgot your password?
+                {isPasswordResetLoading ? 'Sending reset email...' : 'Forgot your password?'}
               </button>
             )}
           </div>
@@ -1313,18 +1511,12 @@ const SentimentalApp = () => {
     <div className="h-full flex flex-col">
       {/* Mobile Header - Only show on mobile */}
       <div className="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-        <button 
-          onClick={() => {
-            setCurrentView('discover');
-            setSelectedStory(null);
-            setCurrentFormat(null);
-            setFormatContent('');
-            setPreviousView('discover');
-          }}
+        <a
+          href="/"
           className="text-lg font-bold text-purple-600 hover:text-purple-700 transition-colors"
         >
           Sentimental
-        </button>
+        </a>
         
         {user ? (
           <div className="flex items-center gap-3">
@@ -1364,57 +1556,27 @@ const SentimentalApp = () => {
       </div>
       
       {/* Welcome Section */}
-      <div className="bg-gradient-to-br from-purple-50 to-indigo-50 border-b border-gray-100 p-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-3">
-            Discover Your True Self ✨
-          </h1>
-          <p className="text-lg text-gray-600 mb-6">
-            A space for deep conversations about life, emotions, relationships, and everything that matters to you. 
-            Reflect, understand, and express your authentic self.
-          </p>
-          
-          {!user ? (
-            <div className="bg-white/70 backdrop-blur-sm rounded-xl p-6 mb-6 border border-white/20">
-              <h3 className="text-xl font-semibold text-gray-800 mb-3">Start Your Journey</h3>
-              <p className="text-gray-600 mb-4">
-                Join a community where your thoughts matter and your story becomes something beautiful.
-              </p>
-              <button
-                onClick={() => setShowLogin(true)}
-                className="bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors"
-              >
-                Begin Discovering Yourself
-              </button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
-              {[
-                { type: 'reflection', icon: '🤔', label: 'Reflection', desc: 'Deep thoughts' },
-                { type: 'reel', icon: '🎬', label: 'Reel', desc: 'Short video script' },
-                { type: 'poem', icon: '📝', label: 'Poem', desc: 'Poetic expression' },
-                { type: 'fairytale', icon: '📚', label: 'Fairytale', desc: 'Magic short story' }
-              ].map((format) => (
-                <div key={format.type} className="bg-white/70 backdrop-blur-sm rounded-lg p-4 text-center border border-white/20">
-                  <div className="text-2xl mb-2">{format.icon}</div>
-                  <div className="font-medium text-gray-800">{format.label}</div>
-                  <div className="text-xs text-gray-600">{format.desc}</div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+      <div className="bg-gradient-to-br from-purple-50 to-indigo-50 border-b border-gray-100 px-4 py-3">
+        <p className="max-w-3xl mx-auto text-center text-sm md:text-base text-gray-700 font-medium flex items-center justify-center gap-1">
+          <span>Discover new perspectives. Tap a story to explore.</span>
+          <span role="img" aria-label="sparkles">✨</span>
+        </p>
       </div>
 
       {/* Story Cards */}
       <div className="flex-1 overflow-y-auto p-6">
-        {loadingFormat ? (
-          <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+        {loadingStories ? (
+          <div className="grid grid-cols-1 gap-6" data-testid="discover-skeleton">
+            {[1,2,3].map(i => (
+              <div key={i} className="bg-white rounded-2xl border border-gray-200 p-6 animate-pulse h-48"></div>
+            ))}
           </div>
         ) : (
-          <div className="grid gap-6">
-            {stories.filter(story => story.public === true).map(story => (
+          <div className="grid grid-cols-1 gap-6">
+            {stories
+              .filter(story => story.public === true)
+              .sort((a, b) => toMillis(b.created_at || b.timestamp) - toMillis(a.created_at || a.timestamp))
+              .map(story => (
               <div key={story.id} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-200">
                 {/* Story Header */}
                 <div className="p-6 pb-4">
@@ -1450,17 +1612,28 @@ const SentimentalApp = () => {
                           {user && story.user_id === user.id ? 'Your Transformations:' : 'Available Transformations:'}
                         </span>
                       </div>
-                      <div className="flex flex-wrap gap-2">
-                        {story.createdFormats.map(format => (
-                          <span key={format} className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 rounded-md text-xs font-medium">
-                            {getFormatIcon(format)} {getFormatDisplayName(format)}
-                          </span>
-                        ))}
-                      </div>
+                      {(() => {
+                        const unique = Array.from(new Set(story.createdFormats.map(normalizeFormat)));
+                        const sorted = sortFormats(unique);
+                        const primary = sorted.slice(0, 4);
+                        const extraCount = sorted.length - primary.length;
+                        return (
+                          <div className="flex flex-wrap gap-2 items-center">
+                            {primary.map(format => (
+                              <span key={format} title={getFormatDisplayName(format)} className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 rounded-md text-xs font-medium">
+                                {getFormatIcon(format)} {getFormatDisplayName(format)}
+                              </span>
+                            ))}
+                            {extraCount > 0 && (
+                              <span className="text-xs text-gray-500">+{extraCount} more</span>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </div>
                   )}
 
-                  <div className="flex items-center justify-end pt-4 border-t border-gray-100">
+                  <div className="flex flex-wrap items-start sm:items-center justify-between gap-3 pt-4 border-t border-gray-100">
                     <button 
                       onClick={() => {
                         setSelectedStory(story);
@@ -1500,18 +1673,12 @@ const SentimentalApp = () => {
     <div className="flex flex-col min-h-[calc(100vh-4rem)] md:min-h-[calc(100vh-5rem)]">
       {/* Mobile Header */}
       <div className="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-        <button 
-          onClick={() => {
-            setCurrentView('discover');
-            setSelectedStory(null);
-            setCurrentFormat(null);
-            setFormatContent('');
-            setPreviousView('discover');
-          }}
+        <a
+          href="/"
           className="text-lg font-bold text-purple-600 hover:text-purple-700 transition-colors"
         >
           Sentimental
-        </button>
+        </a>
         
         {user ? (
           <div className="flex items-center gap-3">
@@ -1583,7 +1750,7 @@ const SentimentalApp = () => {
       {/* Chat Container */}
       <div className="flex-1 max-w-4xl mx-auto w-full flex flex-col min-h-0">
         {/* Messages - Scrollable area */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 min-h-0">
+        <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-6 space-y-6 min-h-0">
           {messages.length === 0 ? (
             <div className="text-center py-12">
               {!user || !user.id || user.id === 'anonymous' || user.id === 'anonymous_user' || user.id === '' || user.id === 'null' || user.id === 'undefined' ? (
@@ -1631,15 +1798,12 @@ const SentimentalApp = () => {
                     <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">📖 Stories</span>
                     <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium">✨ Poems</span>
                   </div>
-                  <p className="text-gray-600 mb-6 max-w-lg mx-auto text-sm">
-                    Tell me what's on your mind - your dreams, challenges, relationships, or anything that matters to you.
-                  </p>
                 </>
               )}
             </div>
           ) : (
             <>
-              {messages.map((msg, index) => (
+              {(showFullChat ? messages : messages.slice(-5)).map((msg, index) => (
                 <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   <div className={`max-w-[80%] p-4 rounded-2xl ${
                     msg.role === 'user' 
@@ -1662,22 +1826,64 @@ const SentimentalApp = () => {
                   </div>
                 </div>
               )}
+              {!showFullChat && messages.length > 5 && (
+                <button
+                  onClick={() => setShowFullChat(true)}
+                  className="text-xs text-purple-600 mt-4 underline mx-auto block"
+                >
+                  Show full history ({messages.length})
+                </button>
+              )}
             </>
           )}
         </div>
         
         {/* Input - Fixed at bottom */}
         <div className="border-t bg-white p-4 flex-shrink-0">
+          {/* Mobile Create Story Button - appears when there are messages */}
+          {messages.length > 0 && user && user.id && user.id !== 'anonymous' && user.id !== 'anonymous_user' && user.id !== '' && user.id !== 'null' && user.id !== 'undefined' && (
+            <div className="md:hidden mb-3">
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
+                <p className="text-sm text-purple-700 mb-2">
+                  ✨ Ready to turn this conversation into a story?
+                </p>
+                <button
+                  onClick={createStoryFromConversation}
+                  disabled={isLoading}
+                  className="text-sm px-3 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {isLoading ? (
+                    <>
+                      <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Creating...
+                    </>
+                  ) : (
+                    <>
+                      <Plus size={14} />
+                      Create Story
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+          
           {user && user.id && user.id !== 'anonymous' && user.id !== 'anonymous_user' && user.id !== '' && user.id !== 'null' && user.id !== 'undefined' && (
             // Show normal chat input for authenticated users
             <div className="flex gap-3">
-              <input
-                type="text"
+              <textarea
+                ref={messageInputRef}
+                rows={2}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                placeholder="Type your message... (Say 'turn this into a story' when you want to save our chat)"
-                className="flex-1 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                  }
+                }}
+                placeholder="Type your message..."
+                className="flex-1 resize-none border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 disabled={isLoading}
               />
               <button
@@ -1706,14 +1912,14 @@ const SentimentalApp = () => {
           </div>
           
           <div className="text-center py-12">
-            <div className="text-6xl mb-4">👤</div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Sign in to see your personal stories</h3>
-            <p className="text-gray-600 mb-6">Sign in to save your stories and continue your journey of personal growth and self-discovery.</p>
+            <div className="text-6xl mb-6">📖</div>
+            <h3 className="text-xl font-bold text-gray-900 mb-3">Your stories will live here</h3>
+            <p className="text-gray-600 mb-8 max-w-md mx-auto">Start a chat to create your first story and begin your journey of self-discovery.</p>
             <button
-              onClick={() => setShowLogin(true)}
+              onClick={() => setCurrentView('share')}
               className="bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors"
             >
-              Sign In
+              Start Chatting
             </button>
           </div>
         </div>
@@ -1721,24 +1927,21 @@ const SentimentalApp = () => {
     }
 
     // Filter stories for authenticated user only
-    const userStories = stories.filter(story => story.user_id === user.id);
+    const userStories = [...stories.filter(story => story.user_id === user.id)]
+      .sort((a, b) => toMillis(b.created_at || b.timestamp) - toMillis(a.created_at || a.timestamp));
+
+    const visibleStories = showAllUserStories ? userStories : userStories.slice(0, 3);
 
     return (
       <div>
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-          <button 
-            onClick={() => {
-              setCurrentView('discover');
-              setSelectedStory(null);
-              setCurrentFormat(null);
-              setFormatContent('');
-              setPreviousView('discover');
-            }}
+          <a
+            href="/"
             className="text-lg font-bold text-purple-600 hover:text-purple-700 transition-colors"
           >
             Sentimental
-          </button>
+          </a>
           
           {user ? (
             <div className="flex items-center gap-3">
@@ -1783,125 +1986,154 @@ const SentimentalApp = () => {
             <p className="text-lg text-gray-600">Your journey of self-discovery through stories</p>
           </div>
 
-        {userStories.length > 0 ? (
-          <div className="grid gap-6">
-            {userStories.map((story) => (
-              <div
-                key={story.id}
-                className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 cursor-pointer border border-gray-100 p-6 group"
-                onClick={() => {
-                  setSelectedStory(story);
-                  setPreviousView('stories');
-                  setCurrentView('story-detail');
-                }}
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-purple-700 transition-colors">
-                      {story.title}
-                    </h3>
-                    <div className="flex items-center gap-3 text-sm text-gray-500 mb-3">
-                      <span>{formatDate(story.created_at || story.timestamp)}</span>
-                      <span>•</span>
-                      <span className="capitalize">{story.type || 'Story'}</span>
-                      {story.public && (
-                        <>
-                          <span>•</span>
-                          <span className="text-green-600 font-medium">Public</span>
-                        </>
+          {renderInspireBanner()}
+
+          {userStories.length > 0 ? (
+            <div className="grid grid-cols-1 gap-6">
+              {/* Book Chapter compilation tile (user-level) */}
+              <div className="bg-white rounded-xl shadow-sm p-6 flex flex-col items-center justify-center border border-gray-100">
+                <button
+                  onClick={() => {
+                    if (userStories.length >= 5 && !isGeneratingChapter) generateBookChapter();
+                  }}
+                  disabled={userStories.length < 5 || isGeneratingChapter}
+                  className={`flex flex-col items-center justify-center w-full h-full gap-2 ${userStories.length >= 5 ? 'text-indigo-700 hover:text-indigo-800' : 'text-gray-400 cursor-not-allowed'}`}
+                  style={{ minHeight: '120px' }}
+                >
+                  <div className="text-4xl">{getFormatIcon('book_chapter')}</div>
+                  <div className="text-sm font-medium">
+                    {isGeneratingChapter ? 'Generating…' : 'Book Chapter'}
+                  </div>
+                  {userStories.length < 5 && !isGeneratingChapter && (
+                    <div className="text-[11px] text-gray-500">Need 5 stories</div>
+                  )}
+                </button>
+              </div>
+              {visibleStories.map((story) => (
+                <div
+                  key={story.id}
+                  className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 cursor-pointer border border-gray-100 p-6 group"
+                  onClick={() => {
+                    setSelectedStory(story);
+                    setPreviousView('stories');
+                    setCurrentView('story-detail');
+                  }}
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-purple-700 transition-colors">
+                        {story.title}
+                      </h3>
+                      <div className="flex items-center gap-3 text-sm text-gray-500 mb-3">
+                        <span>{formatDate(story.created_at || story.timestamp)}</span>
+                        <span>•</span>
+                        <span className="capitalize">{story.type || 'Story'}</span>
+                        {story.public && (
+                          <>
+                            <span>•</span>
+                            <span className="text-green-600 font-medium">Public</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      {/* Edit Button - Only show for story owner or super user */}
+                      {user && (story.user_id === user.id || isSuperUser) && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            startEditingStory(story);
+                          }}
+                          className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          title="Edit story"
+                        >
+                          <Edit size={16} />
+                        </button>
                       )}
                     </div>
                   </div>
-                  
-                  <div className="flex items-center gap-2">
-                    {/* Edit Button - Only show for story owner */}
-                    {user && (story.user_id === user.id || story.author_id === user.id) && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          startEditingStory(story);
-                        }}
-                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="Edit story"
-                      >
-                        <Edit size={16} />
-                      </button>
-                    )}
+
+                  {/* Story Preview */}
+                  <div className="mb-4 p-4 bg-gray-50 rounded-xl group-hover:bg-purple-50 transition-colors">
+                    <p className="text-gray-700 text-sm leading-relaxed line-clamp-3">
+                      {story.content?.substring(0, 200) + '...' || 'Click to read your full story...'}
+                    </p>
                   </div>
-                </div>
 
-                {/* Story Preview */}
-                <div className="mb-4 p-4 bg-gray-50 rounded-xl group-hover:bg-purple-50 transition-colors">
-                  <p className="text-gray-700 text-sm leading-relaxed line-clamp-3">
-                    {story.content?.substring(0, 200) + '...' || 'Click to read your full story...'}
-                  </p>
-                </div>
-
-                {/* Privacy and formats - exact original style */}
-                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                  <div className="flex items-center gap-3 text-sm text-gray-500">
-                    <span className="text-gray-600">
-                      {story.public ? 'Public' : 'Private'}
-                    </span>
-                    {user && (story.user_id === user.id || story.author_id === user.id) && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleStoryPrivacy(story.id, story.public);
-                        }}
-                        className="relative inline-flex items-center h-6 w-11 bg-gray-200 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-                        style={{
-                          backgroundColor: story.public ? '#10B981' : '#D1D5DB'
-                        }}
-                        title={story.public ? 'Make private' : 'Make public'}
-                      >
-                        <span
-                          className="inline-block w-4 h-4 bg-white rounded-full transition-transform"
-                          style={{
-                            transform: story.public ? 'translateX(24px)' : 'translateX(4px)'
+                  {/* Privacy and formats - exact original style */}
+                  <div className="flex flex-wrap items-start sm:items-center justify-between gap-3 pt-4 border-t border-gray-100">
+                    <div className="flex items-center gap-3 text-sm text-gray-500">
+                      <span className="text-gray-600">
+                        {story.public ? 'Public' : 'Private'}
+                      </span>
+                      {user && (story.user_id === user.id || isSuperUser) && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleStoryPrivacy(story.id, story.public);
                           }}
-                        />
-                      </button>
-                    )}
+                          className="relative inline-flex items-center h-6 w-11 bg-gray-200 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                          style={{
+                            backgroundColor: story.public ? '#10B981' : '#D1D5DB'
+                          }}
+                          title={story.public ? 'Make private' : 'Make public'}
+                        >
+                          <span
+                            className="inline-block w-4 h-4 bg-white rounded-full transition-transform"
+                            style={{
+                              transform: story.public ? 'translateX(24px)' : 'translateX(4px)'
+                            }}
+                          />
+                        </button>
+                      )}
+                      
+                      {story.createdFormats && story.createdFormats.length > 0 && (
+                        <>
+                          <span className="text-xs text-purple-600 font-medium">•</span>
+                          {sortFormats(story.createdFormats.map(normalizeFormat)).slice(0, 2).map(format => (
+                            <span key={format} className="bg-purple-100 text-purple-700 px-2 py-1 rounded-full text-xs">
+                              {getFormatDisplayName(format)}
+                            </span>
+                          ))}
+                          {story.createdFormats.length > 2 && (
+                            <span className="text-xs text-gray-500">+{story.createdFormats.length - 2} more</span>
+                          )}
+                        </>
+                      )}
+                    </div>
                     
-                    {story.createdFormats && story.createdFormats.length > 0 && (
-                      <>
-                        <span className="text-xs text-purple-600 font-medium">•</span>
-                        {story.createdFormats.slice(0, 2).map(format => (
-                          <span key={format} className="bg-purple-100 text-purple-700 px-2 py-1 rounded-full text-xs">
-                            {getFormatDisplayName(format)}
-                          </span>
-                        ))}
-                        {story.createdFormats.length > 2 && (
-                          <span className="text-xs text-gray-500">+{story.createdFormats.length - 2} more</span>
-                        )}
-                      </>
-                    )}
-                  </div>
-                  
-                  {/* Read Full Story Button */}
-                  <div className="flex items-center gap-2 text-purple-600 group-hover:text-purple-700 font-medium text-sm">
-                    <BookOpen size={16} />
-                    <span>Read Full Story</span>
-                    <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                    {/* Read Full Story Button */}
+                    <div className="flex items-center gap-2 text-purple-600 group-hover:text-purple-700 font-medium text-sm">
+                      <BookOpen size={16} />
+                      <span>Read Full Story</span>
+                      <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <BookOpen className="mx-auto mb-4 text-gray-400" size={48} />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No stories yet</h3>
-            <p className="text-gray-600 mb-6">Start conversations with your AI companion to explore your inner world and create meaningful stories about your journey.</p>
-            <button
-              onClick={() => setCurrentView('share')}
-              className="bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors"
-            >
-              Start Chatting
-            </button>
-          </div>
-        )}
+              ))}
+              {!showAllUserStories && userStories.length > 3 && (
+                <button
+                  onClick={() => setShowAllUserStories(true)}
+                  className="btn-secondary mx-auto mt-4"
+                >
+                  View All Stories ({userStories.length})
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <BookOpen className="mx-auto mb-4 text-gray-400" size={48} />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No stories yet</h3>
+              <p className="text-gray-600 mb-6">Start conversations with your AI companion to explore your inner world and create meaningful stories about your journey.</p>
+              <button
+                onClick={() => setCurrentView('share')}
+                className="bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors"
+              >
+                Start Chatting
+              </button>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -1939,8 +2171,8 @@ const SentimentalApp = () => {
                 </div>
               </div>
               
-              {/* Edit Button - Only show for story owner */}
-              {user && (selectedStory.user_id === user.id || selectedStory.author_id === user.id) && (
+              {/* Edit Button - Only show for story owner or super user */}
+              {user && (selectedStory.user_id === user.id || isSuperUser) && (
                 <button
                   onClick={() => startEditingStory(selectedStory)}
                   className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
@@ -1958,6 +2190,11 @@ const SentimentalApp = () => {
               <p className="text-gray-700 leading-relaxed text-lg whitespace-pre-wrap">
                 {selectedStory.content}
               </p>
+              {renderActions({
+                 slug: (selectedStory.title || 'story').replace(/\s+/g,'_').toLowerCase(),
+                 storyId: selectedStory.id,
+                 mime: 'text/markdown'
+              })}
             </div>
 
                          {/* Bottom Back Button - After Story Content */}
@@ -1980,18 +2217,46 @@ const SentimentalApp = () => {
                   {user && selectedStory.user_id === user.id ? 'Your Transformations:' : 'Available Transformations:'}
                 </span>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {selectedStory.createdFormats.map(format => (
-                    <button 
-                      key={format} 
-                      onClick={() => viewFormat(selectedStory, format)}
-                      className="bg-purple-100 text-purple-700 rounded-lg p-3 text-center hover:bg-purple-200 transition-colors cursor-pointer border-none"
-                    >
-                      <div className="text-2xl mb-1">{getFormatIcon(format)}</div>
-                      <div className="text-sm font-medium">{getFormatDisplayName(format)}</div>
-                    </button>
-                  ))}
-                </div>
+                {(() => {
+                    const all = sortFormats(Array.from(new Set(selectedStory.createdFormats.map(normalizeFormat))));
+                    const primary = all.slice(0, 4);
+                    const secondary = all.slice(4);
+
+                    const renderButton = (format) => (
+                      <button
+                        key={format}
+                        onClick={() => viewFormat(selectedStory, format)}
+                        className="bg-purple-100 text-purple-700 rounded-lg p-3 text-center hover:bg-purple-200 transition-colors cursor-pointer border-none flex-shrink-0 w-24 snap-start"
+                      >
+                        <div className="text-2xl mb-1" title={getFormatDisplayName(format)}>{getFormatIcon(format)}</div>
+                        <div className="text-sm font-medium">{getFormatDisplayName(format)}</div>
+                      </button>
+                    );
+
+                    return (
+                      <>
+                        <div className="grid grid-flow-col auto-cols-max gap-3 overflow-x-auto snap-x snap-mandatory lg:grid-flow-row lg:auto-cols-fr lg:grid-cols-4 lg:overflow-x-visible">
+                          {(showAllFormats ? all : primary).map(format => renderButton(format))}
+                          {!showAllFormats && secondary.length > 0 && (
+                            <button
+                              onClick={() => setShowAllFormats(true)}
+                              className="bg-purple-50 text-purple-700 rounded-lg p-3 text-center hover:bg-purple-100 transition-colors cursor-pointer border-dashed border-2 border-purple-300 flex flex-col items-center justify-center flex-shrink-0 w-24 snap-start"
+                            >
+                              <div className="text-lg font-semibold">+{secondary.length}</div>
+                              <div className="text-xs font-medium">More formats</div>
+                            </button>
+                          )}
+                        </div>
+                        {showAllFormats && secondary.length > 0 && (
+                          <div className="hidden">
+                            <div className="mt-3 flex gap-3 overflow-x-auto flex-nowrap lg:grid lg:grid-cols-4">
+                              {secondary.map(format => renderButton(format))}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
               </div>
             )}
 
@@ -2005,25 +2270,44 @@ const SentimentalApp = () => {
                   <span className="font-medium text-green-700">Transform Into:</span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {loadingFormats ? (
-                    <div className="col-span-full flex items-center justify-center py-4">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
-                      <span className="ml-2 text-sm text-gray-600">Loading formats...</span>
-                    </div>
-                  ) : (
-                                         supportedFormats
-                       .filter(format => !selectedStory.createdFormats?.includes(format))
-                       .map(format => (
-                         <button 
-                           key={format} 
-                           onClick={() => viewFormat(selectedStory, format)}
-                           className="bg-green-100 text-green-700 rounded-lg p-3 text-center hover:bg-green-200 transition-colors cursor-pointer border-none"
-                         >
-                           <div className="text-2xl mb-1">{getFormatIcon(format)}</div>
-                           <div className="text-sm font-medium">{getFormatDisplayName(format)}</div>
-                         </button>
-                       ))
-                   )}
+                  {(() => {
+                    const available = supportedFormats.filter(f => !selectedStory.createdFormats?.includes(f));
+                    const primary = available.filter(f => PRIMARY_FORMATS.includes(f));
+                    const secondary = available.filter(f => !PRIMARY_FORMATS.includes(f));
+                    return (
+                      <>
+                        {primary.map(format => (
+                          <button 
+                            key={format} 
+                            onClick={() => viewFormat(selectedStory, format)}
+                            className="bg-green-100 text-green-700 rounded-lg p-3 text-center hover:bg-green-200 transition-colors cursor-pointer border-none flex-shrink-0 w-24 snap-start"
+                          >
+                            <div className="text-2xl mb-1" title={getFormatDisplayName(format)}>{getFormatIcon(format)}</div>
+                            <div className="text-sm font-medium">{getFormatDisplayName(format)}</div>
+                          </button>
+                        ))}
+                        {!showAllFormats && secondary.length > 0 && (
+                          <button
+                            onClick={() => setShowAllFormats(true)}
+                            className="bg-green-50 text-green-700 rounded-lg p-3 text-center hover:bg-green-100 transition-colors cursor-pointer border-dashed border-2 border-green-300 flex flex-col items-center justify-center"
+                          >
+                            <div className="text-lg font-semibold">+{secondary.length}</div>
+                            <div className="text-xs font-medium">More formats</div>
+                          </button>
+                        )}
+                        {showAllFormats && secondary.map(format => (
+                          <button 
+                            key={format} 
+                            onClick={() => viewFormat(selectedStory, format)}
+                            className="bg-green-100 text-green-700 rounded-lg p-3 text-center hover:bg-green-200 transition-colors cursor-pointer border-none flex-shrink-0 w-24 snap-start"
+                          >
+                            <div className="text-2xl mb-1" title={getFormatDisplayName(format)}>{getFormatIcon(format)}</div>
+                            <div className="text-sm font-medium">{getFormatDisplayName(format)}</div>
+                          </button>
+                        ))}
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
             )}
@@ -2045,21 +2329,17 @@ const SentimentalApp = () => {
       song: 'Song',
       reel: 'Reel',
       fairytale: 'Fairytale',
+      short_story: 'Fairytale',
       article: 'Article',
       blog_post: 'Blog Post',
       presentation: 'Presentation',
       newsletter: 'Newsletter',
       podcast: 'Podcast',
-      insights: 'Therapeutic Feedback',
+      reflection: 'Reflection',
       growth_summary: 'Growth Summary',
       journal_entry: 'Journal Entry',
-      
-      // Modern Viral Formats
-      tiktok_script: '📱',
-      instagram_reel: '🎬',
-      x_thread: '🧵',
-      youtube_short: '▶️',
-      instagram_story: '📸',
+      book_chapter: 'Book Chapter',
+      letter: 'Letter'
     };
     
     const displayName = displayNames[formatType] || formatType.replace('_', ' ');
@@ -2070,25 +2350,39 @@ const SentimentalApp = () => {
   const renderFormatDetail = () => {
     if (!currentFormat) return null;
 
+    // Determine if logged-in user is the super admin (Marko)
+    const isSuperUser = user && ['TCoWwyV0sMlNiFQgLuXR'].includes(user.id);
+
     // Special designs for different format types
     const renderFormatContent = () => {
-      if (currentFormat.formatType === 'song') {
+      if (currentFormat.formatType === 'song' || currentFormat.formatType === 'podcast') {
         const contentText = typeof formatContent === 'object' ? formatContent.content || '' : formatContent || '';
         
         // Priority: database title > extracted title > generic fallback
-        let songTitle = 'Generated Song';
+        let audioTitle = currentFormat.formatType === 'podcast' ? 'Podcast Episode' : 'Generated Song';
         if (currentFormat.title && currentFormat.title !== 'Default Title') {
-          songTitle = currentFormat.title;
-        } else {
+          audioTitle = currentFormat.title;
+        } else if (currentFormat.formatType === 'song') {
           const extractedTitle = extractSongTitle(contentText);
           if (extractedTitle && extractedTitle !== 'Generated Song') {
-            songTitle = extractedTitle;
+            audioTitle = extractedTitle;
           }
+        } else if (currentFormat.formatType === 'podcast') {
+          audioTitle = currentFormat.story.title || 'Podcast Episode';
         }
         
         // Clean content: remove TITLE: line since we show it separately
         let cleanContent = contentText;
-        if (cleanContent) {
+
+        // If nested content itself is an object, stringify for safe display
+        if (typeof cleanContent === 'object') {
+          cleanContent = JSON.stringify(cleanContent, null, 2);
+        }
+
+        // Ensure plain string
+        cleanContent = String(cleanContent);
+
+        if (cleanContent && typeof cleanContent.replace === 'function') {
           cleanContent = cleanContent.replace(/^TITLE:\s*['""]([^'""]+)['""]?\s*\n?/i, '');
           cleanContent = cleanContent.replace(/^TITLE:\s*([^\n]+)\s*\n?/i, '');
           cleanContent = cleanContent.trim();
@@ -2099,23 +2393,25 @@ const SentimentalApp = () => {
         const hasAudio = audioUrl;
         
         return (
-          <div className="bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl p-6 text-white">
+          <div className={`bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl p-6 text-white`}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="text-3xl">🎵</div>
+                <div className="text-3xl">{currentFormat.formatType === 'podcast' ? '🎧' : '🎵'}</div>
                 <div>
-                  <h2 className="text-xl font-semibold">{songTitle}</h2>
+                  <h2 className="text-xl font-semibold">{audioTitle}</h2>
                   <p className="text-sm opacity-90">Based on: {currentFormat.story.title}</p>
                 </div>
               </div>
               
-              {/* Upload Button */}
-              <button
-                onClick={() => setShowUploadModal(true)}
-                className="mr-2 px-3 py-1 bg-white/20 rounded-lg text-xs hover:bg-white/30 transition-colors"
-              >
-                Upload MP3
-              </button>
+              {/* Upload Button - show only for story owner or super user */}
+              {user && (currentFormat.story.user_id === user.id || isSuperUser) && (
+                <button
+                  onClick={() => setShowUploadModal(true)}
+                  className="mr-2 px-3 py-1 bg-white/20 rounded-lg text-xs hover:bg-white/30 transition-colors"
+                >
+                  Upload Audio
+                </button>
+              )}
             </div>
             
             {/* Audio Player */}
@@ -2127,25 +2423,37 @@ const SentimentalApp = () => {
                   onError={(e) => console.error('Audio error:', e, 'URL:', audioUrl)}
                   onCanPlay={() => console.log('Audio can play:', audioUrl)}
                 >
-                  <source src={audioUrl} type="audio/mpeg" />
+                  <source src={audioUrl} />
                   Your browser does not support the audio element.
                 </audio>
+                {currentFormat.audio_url && renderActions({
+                   slug: audioTitle.replace(/\s+/g,'_').toLowerCase(),
+                   storyId: currentFormat.story.id,
+                   formatType: currentFormat.formatType,
+                   mime: currentFormat.formatType === 'podcast' ? 'audio/wav' : 'audio/mpeg'
+                })}
               </div>
             ) : (
               <div className="bg-black/20 rounded-lg p-4 mb-4">
                 <div className="flex items-center justify-between text-sm mb-2">
-                  <span>🎧 Music Player</span>
-                  <button 
-                    onClick={() => setShowUploadModal(true)}
-                    className="bg-white/20 hover:bg-white/30 px-2 py-1 rounded text-xs transition-colors"
-                  >
-                    Upload MP3
-                  </button>
+                  <span>{currentFormat.formatType === 'podcast' ? '🎙️ Podcast Player' : '🎧 Music Player'}</span>
+                  {user && (currentFormat.story.user_id === user.id || isSuperUser) && (
+                    <button 
+                      onClick={() => setShowUploadModal(true)}
+                      className="bg-white/20 hover:bg-white/30 px-2 py-1 rounded text-xs transition-colors"
+                    >
+                      Upload Audio
+                    </button>
+                  )}
                 </div>
                 <div className="w-full bg-white/20 rounded-full h-2">
                   <div className="bg-white/50 h-2 rounded-full w-0"></div>
                 </div>
-                <div className="text-xs text-center mt-2 opacity-75">Click "Upload MP3" to add audio</div>
+                {user && (currentFormat.story.user_id === user.id || isSuperUser) ? (
+                  <div className="text-xs text-center mt-2 opacity-75">Click "Upload Audio" to add audio</div>
+                ) : (
+                  <div className="text-xs text-center mt-2 opacity-50">{currentFormat.formatType === 'podcast' ? 'Podcast player ready' : 'Music player ready'}</div>
+                )}
               </div>
             )}
 
@@ -2157,14 +2465,53 @@ const SentimentalApp = () => {
             
             <div className="mt-4 text-xs opacity-75">
               {hasAudio ? 
-                '🎵 Music ready to play!' : 
-                '🎧 Upload MP3 file to enable playback'
+                (currentFormat.formatType === 'podcast' ? '🎙️ Podcast ready to play!' : '🎵 Music ready to play!') : 
+                '🎧 Upload audio file to enable playback'
               }
             </div>
           </div>
         );
       }
       
+      // Instagram format with image support
+      if (currentFormat.formatType === 'instagram') {
+        const isOwner = user && (currentFormat.story.user_id === user.id || isSuperUser);
+
+        const handleImageChange = async (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          if (!file.type.startsWith('image/')) {
+            alert('Please select an image');
+            return;
+          }
+          const res = await uploadImage(file, currentFormat.story.id);
+          if (res.success) {
+            setCurrentFormat(prev => ({ ...prev, cover_url: res.image_url }));
+          } else {
+            alert(res.error || 'Upload failed');
+          }
+        };
+
+        return (
+          <div className="space-y-4">
+            {currentFormat.cover_url && <img src={currentFormat.cover_url} alt="Instagram cover" className="w-full max-w-[420px] mx-auto rounded-xl" />}
+            <div className="prose max-w-none">
+              <pre className="whitespace-pre-wrap font-sans text-gray-700 leading-relaxed text-base">
+                {typeof formatContent === 'object' ? formatContent.content || JSON.stringify(formatContent,null,2) : formatContent}
+              </pre>
+            </div>
+            {isOwner && (
+              <div>
+                <input type="file" accept="image/*" id="ig-image-upload" className="hidden" onChange={handleImageChange} />
+                <label htmlFor="ig-image-upload" className="inline-block px-4 py-2 bg-purple-600 text-white rounded-lg cursor-pointer hover:bg-purple-700 text-sm">
+                  {currentFormat.cover_url ? 'Replace Image' : 'Upload Image'}
+                </label>
+              </div>
+            )}
+          </div>
+        );
+      }
+
       if (currentFormat.formatType === 'script' || currentFormat.formatType === 'video' || currentFormat.formatType.includes('reel')) {
         return (
           <div className="bg-gray-900 rounded-xl overflow-hidden">
@@ -2184,7 +2531,14 @@ const SentimentalApp = () => {
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Video Script</h3>
               <div className="prose max-w-none">
                 <pre className="whitespace-pre-wrap font-sans text-gray-700 leading-relaxed text-sm">
-                  {typeof formatContent === 'object' ? formatContent.content || JSON.stringify(formatContent, null, 2) : formatContent}
+                  {(() => {
+                    if (typeof formatContent === 'object') {
+                      const inner = formatContent.content;
+                      if (typeof inner === 'string') return inner;
+                      return JSON.stringify(formatContent, null, 2);
+                    }
+                    return formatContent;
+                  })()}
                 </pre>
               </div>
               <div className="mt-4 text-xs text-gray-500">
@@ -2195,11 +2549,24 @@ const SentimentalApp = () => {
         );
       }
 
-      // Default format display
+      // Prepare safe display text
+      let displayText;
+      if (typeof formatContent === 'object') {
+        if (formatContent.content) {
+          displayText = formatContent.content;
+        } else if (formatContent.error) {
+          displayText = `⚠️ ${formatContent.error}`;
+        } else {
+          displayText = JSON.stringify(formatContent, null, 2);
+        }
+      } else {
+        displayText = formatContent;
+      }
+
       return (
         <div className="prose max-w-none">
           <pre className="whitespace-pre-wrap font-sans text-gray-700 leading-relaxed text-lg">
-            {typeof formatContent === 'object' ? formatContent.content || JSON.stringify(formatContent, null, 2) : formatContent}
+            {displayText}
           </pre>
         </div>
       );
@@ -2210,10 +2577,13 @@ const SentimentalApp = () => {
         <div className="mb-6">
           <button
             onClick={() => {
-              setCurrentView('story-detail');
+              if (selectedStory) {
+                setCurrentView('story-detail');
+              } else {
+                setCurrentView(previousView || 'stories');
+              }
               setCurrentFormat(null);
               setFormatContent('');
-              // Keep the selected story but clear format state
             }}
             className="flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-4"
           >
@@ -2238,8 +2608,8 @@ const SentimentalApp = () => {
                   </div>
                 </div>
                 
-                {/* Edit Button - Only show for story owner */}
-                {user && currentFormat.story.user_id === user.id && (
+                {/* Edit Button - Only show for story owner or super user */}
+                {user && (currentFormat.story.user_id === user.id || isSuperUser) && (
                   <button
                     onClick={() => startEditingFormat(currentFormat, formatContent)}
                     className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
@@ -2259,7 +2629,15 @@ const SentimentalApp = () => {
                   <span className="ml-3 text-gray-600">Loading format...</span>
                 </div>
               ) : (
-                renderFormatContent()
+                <>
+                  {renderFormatContent()}
+                  {renderActions({
+                    slug: (currentFormat.title || getFormatDisplayName(currentFormat.formatType)).replace(/\s+/g,'_').toLowerCase(),
+                    storyId: currentFormat.story.id,
+                    formatType: currentFormat.formatType,
+                    mime: currentFormat.audio_url ? (currentFormat.formatType === 'podcast' ? 'audio/wav' : 'audio/mpeg') : 'text/markdown'
+                  })}
+                </>
               )}
             </div>
           </div>
@@ -2288,7 +2666,7 @@ const SentimentalApp = () => {
           // Update current format with audio URL
           setCurrentFormat(prev => ({...prev, audio_url: result.audio_url}));
           setShowUploadModal(false);
-          alert('Audio uploaded successfully! 🎵');
+          alert('Audio uploaded successfully!');
         } else {
           alert('Upload failed: ' + (result.error || 'Unknown error'));
         }
@@ -2314,7 +2692,7 @@ const SentimentalApp = () => {
           
           <div className="mb-4">
             <p className="text-sm text-gray-600 mb-2">
-              Upload an MP3 file for: <strong>{currentFormat?.title || 'Song'}</strong>
+              Upload an audio file for: <strong>{currentFormat?.title || (currentFormat?.formatType === 'podcast' ? 'Podcast' : 'Song')}</strong>
             </p>
             <p className="text-xs text-gray-500">
               Supported formats: MP3, WAV, OGG, M4A (Max 16MB)
@@ -2329,7 +2707,7 @@ const SentimentalApp = () => {
               </div>
             ) : (
               <>
-                <div className="text-4xl mb-2">🎵</div>
+                <div className="text-4xl mb-2">{currentFormat?.formatType === 'podcast' ? '🎧' : '🎵'}</div>
                 <p className="text-gray-600 mb-2">Choose audio file</p>
                 <input
                   type="file"
@@ -2616,16 +2994,7 @@ const SentimentalApp = () => {
               </svg>
             )
           },
-          { 
-            id: 'inner-space', 
-            label: 'Space', 
-            icon: () => (
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88"/>
-              </svg>
-            )
-          }
+          // Space tab hidden until ready for production
         ].map((tab) => (
           <button
             key={tab.id}
@@ -2666,13 +3035,6 @@ const SentimentalApp = () => {
       </div>
     </div>
   );
-
-
-
-  // Don't render anything until app is initialized to prevent flashing
-  if (!appInitialized) {
-    return null;
-  }
 
   // Edit Story Modal
   const renderEditStoryModal = () => {
@@ -2827,6 +3189,136 @@ const SentimentalApp = () => {
       </div>
     );
   };
+
+  // Generate Book Chapter compilation (requires at least 5 stories)
+  const generateBookChapter = async () => {
+    if (!user || !user.id) {
+      setShowLogin(true);
+      return;
+    }
+
+    setIsGeneratingChapter(true);
+    try {
+      const response = await fetch(`/api/users/${user.id}/generate-book-chapter`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-ID': user.id,
+          'X-User-Email': user.email || ''
+        }
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (response.ok) {
+        const chapterContent = data.content || data.chapter || data.book_chapter || JSON.stringify(data, null, 2);
+        setCurrentFormat({ 
+          formatType: 'book_chapter', 
+          title: data.title || 'Book Chapter', 
+          story: { title: 'Compilation', user_id: user.id }
+        });
+        setFormatContent(chapterContent);
+        setPreviousView('stories');
+        setCurrentView('format-detail');
+      } else {
+        alert(data.message || 'Failed to generate Book Chapter.');
+      }
+    } catch (error) {
+      console.error('Error generating Book Chapter:', error);
+      alert('Error generating Book Chapter. Please try again.');
+    } finally {
+      setIsGeneratingChapter(false);
+    }
+  };
+
+  // Utility: sort formats so Song appears first
+  const sortFormats = (formatsArray) => {
+    if (!Array.isArray(formatsArray)) return [];
+    const priority = PRIMARY_FORMATS;
+    return [...formatsArray].sort((a, b) => {
+      const aIndex = priority.indexOf(a);
+      const bIndex = priority.indexOf(b);
+      if (aIndex === -1 && bIndex === -1) return 0;
+      if (aIndex === -1) return 1;
+      if (bIndex === -1) return -1;
+      return aIndex - bIndex;
+    });
+  };
+
+  // Utility: map legacy names to current ones
+  const normalizeFormat = (fmt) => (fmt === 'short_story' ? 'fairytale' : fmt);
+
+  // ────────────────────────────────────────────────
+  // Curated Story Starters
+  // ────────────────────────────────────────────────
+  const curatedTemplates = [
+    { id: 'identity_reflection', title: 'Who Am I?', emoji: '🪞', teaser: 'Reflect on the moments that shaped your identity.', starter: 'Think of a recent moment where you felt truly like yourself. What happened?' },
+    { id: 'purpose_path', title: 'What Drives Me?', emoji: '🧭', teaser: 'Explore the passions and values that guide you.', starter: "What's one passion that makes you lose track of time? Why is it meaningful to you?" },
+    { id: 'simple_joy', title: 'Small Joys', emoji: '🌿', teaser: 'Celebrate the tiny moments that spark happiness.', starter: 'Describe a small, recent moment that made you smile.' },
+    { id: 'gratitude_note', title: 'Gratitude Snapshot', emoji: '💖', teaser: 'Express thanks to someone or something today.', starter: 'Who or what are you grateful for right now, and why?' }
+  ];
+  const [activeTemplate, setActiveTemplate] = useState(null);
+
+  const startTemplate = (template) => {
+    setActiveTemplate(template);
+    setMessages([{ role: 'assistant', content: template.starter }]);
+    setPreviousView('stories');
+    setCurrentView('share');
+    setShowFullChat(false);
+  };
+
+  const renderCuratedTemplates = () => (
+    <div className="space-y-3">
+      {curatedTemplates.map((tpl) => (
+        <div key={tpl.id} className="bg-gray-50 border border-gray-100 rounded-xl p-4 flex items-start gap-4">
+          <div className="text-2xl">{tpl.emoji}</div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-gray-900">{tpl.title}</h3>
+            <p className="text-sm text-gray-600 mb-2">{tpl.teaser}</p>
+            <button
+              onClick={() => startTemplate(tpl)}
+              className="bg-purple-600 text-white px-3 py-1 rounded-md text-xs font-medium hover:bg-purple-700 transition-colors"
+            >Start</button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  // Collapsible Story Starters panel visibility
+  const [showStarters, setShowStarters] = useState(() => {
+    return localStorage.getItem('sentimental_show_starters') === 'true';
+  });
+
+  const toggleStarters = () => {
+    const next = !showStarters;
+    setShowStarters(next);
+    localStorage.setItem('sentimental_show_starters', next);
+  };
+
+  const renderInspireBanner = () => (
+    <div className="mb-8">
+      <div onClick={toggleStarters} className="cursor-pointer bg-purple-50 border border-purple-100 rounded-full px-4 py-3 flex items-center justify-between gap-3 hover:bg-purple-100">
+        <span className="flex items-center gap-2 text-sm font-medium text-gray-800"><Sparkles /> Need ideas? Tap to get inspired</span>
+        {showStarters ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+      </div>
+      {showStarters && (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mt-4">
+          <h3 className="text-sm font-semibold text-gray-800 mb-3">Story Starters</h3>
+          {renderCuratedTemplates()}
+        </div>
+      )}
+    </div>
+  );
+
+  // refs for chat scrolling & focus
+  const messagesContainerRef = React.useRef(null);
+  const messageInputRef = React.useRef(null);
+
+  // Don't render anything until app is initialized to prevent flashing
+  if (!appInitialized) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
