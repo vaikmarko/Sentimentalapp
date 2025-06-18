@@ -178,36 +178,40 @@ const makeBlobUrl = (text, mime='text/markdown') => {
 
 const shareLink = async (title, url, type='text') => {
   try {
-    if (navigator.share) {
-      await navigator.share({ title: 'Sentimental', text: title, url });
-    } else {
-      await navigator.clipboard.writeText(url);
-      alert('Link copied!');
-    }
+    await navigator.clipboard.writeText(url);
+    alert('Link copied!');
     window.track?.('share_clicked', { type });
   } catch {}
 };
 
-function renderActions({ slug, content='', mime='text/markdown', url='' }) {
+function renderActions({ slug, storyId=null, formatType='', mime='text/markdown', url='' }) {
   const isAudio = mime.startsWith('audio');
-  const downloadUrl = url || makeBlobUrl(content, mime);
-  const ext = isAudio ? (mime.split('/')[1] || 'audio') : 'md';
+
+  // Build URL to share.
+  const shareUrl = url || (() => {
+    try {
+      const base = window.location.origin;
+      if (storyId) {
+        // Prefer dedicated short-link route for cleaner URLs
+        const fmtSegment = formatType ? `/${encodeURIComponent(formatType)}` : '';
+        return `${base}/s/${storyId}${fmtSegment}`;
+      }
+      // Fallback to starter slug via /app
+      const appBase = `${base}/app`;
+      return `${appBase}?starter=${encodeURIComponent(slug)}`;
+    } catch {
+      return '';
+    }
+  })();
   return (
     <div className="flex gap-3 mt-4">
-      <a
-        href={downloadUrl}
-        download={`${slug}.${ext}`}
-        onClick={() => window.track?.('download', { type: isAudio ? 'audio' : 'text' })}
-        className="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
-        title="Download"
-      ><Download size={16}/></a>
       <button
-        onClick={() => shareLink(slug, downloadUrl, isAudio ? 'audio' : 'text')}
+        onClick={() => shareLink(slug, shareUrl, isAudio ? 'audio' : 'text')}
         className="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
         title="Share link"
       ><Share2 size={16}/></button>
     </div>
-);
+  );
 }
 
 // Main App Component
@@ -259,7 +263,7 @@ const SentimentalApp = () => {
   const [showFullChat, setShowFullChat] = useState(false);
 
   // Super admin helper – Marko can edit any story
-  const isSuperUser = user && (user.email === 'vaikmarko@gmail.com' || user.id === 'TCoWwyV0sMlNiFQgLuXR');
+  const isSuperUser = user && ['TCoWwyV0sMlNiFQgLuXR'].includes(user.id);
 
   // Helper: safe timestamp → milliseconds (fallback 0)
   const toMillis = (val) => {
@@ -448,6 +452,27 @@ const SentimentalApp = () => {
       if (response.ok) {
         const data = await response.json();
         setStories(data);
+
+        // If URL contains ?story=<id> (and optional &format=<type>), auto-open it
+        try {
+          const params = new URLSearchParams(window.location.search);
+          const storyIdParam = params.get('story');
+          if (storyIdParam) {
+            const storyObj = data.find((s) => String(s.id) === String(storyIdParam));
+            if (storyObj) {
+              setSelectedStory(storyObj);
+              setCurrentView('story-detail');
+
+              const formatParam = params.get('format');
+              if (formatParam) {
+                // Delay viewFormat slightly to ensure state updated
+                setTimeout(() => viewFormat(storyObj, formatParam), 100);
+              }
+            }
+          }
+        } catch (e) {
+          console.error('Error processing share link params:', e);
+        }
       }
     } catch (error) {
       console.error('Error fetching stories:', error);
@@ -1986,7 +2011,7 @@ const SentimentalApp = () => {
                     
                     <div className="flex items-center gap-2">
                       {/* Edit Button - Only show for story owner or super user */}
-                      {user && (story.user_id === user.id || story.author_id === user.id || isSuperUser) && (
+                      {user && (story.user_id === user.id || isSuperUser) && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -2014,7 +2039,7 @@ const SentimentalApp = () => {
                       <span className="text-gray-600">
                         {story.public ? 'Public' : 'Private'}
                       </span>
-                      {user && (story.user_id === user.id || story.author_id === user.id || isSuperUser) && (
+                      {user && (story.user_id === user.id || isSuperUser) && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -2119,7 +2144,7 @@ const SentimentalApp = () => {
               </div>
               
               {/* Edit Button - Only show for story owner or super user */}
-              {user && (selectedStory.user_id === user.id || selectedStory.author_id === user.id || isSuperUser) && (
+              {user && (selectedStory.user_id === user.id || isSuperUser) && (
                 <button
                   onClick={() => startEditingStory(selectedStory)}
                   className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
@@ -2139,7 +2164,7 @@ const SentimentalApp = () => {
               </p>
               {renderActions({
                  slug: (selectedStory.title || 'story').replace(/\s+/g,'_').toLowerCase(),
-                 content: selectedStory.content || '',
+                 storyId: selectedStory.id,
                  mime: 'text/markdown'
               })}
             </div>
@@ -2297,7 +2322,7 @@ const SentimentalApp = () => {
     if (!currentFormat) return null;
 
     // Determine if logged-in user is the super admin (Marko)
-    const isSuperUser = user && (user.email === 'vaikmarko@gmail.com' || user.id === 'TCoWwyV0sMlNiFQgLuXR');
+    const isSuperUser = user && ['TCoWwyV0sMlNiFQgLuXR'].includes(user.id);
 
     // Special designs for different format types
     const renderFormatContent = () => {
@@ -2374,6 +2399,8 @@ const SentimentalApp = () => {
                 </audio>
                 {currentFormat.audio_url && renderActions({
                    slug: audioTitle.replace(/\s+/g,'_').toLowerCase(),
+                   storyId: currentFormat.story.id,
+                   formatType: currentFormat.formatType,
                    url: currentFormat.audio_url,
                    mime: currentFormat.formatType === 'podcast' ? 'audio/wav' : 'audio/mpeg'
                 })}
@@ -2535,7 +2562,16 @@ const SentimentalApp = () => {
                   <span className="ml-3 text-gray-600">Loading format...</span>
                 </div>
               ) : (
-                renderFormatContent()
+                <>
+                  {renderFormatContent()}
+                  {renderActions({
+                    slug: (currentFormat.title || getFormatDisplayName(currentFormat.formatType)).replace(/\s+/g,'_').toLowerCase(),
+                    storyId: currentFormat.story.id,
+                    formatType: currentFormat.formatType,
+                    mime: currentFormat.audio_url ? (currentFormat.formatType === 'podcast' ? 'audio/wav' : 'audio/mpeg') : 'text/markdown',
+                    url: currentFormat.audio_url || ''
+                  })}
+                </>
               )}
             </div>
           </div>

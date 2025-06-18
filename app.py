@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request, send_from_directory
+from flask import Flask, render_template, jsonify, request, send_from_directory, redirect
 from datetime import datetime
 import json
 import re
@@ -2900,6 +2900,23 @@ def generate_book_chapter(user_id):
     except Exception as e:
         logger.error(f"Error generating book chapter: {e}")
         return jsonify({'error': str(e)}), 500
+
+# -------------------------------------------------------
+# Public share short-links (redirect to SPA with query params)
+# e.g.  /s/123           → /app?story=123
+#       /s/123/podcast   → /app?story=123&format=podcast
+# -------------------------------------------------------
+
+
+@app.route('/s/<string:story_id>', defaults={'format_type': None})
+@app.route('/s/<string:story_id>/<string:format_type>')
+def short_link(story_id, format_type):
+    """Generate a simple, share-friendly URL that redirects to the SPA with the
+    required query parameters so the front-end can open the story (and format)."""
+    target = f"/app?story={story_id}"
+    if format_type:
+        target += f"&format={format_type}"
+    return redirect(target, code=302)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080))) 
