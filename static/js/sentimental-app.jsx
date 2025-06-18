@@ -1633,9 +1633,18 @@ const SentimentalApp = () => {
                         return (
                           <div className="flex flex-wrap gap-2 items-center">
                             {primary.map(format => (
-                              <span key={format} title={getFormatDisplayName(format)} className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 rounded-md text-xs font-medium">
+                              <button
+                                key={format}
+                                title={getFormatDisplayName(format)}
+                                onClick={() => {
+                                  setPreviousView('discover');
+                                  setSelectedStory(story);
+                                  viewFormat(story, format);
+                                }}
+                                className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 rounded-md text-xs font-medium hover:bg-purple-200 transition-colors"
+                              >
                                 {getFormatIcon(format)} {getFormatDisplayName(format)}
-                              </span>
+                              </button>
                             ))}
                             {extraCount > 0 && (
                               <span className="text-xs text-gray-500">+{extraCount} more</span>
