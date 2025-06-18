@@ -2401,7 +2401,6 @@ const SentimentalApp = () => {
                    slug: audioTitle.replace(/\s+/g,'_').toLowerCase(),
                    storyId: currentFormat.story.id,
                    formatType: currentFormat.formatType,
-                   url: currentFormat.audio_url,
                    mime: currentFormat.formatType === 'podcast' ? 'audio/wav' : 'audio/mpeg'
                 })}
               </div>
@@ -2568,8 +2567,7 @@ const SentimentalApp = () => {
                     slug: (currentFormat.title || getFormatDisplayName(currentFormat.formatType)).replace(/\s+/g,'_').toLowerCase(),
                     storyId: currentFormat.story.id,
                     formatType: currentFormat.formatType,
-                    mime: currentFormat.audio_url ? (currentFormat.formatType === 'podcast' ? 'audio/wav' : 'audio/mpeg') : 'text/markdown',
-                    url: currentFormat.audio_url || ''
+                    mime: currentFormat.audio_url ? (currentFormat.formatType === 'podcast' ? 'audio/wav' : 'audio/mpeg') : 'text/markdown'
                   })}
                 </>
               )}
