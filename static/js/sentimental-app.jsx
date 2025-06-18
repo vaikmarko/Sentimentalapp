@@ -1649,7 +1649,7 @@ const SentimentalApp = () => {
       {/* Chat Container */}
       <div className="flex-1 max-w-4xl mx-auto w-full flex flex-col min-h-0">
         {/* Messages - Scrollable area */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 min-h-0">
+        <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-6 space-y-6 min-h-0">
           {messages.length === 0 ? (
             <div className="text-center py-12">
               {!user || !user.id || user.id === 'anonymous' || user.id === 'anonymous_user' || user.id === '' || user.id === 'null' || user.id === 'undefined' ? (
