@@ -212,6 +212,20 @@ const SentimentalApp = () => {
   const [showAllUserStories, setShowAllUserStories] = useState(false);
   const [showFullChat, setShowFullChat] = useState(false);
 
+  // Refs for auto-scroll and focus on mobile chat view
+  const messagesContainerRef = useRef(null);
+  const messageInputRef = useRef(null);
+
+  useEffect(() => {
+    if (currentView === 'share' && window.innerWidth < 768) {
+      // let layout settle then ensure input visible
+      setTimeout(() => {
+        messagesContainerRef.current?.scrollTo({ top: messagesContainerRef.current.scrollHeight });
+        messageInputRef.current?.focus();
+      }, 300);
+    }
+  }, [currentView]);
+
   // Super admin helper – Marko can edit any story
   const isSuperUser = user && (user.email === 'vaikmarko@gmail.com' || user.id === 'TCoWwyV0sMlNiFQgLuXR');
 
@@ -1771,6 +1785,7 @@ const SentimentalApp = () => {
             // Show normal chat input for authenticated users
             <div className="flex gap-3">
               <textarea
+                ref={messageInputRef}
                 rows={2}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
