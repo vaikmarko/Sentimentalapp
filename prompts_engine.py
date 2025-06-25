@@ -276,6 +276,10 @@ Remember: You're not trying to fix or solve anything. You're helping them explor
         
         base_prompt = self._conversation_prompts['system_base']
         
+        # Always encourage conversational flow continuity
+        base_prompt += ("\n\nGuideline: If the user has not indicated the conversation is over, "
+                        "end your reply with an inviting follow-up question that naturally encourages them to share more.")
+        
         # Add context-specific guidance
         context_additions = []
         
@@ -733,6 +737,8 @@ Create a 300-500 word story that:
 5. **Makes Them the Hero**: Help them see their growth and strength, but in their own words/style
 
 6. **Stays Relatable**: Other people their age should read this and think "I totally get that" or "I've felt that way too"
+
+7. **Only Use Provided Details**: Do NOT add any new events, characters, explanations, or factual details that the user did not explicitly mention in the conversation. If something is unclear or missing, simply omit it rather than inventing or assuming.
 
 WRITING STYLE:
 - Write in first person ("I realized..." "I found myself..." "I learned...")
