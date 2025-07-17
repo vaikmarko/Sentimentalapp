@@ -14,8 +14,11 @@
     "@babel/cli": "^7.23.4",
     "@babel/core": "^7.23.5",
     "@babel/preset-react": "^7.23.3",
-    "tailwindcss": "^3.4.16",
-    "@tailwindcss/forms": "^0.5.7"
+    "@tailwindcss/forms": "^0.5.7",
+    "@tailwindcss/postcss": "^4.1.11",
+    "tailwindcss": "^3.4.16"
   },
-  "dependencies": {}
-} 
+  "dependencies": {
+    "react-markdown": "^10.1.0"
+  }
+}

@@ -17,45 +17,56 @@ import openai
 import random
 from werkzeug.utils import secure_filename
 import uuid
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
+import patch_ng
+import json as _json
+# JSON Schema validation (used for validating knowledge objects)
+try:
+    import jsonschema as _jsonschema
+except ImportError:
+    _jsonschema = None
 
-# Load environment variables from .env files
-load_dotenv('functions/.env')  # Load from functions/.env first
-load_dotenv()  # Then try root .env as fallback
+# Load environment variables from nearest .env (only once)
+load_dotenv(find_dotenv())
 
-# Import our intelligent engines
+# Configure OpenAI – prefer MENTALOS_OPENAI_API_KEY but fall back to OPENAI_API_KEY
+openai.api_key = os.getenv('MENTALOS_OPENAI_API_KEY') or os.getenv('OPENAI_API_KEY')
+# If key looks like a placeholder or is missing, wipe it so code drops to safe-mode
+if openai.api_key and not openai.api_key.startswith('sk-'):
+    print('WARNING: OpenAI API key appears to be invalid or a placeholder; ignoring it until a real key is provided')
+    openai.api_key = None
+
+# If we have a valid key under MENTALOS_OPENAI_API_KEY but OPENAI_API_KEY is either missing or clearly a placeholder,
+# mirror the good key over so any legacy modules that still read OPENAI_API_KEY pick it up.
+if os.getenv('MENTALOS_OPENAI_API_KEY', '').startswith('sk-'):
+    good_key = os.getenv('MENTALOS_OPENAI_API_KEY')
+    bad_key = os.getenv('OPENAI_API_KEY', '')
+    if not bad_key.startswith('sk-'):
+        os.environ['OPENAI_API_KEY'] = good_key
+
+# --------------------------------------------------------------------
+
+import random
+from werkzeug.utils import secure_filename
+import uuid
+
+# Import our intelligent engines (these may touch openai during init, so do it *after* key sanitisation)
 from smart_story_engine import SmartStoryEngine
 from personal_context_mapper import PersonalContextMapper
 from knowledge_engine import KnowledgeEngine
 from formats_generation_engine import FormatsGenerationEngine
 from format_types import FormatType
 from prompts_engine import PromptsEngine, PromptType, AIProviderManager
-# Utils functions (moved inline to avoid import issues)
-def is_anonymous_user(user_id):
-    """Check if user is anonymous"""
-    return user_id and (user_id.startswith('anon_') or user_id == 'anonymous')
 
-def allowed_file(filename):
-    """Check if file extension is allowed"""
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-def is_valid_access_code(code):
-    """Check if access code is valid"""
-    valid_codes = ['ALPHA2024', 'BETA2024', 'DEMO2024']
-    return code in valid_codes
-
-def is_demo_user(user_id):
-    """Check if user is demo user"""
-    return user_id and user_id.startswith('demo_')
+# The logger isn't configured until now, replicate the earlier messages
+if not openai.api_key:
+    logging.warning('OPENAI_API_KEY not found in environment variables – OpenAI features disabled')
+else:
+    logging.info('OpenAI API key loaded from environment variables')
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-# Configure OpenAI
-openai.api_key = os.getenv('OPENAI_API_KEY')
-if not openai.api_key:
-    logger.warning("OPENAI_API_KEY not found in environment variables")
 
 # Environment detection
 ENVIRONMENT = os.getenv('ENVIRONMENT', 'test')  # production, demo, test
@@ -135,10 +146,31 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 # Extend allowed extensions for image uploads
 ALLOWED_EXTENSIONS = {'mp3', 'wav', 'ogg', 'm4a', 'jpg', 'jpeg', 'png', 'webp'}
 
+# MentalOS file system base directory
+BASE_MENTALOS_DIR = os.path.join(os.getcwd(), 'MentalOS', 'user_data')
+os.makedirs(BASE_MENTALOS_DIR, exist_ok=True)
+
 # allowed_file function moved to utils.py
 
 # Ensure upload directory exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+def is_anonymous_user(user_id):
+    """Check if user is anonymous"""
+    return user_id and (user_id.startswith('anon_') or user_id == 'anonymous')
+
+def allowed_file(filename):
+    """Check if file extension is allowed"""
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def is_valid_access_code(code):
+    """Check if access code is valid"""
+    valid_codes = ['ALPHA2024', 'BETA2024', 'DEMO2024']
+    return code in valid_codes
+
+def is_demo_user(user_id):
+    """Check if user is demo user"""
+    return user_id and user_id.startswith('demo_')
 
 def analyze_text(text):
     """Analyzes text and finds themes, emotions and connections"""
@@ -3017,5 +3049,815 @@ def upload_image():
         logger.error(f"Error uploading image: {str(e)}")
         return jsonify({'error': 'Upload failed', 'details': str(e)}), 500
 
+# =============================================================================
+# MentalOS – File helper utilities
+# =============================================================================
+
+BASE_MENTALOS_DIR = os.path.join('MentalOS', 'user_data')
+os.makedirs(BASE_MENTALOS_DIR, exist_ok=True)
+
+
+def _sanitize_subpath(path: str) -> str:
+    """Sanitize a relative file path so it cannot escape the user directory."""
+    if path is None:
+        raise ValueError("Path cannot be None")
+    # Normalize and strip leading slashes
+    normalized = os.path.normpath(path).lstrip(os.sep)
+    # Disallow parent traversal
+    if normalized.startswith('..') or '..' + os.sep in normalized:
+        raise ValueError("Invalid path")
+    return normalized
+
+
+def _get_user_dir(user_id: str) -> str:
+    """Return (and create if absent) the directory for a MentalOS user."""
+    user_safe = secure_filename(str(user_id)) or 'anonymous'
+    user_dir = os.path.join(BASE_MENTALOS_DIR, user_safe)
+    os.makedirs(user_dir, exist_ok=True)
+    return user_dir
+
+
+def open_file_fs(user_id: str, path: str) -> str:
+    """Open and return the contents of a MentalOS file. Returns empty string if not found."""
+    rel = _sanitize_subpath(path)
+    abs_path = os.path.join(_get_user_dir(user_id), rel)
+    if not os.path.exists(abs_path):
+        return ""
+    with open(abs_path, 'r', encoding='utf-8') as f:
+        return f.read()
+
+
+def append_file_fs(user_id: str, path: str, text: str) -> str:
+    """Append text to a MentalOS file (creates it and parent dirs if needed)."""
+    rel = _sanitize_subpath(path)
+    abs_path = os.path.join(_get_user_dir(user_id), rel)
+    os.makedirs(os.path.dirname(abs_path), exist_ok=True)
+    with open(abs_path, 'a', encoding='utf-8') as f:
+        f.write(text)
+        if not text.endswith('\n'):
+            f.write('\n')
+    return "OK"
+
+
+def overwrite_file_fs(user_id: str, path: str, text: str) -> str:
+    """Overwrite (or create) a MentalOS file with provided text."""
+    rel = _sanitize_subpath(path)
+    abs_path = os.path.join(_get_user_dir(user_id), rel)
+    os.makedirs(os.path.dirname(abs_path), exist_ok=True)
+    with open(abs_path, 'w', encoding='utf-8') as f:
+        f.write(text)
+    return "OK"
+
+
+# =============================================================================
+# MentalOS – Chat endpoint (AI-powered with function calling)
+# =============================================================================
+
+@app.route('/api/mental-os/files/<path:filename>', methods=['GET'])
+def get_mental_os_file(filename):
+    """Get the content of a MentalOS file without triggering AI processing."""
+    try:
+        user_id = request.headers.get('X-User-ID') or request.args.get('user_id') or 'anonymous'
+        content = open_file_fs(user_id, filename)
+        return jsonify({'content': content, 'path': filename})
+    except Exception as e:
+        logger.error(f"Error reading MentalOS file {filename}: {e}")
+        return jsonify({'error': str(e), 'content': ''}), 500
+
+def build_user_knowledge_model(user_id: str) -> dict:
+    """Aggregate all user files into a unified knowledge model: {filename: content}"""
+    user_dir = _get_user_dir(user_id)
+    knowledge = {}
+    for root, _, files in os.walk(user_dir):
+        for f in files:
+            rel_path = os.path.relpath(os.path.join(root, f), user_dir)
+            try:
+                with open(os.path.join(root, f), 'r', encoding='utf-8') as file:
+                    content = file.read()
+                    knowledge[rel_path] = content
+            except Exception as e:
+                knowledge[rel_path] = f"ERROR: {e}"
+    return knowledge
+
+# Add a utility to generate a patch prompt and apply a minimal patch
+
+def propose_patch_with_llm(user_message, file_content):
+    """Ask the LLM to propose a minimal patch (find/replace) for the file given the user message."""
+    system_prompt = (
+        "You are a context-aware agent. Given the following file and the user's message, propose a minimal patch to update only the new information. "
+        "Return ONLY a JSON object with 'find' (the exact string to replace) and 'replace' (the new string), or an empty object if no change is needed. Do not return the full file."
+    )
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": f"User message: {user_message}\n\nFile content:\n{file_content}"}
+    ]
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo-1106",
+            messages=messages,
+            max_tokens=200,
+            temperature=0.3,
+        )
+        import json
+        patch = json.loads(response.choices[0].message.content.strip())
+        return patch
+    except Exception as e:
+        return {}
+
+def propose_unified_diff_with_llm(user_message, file_content):
+    """Ask the LLM to propose a unified diff for the file given the user message."""
+    system_prompt = (
+        "You are a context-aware agent. Given the following file and the user's message, propose a minimal unified diff (in standard unified diff format) to update only the new information. "
+        "Return ONLY the unified diff as plain text. Do not return the full file or any explanation."
+    )
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": f"User message: {user_message}\n\nFile content:\n{file_content}"}
+    ]
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo-1106",
+            messages=messages,
+            max_tokens=400,
+            temperature=0.3,
+        )
+        diff = response.choices[0].message.content.strip()
+        return diff
+    except Exception as e:
+        return ""
+
+@app.route('/api/mental-os/chat/message', methods=['POST'])
+def process_mental_chat_message():
+    """Endpoint for MentalOS Therapist Bot that can read/write user markdown files."""
+    try:
+        data = request.get_json(force=True)
+        # Front-end now sends the currently active file and list of open files for richer context
+        active_file = data.get('active_file')
+        open_files_ctx = data.get('open_files') or []
+        missing_fields = data.get('missing_fields') or []
+        # Compute missing fields here if front-end did not supply them
+        if (not missing_fields) and active_file:
+            current_content = file_contents.get(active_file, '')
+            if not current_content:
+                try:
+                    current_content = open_file_fs(user_id, active_file)
+                except Exception:
+                    pass
+            missing_fields = compute_missing_fields(active_file, current_content)
+
+        user_id = data.get('user_id') or request.headers.get('X-User-ID') or 'anonymous'
+        if 'messages' in data:
+            messages = data['messages']
+        else:
+            history = data.get('conversation_history', [])
+            messages = history.copy()
+            incoming = data.get('message')
+            if incoming:
+                messages.append({"role": "user", "content": incoming})
+        if not messages:
+            return jsonify({'error': 'No messages provided'}), 400
+
+        mental_api_key = os.getenv('MENTALOS_OPENAI_API_KEY')
+        if mental_api_key:
+            openai.api_key = mental_api_key
+        elif not openai.api_key:
+            return jsonify({
+                'error': 'OpenAI API key not configured',
+                'ai_response': '🔑 **API Key Missing**\n\nI need a valid OpenAI API key to operate. Please add your key to the `.env` file as `MENTALOS_OPENAI_API_KEY=<your-key>` and restart the server.',
+                'setup_required': True
+            }), 200
+
+        user_dir = _get_user_dir(user_id)
+        logger.info(f"MentalOS: User directory for {user_id}: {user_dir}")
+        existing_files = []
+        file_contents = {}
+        for root, _, files in os.walk(user_dir):
+            for f in files:
+                rel_path = os.path.relpath(os.path.join(root, f), user_dir)
+                existing_files.append(rel_path)
+                try:
+                    with open(os.path.join(root, f), 'r', encoding='utf-8') as file:
+                        content = file.read()
+                        file_contents[rel_path] = content
+                except:
+                    file_contents[rel_path] = ''
+        logger.info(f"MentalOS: Found files for user {user_id}: {existing_files}")
+
+        user_message = ''
+        for m in reversed(messages):
+            if m.get('role') == 'user':
+                user_message = m.get('content', '')
+                break
+
+        # If the user just answered a placeholder question, patch it directly instead of relying on the LLM diff
+        diffs_applied = []
+        direct_patch_done = False
+        if active_file and missing_fields:
+            # Try each missing field until we manage to extract a plausible value
+            for candidate_field in missing_fields:
+                entry = KNOWLEDGE_MAP.get(active_file, {})
+                placeholder = entry.get('fields', {}).get(candidate_field)
+                if not placeholder:
+                    continue
+                if active_file not in file_contents:
+                    continue
+
+                from patch_engine import replace_placeholder
+                import re as _re
+
+                value: str | None = None
+                lowered_field = candidate_field.lower()
+
+                if lowered_field == 'name':
+                    # Only capture the name when the user explicitly states it to avoid mis-classifying locations.
+                    m_val = _re.search(r"\b(?:my\s+name\s+is|i(?:'|\s*a)?m)\s+([A-Z][a-zA-Z]+)\b", user_message, flags=_re.IGNORECASE)
+                    if m_val:
+                        value = m_val.group(1).strip()
+                    # No fallback – skip updating Name if we don't have a clear signal
+
+                elif 'age' in lowered_field:
+                    m_age = _re.search(r"\b(\d{1,3})\b", user_message)
+                    if m_age and 0 < int(m_age.group(1)) < 120:
+                        value = m_age.group(1)
+                elif 'location' in lowered_field:
+                    # Look for a phrase like "in Paris" or just a capitalised city/country combo
+                    m_loc = _re.search(r"\b(?:in|at|from)\s+([A-Z][A-Za-z\s,]{2,40})", user_message)
+                    if m_loc:
+                        cand = m_loc.group(1).strip().strip('.')
+                        # collapse extra spaces
+                        cand = _re.sub(r"\s{2,}", " ", cand)
+                        value = cand if 1 <= len(cand.split()) <= 6 else None
+                    else:
+                        # Fallback: use last capitalised phrase if it contains a comma (City, Country)
+                        caps = _re.findall(r"[A-Z][A-Za-z]+(?:,\s*[A-Z][A-Za-z]+)+", user_message)
+                        if caps:
+                            value = caps[-1]
+                elif 'current role' in lowered_field or 'role' == lowered_field:
+                    m_role = _re.search(r"\b(?:i\s+am|i'm|im)\s+(?:a|an)?\s*([^.,;]+)", user_message, flags=_re.IGNORECASE)
+                    if m_role:
+                        raw = m_role.group(1).strip()
+                        clean = raw.split(' in ')[0].title()
+                        # basic sanity: 1-5 words, no digits
+                        if 1 <= len(clean.split()) <= 5 and not _re.search(r"\d", clean):
+                            value = clean
+                elif 'relationship' in lowered_field:
+                    rel_words = {'single','married','partnered','dating','engaged','divorced','separated'}
+                    m_rel = _re.search(r"\b(single|married|partnered|engaged|dating|divorced|separated)\b", user_message, flags=_re.IGNORECASE)
+                    if m_rel:
+                        value = m_rel.group(1).capitalize()
+                else:
+                    # Generic fallback – use raw trimmed message.
+                    value = user_message.strip() if user_message.strip() else None
+
+                # Only patch if we extracted a plausible value and actual replacement occurred.
+                if value:
+                    original_content = file_contents[active_file]
+                    new_content_active = replace_placeholder(original_content, placeholder, value)
+                    if new_content_active != original_content:
+                        overwrite_file_fs(user_id, active_file, new_content_active)
+                        file_contents[active_file] = new_content_active  # keep in-memory copy fresh
+                        diffs_applied.append({
+                            "operation": "overwrite_file",
+                            "path": active_file,
+                            "snippet": new_content_active,
+                            "reason": f"Filled {candidate_field}"
+                        })
+                        direct_patch_done = True
+                        # Recompute missing fields so the follow-up question targets the next empty placeholder
+                        missing_fields = compute_missing_fields(active_file, new_content_active)
+                        break
+
+        # Decide which files to patch – prioritise active_file if provided (LLM diff)
+        if active_file and active_file in file_contents and not direct_patch_done:
+            files_iter = [(active_file, file_contents[active_file])]
+        else:
+            files_iter = file_contents.items()
+
+        for file_path, file_content in files_iter:
+            diff = propose_unified_diff_with_llm(user_message, file_content)
+            if diff and diff.startswith('---'):
+                patch_set = patch_ng.fromstring(diff)
+                patched = patch_ng.patch(file_content, patch_set)
+                if patched is not None and patched != file_content:
+                    overwrite_file_fs(user_id, file_path, patched)
+                    diffs_applied.append({
+                        "operation": "overwrite_file",
+                        "path": file_path,
+                        "snippet": patched,
+                        "diff": diff
+                    })
+        # Always generate a conversational reply
+        ai_reply = None
+        try:
+            user_name = None
+            if active_file and '**Name**' in file_contents.get(active_file, ''):
+                import re as _re
+                m_name = _re.search(r"\*\*Name\*\*\s*\|\s*([^|\n]+)", file_contents[active_file])
+                if m_name:
+                    name_candidate = m_name.group(1).strip().strip('*_')
+                    if name_candidate and '[' not in name_candidate:
+                        user_name = name_candidate
+
+            if active_file and missing_fields:
+                # Build context-aware prompt
+                chat_prompt = (
+                    f"You are a therapist assistant helping a user fill out {active_file}. "
+                    + (f"The user's name is {user_name}. " if user_name else "") +
+                    f"The field **{missing_fields[0]}** is still empty. Ask ONE empathetic, open-ended question to learn that field. "
+                    "If the user just provided that value, briefly acknowledge and then ask for the next missing field."
+                )
+            elif active_file:
+                chat_prompt = (
+                    f"You are a world-class therapist helping a user fill out their personal file: {active_file}. "
+                    + (f"The user's name is {user_name}. " if user_name else "") +
+                    "Respond with empathy, briefly reflect what the user said, then ask ONE open-ended follow-up question that will elicit new useful information for that file. "
+                    "If the user already provided new concrete facts, incorporate them into the appropriate section when proposing a diff."
+                )
+            else:
+                chat_prompt = "You are a friendly, thoughtful assistant. Respond conversationally and empathetically."
+            chat_prompt += " When you learn a concrete fact that belongs in a field, call the knowledge_object function with the appropriate 'placeholder_update'. For therapist insights, call knowledge_object with 'therapist_note'."
+            chat_messages = [{"role": "system", "content": chat_prompt}, {"role": "user", "content": user_message}]
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo-1106",
+                messages=chat_messages,
+                functions=EXTRACTION_FUNCTIONS,
+                function_call="auto",
+                max_tokens=200,
+                temperature=0.7,
+            )
+            ai_reply = response.choices[0].message.content.strip()
+            # If the model returned any function calls, apply them
+            finish_reason = response.choices[0].finish_reason
+            if finish_reason == "function_call":
+                func_call = response.choices[0].message.function_call
+                try:
+                    obj = _json.loads(func_call.arguments)
+                    if isinstance(obj, dict):
+                        objects = [obj]
+                    else:
+                        objects = obj
+                    fc_diffs = _apply_knowledge_objects(user_id, objects)
+                    diffs_applied.extend(fc_diffs)
+                except Exception as _e:
+                    logger.warning(f"Could not parse function-call arguments: {_e}")
+        except Exception as e:
+            logger.error(f"OpenAI ChatCompletion failed: {e}")
+            ai_reply = "Hi! How can I help you today? (AI system unavailable)"
+        if diffs_applied:
+            diff_chunks = [d['diff'] for d in diffs_applied if 'diff' in d]
+            return {
+                "message": ai_reply,
+                "sources": diffs_applied,
+                "diff_preview": '\n\n'.join(diff_chunks) if diff_chunks else ''
+            }
+
+        # ------------------------------
+        # Deterministic fallback: append goal
+        # ------------------------------
+        lowered = user_message.lower()
+        if 'goal' in lowered and 'add' in lowered:
+            import re as _re
+            m = _re.search(r"'([^']+)'", user_message)
+            if m:
+                goal_line = m.group(1).strip()
+                if goal_line:
+                    goals_path = 'goals.md'
+                    existing = open_file_fs(user_id, goals_path)
+                    if goal_line not in existing:
+                        new_content = (existing.rstrip() + '\n' if existing.strip() else '') + f"- {goal_line}.\n"
+                        overwrite_file_fs(user_id, goals_path, new_content)
+                        return {
+                            "message": ai_reply,
+                            "sources": [{"operation": "append_goal", "path": goals_path, "text": goal_line}],
+                            "diff_preview": f"Appended '- {goal_line}.' to {goals_path}"
+                        }
+
+        # Fallback 2 – detect explicit "my name is ..." introduction only.
+        # This prevents mistaking locations like "Tallinn" for the user's name.
+        name_match = None
+        import re as _re
+        if "name" in user_message.lower():
+            m2 = _re.search(r"my\s+name\s+is\s+([A-Z][a-zA-Z]+)", user_message, flags=_re.IGNORECASE)
+            if m2:
+                name_match = m2.group(1).strip()
+
+        if name_match:
+            about_path = 'AboutMe.md'
+            about_content = open_file_fs(user_id, about_path)
+            # Attempt direct placeholder replace first
+            variants = ["[Your name here]", "*[Your name here]*", "**[Your name here]**"]
+            for var in variants:
+                if var in about_content:
+                    about_content = about_content.replace(var, name_match, 1)
+                    break
+            # If Name row exists but placeholder not found, update row value
+            if _re.search(r"\*\*Name\*\*\s*\|", about_content):
+                new_about = _re.sub(r"\*\*Name\*\*\s*\|[^\n]*", f"**Name** | {name_match}", about_content)
+            else:
+                # Append a Name row to the end of first table
+                lines = about_content.split('\n')
+                insert_idx = 0
+                for i,l in enumerate(lines):
+                    if l.strip().startswith('|') and '|' in l:
+                        insert_idx = i
+                lines.insert(insert_idx+1, f"| **Name** | {name_match} |")
+                new_about = '\n'.join(lines)
+            overwrite_file_fs(user_id, about_path, new_about)
+            return {
+                "message": ai_reply,
+                "sources": [{"operation": "overwrite_file", "path": about_path, "snippet": new_about}],
+                "diff_preview": f"Set Name to {name_match} in {about_path}"
+            }
+
+        return {"message": ai_reply, "sources": []}
+
+    except Exception as e:
+        logger.error(f"Error processing MentalOS chat message: {e}")
+        return jsonify({'error': str(e)}), 500
+
+def patch_aboutme_field(user_id: str, field: str, value: str) -> str:
+    """Patch a single field in AboutMe.md, replacing only the relevant line."""
+    path = 'AboutMe.md'
+    content = open_file_fs(user_id, path)
+    # Map field to regex pattern and replacement
+    field_map = {
+        'name': (r'(\*\*Name\*\*\s*\|\s*)\*?[^|\n]*\*?', f'**Name** | {value}'),
+        'age': (r'(\*\*Age & Life Stage\*\*\s*\|\s*)\*?[^|\n]*\*?', f'**Age & Life Stage** | {value}'),
+        'location': (r'(\*\*Location\*\*\s*\|\s*)\*?[^|\n]*\*?', f'**Location** | {value}'),
+        'role': (r'(\*\*Current Role\*\*\s*\|\s*)\*?[^|\n]*\*?', f'**Current Role** | {value}'),
+        'relationship': (r'(\*\*Relationship Status\*\*\s*\|\s*)\*?[^|\n]*\*?', f'**Relationship Status** | {value}'),
+    }
+    if field not in field_map:
+        return 'ERROR: Unknown field'
+    pattern, replacement = field_map[field]
+    new_content, n = re.subn(pattern, replacement, content)
+    if n > 0:
+        overwrite_file_fs(user_id, path, new_content)
+        return 'OK'
+    else:
+        return 'ERROR: Field not found in file'
+
+# Load Knowledge Map (single source of truth for MentalOS file schemas)
+KNOWLEDGE_MAP_PATH = os.path.join(os.getcwd(), 'MentalOS', 'knowledge_map.json')
+try:
+    with open(KNOWLEDGE_MAP_PATH, 'r', encoding='utf-8') as _km:
+        KNOWLEDGE_MAP = _json.load(_km)
+        logger.info(f"Loaded knowledge map with {len(KNOWLEDGE_MAP)} entries from {KNOWLEDGE_MAP_PATH}")
+except Exception as _e:
+    logger.warning(f"Could not load knowledge map at {KNOWLEDGE_MAP_PATH}: {_e}")
+    KNOWLEDGE_MAP = {}
+
+
+def compute_missing_fields(file_name: str, content: str):
+    """Return list of field names whose placeholder is still present in content, according to KNOWLEDGE_MAP."""
+    entry = KNOWLEDGE_MAP.get(file_name) or {}
+    fields = entry.get('fields', {})
+    missing = []
+    def _strip(s: str):
+        return s.replace('*', '').replace('_', '').strip()
+    norm_content = _strip(content)
+    for field, placeholder in fields.items():
+        if _strip(placeholder) in norm_content:
+            missing.append(field)
+    return missing
+
+# ------------------------------------------------------------------
+# PUT /api/mental-os/files/<filename>
+# Save raw markdown coming from the front-end so templates remain intact.
+# ------------------------------------------------------------------
+@app.route('/api/mental-os/files/<path:filename>', methods=['PUT'])
+def save_mental_os_file(filename):
+    """Overwrite or create a MentalOS file with the content provided by the UI."""
+    try:
+        data = request.get_json(force=True)
+        if not data or 'content' not in data:
+            return jsonify({'error': 'Missing content field'}), 400
+
+        user_id = request.headers.get('X-User-ID') \
+                  or request.args.get('user_id') \
+                  or 'anonymous'
+
+        overwrite_file_fs(user_id, filename, data['content'])
+        return jsonify({'status': 'ok', 'path': filename})
+    except Exception as e:
+        logger.error(f"Error saving MentalOS file {filename}: {e}")
+        return jsonify({'error': str(e)}), 500
+
+# ------------------------------------------------------------------
+# Unified schema – future-proof replacement of KNOWLEDGE_MAP
+# ------------------------------------------------------------------
+MENTAL_SCHEMA_PATH = os.path.join(os.getcwd(), 'MentalOS', 'mental_model_schema.json')
+try:
+    with open(MENTAL_SCHEMA_PATH, 'r', encoding='utf-8') as _ms:
+        import json as _json2
+        MENTAL_SCHEMA = _json2.load(_ms)
+        logger.info(f"Loaded MentalOS unified schema from {MENTAL_SCHEMA_PATH}")
+except Exception as _e:
+    logger.warning(f"Could not load mental model schema at {MENTAL_SCHEMA_PATH}: {_e}")
+    MENTAL_SCHEMA = {}
+
+# Compile schema validator once for fast reuse
+if _jsonschema and MENTAL_SCHEMA:
+    try:
+        MENTAL_VALIDATOR = _jsonschema.Draft7Validator(MENTAL_SCHEMA)
+    except Exception as _e:
+        logger.warning(f"Could not compile JSON schema validator: {_e}")
+        MENTAL_VALIDATOR = None
+else:
+    MENTAL_VALIDATOR = None
+
+# -----------------------
+# Function-calling extraction helpers
+# -----------------------
+
+# OpenAI function-call parameter schema must **NOT** contain oneOf / anyOf at the top level (client 1.x restriction).
+# Therefore we expose a minimal permissive schema to OpenAI, while still validating rich objects with
+# MENTAL_VALIDATOR after the call succeeds.
+
+_SIMPLE_KNOWLEDGE_OBJECT_SCHEMA = {
+    "type": "object",
+    "description": "Lightweight schema only used for OpenAI function-calling. Real validation happens server-side.",
+    "properties": {
+        "kind": {"type": "string", "description": "Type of knowledge object (e.g. placeholder_update, therapist_note, summary_update, conclusion, cross_link)"},
+        "file": {"type": "string"},
+        "field": {"type": "string"},
+        "value": {"type": "string"},
+        "note": {"type": "string"},
+        "section": {"type": "string"},
+        "markdown": {"type": "string"},
+        "tag": {"type": "string"},
+        "text": {"type": "string"},
+        "evidence": {"type": "array", "items": {"type": "string"}},
+        "from_file": {"type": "string"},
+        "to_file": {"type": "string"},
+        "reason": {"type": "string"},
+        "confidence": {"type": "number"}
+    },
+    "required": ["kind"],
+    "additionalProperties": True
+}
+
+EXTRACTION_FUNCTIONS = [
+    {
+        "name": "knowledge_object",
+        "description": "Emit a knowledge object describing how to update the user's markdown knowledge base.",
+        "parameters": _SIMPLE_KNOWLEDGE_OBJECT_SCHEMA
+    }
+]
+
+def _apply_knowledge_objects(user_id: str, objects: list[dict]):
+    """Apply objects returned by the LLM to markdown files, returning diff metadata list."""
+    diffs = []
+    for obj in objects:
+        # ------------------------------------------------------------------
+        # 1) Validate structure and skip low-confidence proposals
+        # ------------------------------------------------------------------
+        if MENTAL_VALIDATOR:
+            try:
+                MENTAL_VALIDATOR.validate(obj)
+            except Exception as _ve:
+                logger.warning(f"Invalid knowledge object skipped: {_ve}")
+                continue
+
+        if isinstance(obj.get('confidence'), (int, float)) and obj['confidence'] < 0.3:
+            logger.info(f"Skipping very low-confidence object: {obj}")
+            continue
+
+        kind = obj.get("kind")
+        if kind == "placeholder_update":
+            file = obj.get("file")
+            field = obj.get("field")
+            value = obj.get("value")
+            if not (file and field and value):
+                continue
+            # naive: use patch_aboutme_field for AboutMe, else simple replace
+            if file == "AboutMe.md":
+                res = patch_aboutme_field(user_id, field.lower().split()[0], value)
+                if res == 'OK':
+                    content = open_file_fs(user_id, file)
+                    diffs.append({"operation": "overwrite_file", "path": file, "snippet": content})
+            else:
+                # generic: replace placeholder string if exists
+                placeholder = KNOWLEDGE_MAP.get(file, {}).get('fields', {}).get(field)
+                if placeholder:
+                    content = open_file_fs(user_id, file)
+                    new_content = content.replace(placeholder, value, 1)
+                    if new_content != content:
+                        overwrite_file_fs(user_id, file, new_content)
+                        diffs.append({"operation": "overwrite_file", "path": file, "snippet": new_content})
+        elif kind == "therapist_note":
+            file = obj.get("file", "TherapistNotes/private.md")
+            note = obj.get("note")
+            if note:
+                append_file_fs(user_id, file, f"- {note}\n")
+                diffs.append({"operation": "append", "path": file, "snippet": note})
+        elif kind == "summary_update":
+            file = obj.get("file")
+            section = obj.get("section")
+            markdown_body = obj.get("markdown")
+            if not (file and section and markdown_body):
+                continue
+            try:
+                content = open_file_fs(user_id, file)
+            except Exception:
+                content = ""
+            lines = content.split('\n') if content else []
+            heading_idx = None
+            heading_level = 0
+            import re as _re
+            for i, l in enumerate(lines):
+                if l.lstrip().startswith('#'):
+                    stripped = l.lstrip('#').strip()
+                    if stripped.lower() == section.lower():
+                        heading_idx = i
+                        heading_level = len(l) - len(l.lstrip('#'))
+                        break
+            if heading_idx is not None:
+                end_idx = len(lines)
+                for j in range(heading_idx + 1, len(lines)):
+                    if lines[j].startswith('#') and (len(lines[j]) - len(lines[j].lstrip('#'))) <= heading_level:
+                        end_idx = j
+                        break
+                new_lines = lines[:heading_idx + 1] + markdown_body.split('\n') + lines[end_idx:]
+            else:
+                new_lines = lines + [f"## {section}"] + markdown_body.split('\n')
+            new_content = '\n'.join(new_lines)
+            overwrite_file_fs(user_id, file, new_content)
+            diffs.append({"operation": "overwrite_file", "path": file, "snippet": new_content})
+
+        elif kind == "conclusion":
+            file = obj.get("file")
+            tag = obj.get("tag") or obj.get("title")
+            text = obj.get("text")
+            evidence = obj.get("evidence", [])
+            if not (file and tag and text):
+                continue
+            try:
+                content = open_file_fs(user_id, file)
+            except Exception:
+                content = ""
+            appendix = f"\n### Conclusion: {tag}\n\n{text}\n"
+            if evidence:
+                appendix += "\nEvidence:\n" + '\n'.join(f"- {e}" for e in evidence) + '\n'
+            new_content = content.rstrip() + appendix
+            overwrite_file_fs(user_id, file, new_content)
+            diffs.append({"operation": "append", "path": file, "snippet": appendix.strip()})
+
+        elif kind == "cross_link":
+            from_file = obj.get("from_file")
+            to_file = obj.get("to_file")
+            reason = obj.get("reason", "related")
+            if not (from_file and to_file):
+                continue
+            try:
+                content = open_file_fs(user_id, from_file)
+            except Exception:
+                content = ""
+            link_line = f"- Linked to [{to_file}]({to_file}): {reason}"
+            if link_line not in content:
+                new_content = (content.rstrip() + '\n' if content else '') + link_line + '\n'
+                overwrite_file_fs(user_id, from_file, new_content)
+                diffs.append({"operation": "append", "path": from_file, "snippet": link_line})
+
+# --------------------------------------------------------------------
+# === MentalOS Share-link & Folder Index helpers ===
+
+from pathlib import Path
+import uuid
+from functools import lru_cache
+
+# In-memory token store – fine for dev; can be swapped for Firestore later
+SHARE_TOKEN_MAP: dict[str, dict] = {}
+
+VOICES_DIR_NAME = "voices"
+
+@lru_cache(maxsize=1024)
+def _scan_user_folders(user_id: str) -> list[dict]:
+    """Ensure the ⚡ VOICES folder exists and return all folder metadata (even empty ones)."""
+    user_dir = Path(BASE_MENTALOS_DIR) / user_id
+    # Guarantee base user directory and an (initially empty) voices/ folder exist
+    voices_path = user_dir / VOICES_DIR_NAME
+    voices_path.mkdir(parents=True, exist_ok=True)
+    # Ensure an instruction file exists so users immediately understand this folder
+    info_path = voices_path / "ABOUT_THIS_FOLDER.md"
+    if not info_path.exists():
+        info_path.write_text(
+            """# 🗣️ Voices – how it works\n\nInvite trusted people to share how they see you.\n\n1. Click the ➕ icon or the Share button to create a *voice* file.\n2. A unique link is copied to your clipboard – send it to your friend.\n3. They can write directly in that file; you'll see it update live.\n\nCreate as many voices as you like. Each file is private between you and the person you invited.\n""",
+            encoding="utf-8")
+
+    if not user_dir.exists():
+        return []
+
+    folders = []
+    for folder_path in user_dir.iterdir():
+        if not folder_path.is_dir():
+            continue
+        # Collect .md files (may be empty)
+        files = [
+            {"name": f.name, "label": f.stem.replace('-', ' ').replace('_', ' ').title()} for f in folder_path.glob("*.md")
+        ]
+        folders.append({"name": folder_path.name, "files": files})
+    return folders
+
+@app.route('/api/mental-os/folders', methods=['GET'])
+def list_mental_folders():
+    """Return dynamic folder list for a user (used to augment sidebar)."""
+    user_id = request.args.get('user_id')
+    if not user_id:
+        return jsonify({"error": "user_id required"}), 400
+    folders = _scan_user_folders(user_id)
+    return jsonify({"folders": folders})
+
+# ---------------- Share token flow ----------------
+
+@app.route('/api/mental-os/share', methods=['POST'])
+def create_share_link():
+    data = request.get_json() or {}
+    user_id = data.get('user_id')
+    label = data.get('label', '').strip()
+    role = (data.get('role') or 'friend').strip().lower()
+    if not user_id or not label:
+        return jsonify({"error": "user_id and label required"}), 400
+
+    # Create voices folder
+    user_dir = Path(BASE_MENTALOS_DIR) / user_id / VOICES_DIR_NAME
+    user_dir.mkdir(parents=True, exist_ok=True)
+
+    # Build filename
+    slug = re.sub(r'[^a-zA-Z0-9]+', '_', label.lower()).strip("_")
+    filename = f"{slug}.md"
+    file_path = user_dir / filename
+
+    # Generate token and share URL first so we can embed it
+    token = uuid.uuid4().hex
+    relative_url = f"/share/{token}"
+    full_url = request.host_url.rstrip('/') + relative_url  # e.g. http://localhost:8080/share/<token>
+
+    if not file_path.exists():
+        questions_by_role = {
+            'partner': [
+                f"How would you describe {label}'s love language?",
+                "When do you feel you connect the most?",
+                "What habits of mine help our relationship?",
+                "What could I do to better support you?"
+            ],
+            'friend': [
+                f"What's your favourite memory with {label}?",
+                "When have you seen me happiest?",
+                "When have you seen me struggle?",
+                "How can I be a better friend to you?"
+            ],
+            'family': [
+                "What family traits do you see in me?",
+                "When do I shine around family?",
+                "Where do I clash with family expectations?",
+                "How can our relationship grow?"
+            ],
+            'coworker': [
+                f"How would you describe {label}'s working style?",
+                "What strengths do I bring to the team?",
+                "Where could I improve professionally?",
+                "How can we collaborate better?"
+            ]
+        }
+        interview = questions_by_role.get(role, questions_by_role['friend'])
+        interview_block = "\n  - " + "\n  - ".join(interview)
+
+        template = (
+            f"<!--\ninterview:{interview_block}\n-->\n"
+            f"# Perspective from {label} ({role.title()})\n\n"
+            f"> **Share link**: {full_url}\n\n"
+            "*Write freely; bullet points are welcome.*\n"
+        )
+        file_path.write_text(template, encoding='utf-8')
+
+    # Store mapping after file is ensured
+    SHARE_TOKEN_MAP[token] = {
+        "owner": user_id,
+        "file": str(file_path.relative_to(BASE_MENTALOS_DIR)),
+    }
+
+    return jsonify({"token": token, "url": relative_url, "full_url": full_url, "file": filename})
+
+@app.route('/api/mental-os/share/<string:token>', methods=['GET', 'PUT'])
+def handle_share_token(token):
+    info = SHARE_TOKEN_MAP.get(token)
+    if not info:
+        return jsonify({"error": "invalid token"}), 404
+    owner = info['owner']
+    rel_path = info['file']
+    abs_path = Path(BASE_MENTALOS_DIR) / rel_path
+    if request.method == 'GET':
+        if not abs_path.exists():
+            return jsonify({"error": "file missing"}), 404
+        return abs_path.read_text(encoding='utf-8')
+    else:  # PUT
+        content = request.get_data(as_text=True)
+        abs_path.write_text(content, encoding='utf-8')
+        # Invalidate folder scan cache so owner sees new file updated counters
+        _scan_user_folders.cache_clear()
+        return jsonify({"status": "saved"})
+
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080))) 
+    # Run without Flask auto-reloader so long-running chat sessions aren't interrupted
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)), debug=False, use_reloader=False) 
