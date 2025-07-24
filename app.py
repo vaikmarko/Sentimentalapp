@@ -29,20 +29,14 @@ except ImportError:
 # Load environment variables from nearest .env (only once)
 load_dotenv(find_dotenv())
 
-# Configure OpenAI – prefer MENTALOS_OPENAI_API_KEY but fall back to OPENAI_API_KEY
-openai.api_key = os.getenv('MENTALOS_OPENAI_API_KEY') or os.getenv('OPENAI_API_KEY')
+# Configure OpenAI – prefer project-specific OPENAI_API_KEY, otherwise fall back to MENTALOS_OPENAI_API_KEY
+openai.api_key = os.getenv('OPENAI_API_KEY') or os.getenv('MENTALOS_OPENAI_API_KEY')
 # If key looks like a placeholder or is missing, wipe it so code drops to safe-mode
 if openai.api_key and not openai.api_key.startswith('sk-'):
     print('WARNING: OpenAI API key appears to be invalid or a placeholder; ignoring it until a real key is provided')
     openai.api_key = None
 
-# If we have a valid key under MENTALOS_OPENAI_API_KEY but OPENAI_API_KEY is either missing or clearly a placeholder,
-# mirror the good key over so any legacy modules that still read OPENAI_API_KEY pick it up.
-if os.getenv('MENTALOS_OPENAI_API_KEY', '').startswith('sk-'):
-    good_key = os.getenv('MENTALOS_OPENAI_API_KEY')
-    bad_key = os.getenv('OPENAI_API_KEY', '')
-    if not bad_key.startswith('sk-'):
-        os.environ['OPENAI_API_KEY'] = good_key
+# (Removed automatic key mirroring – keeps Sentimental and MentalOS keys isolated.)
 
 # --------------------------------------------------------------------
 
@@ -268,16 +262,18 @@ class IntelligentConversationEngine:
     
     def __init__(self):
         self.client = None
-        try:
-            if os.getenv('OPENAI_API_KEY'):
-                # Use legacy OpenAI API approach for compatibility
-                openai.api_key = os.getenv('OPENAI_API_KEY')
-                self.client = openai  # Use the module directly
-                logger.info("OpenAI client initialized successfully using legacy API")
-            else:
-                logger.warning("OPENAI_API_KEY not found - using fallback responses")
-        except Exception as e:
-            logger.warning(f"Failed to initialize OpenAI client: {e}")
+        # Prefer an already configured key (e.g. MENTALOS_OPENAI_API_KEY was set at module load).
+        # Only fall back to OPENAI_API_KEY if it looks valid **and** no key is currently active.
+        if openai.api_key and openai.api_key.startswith('sk-'):
+            self.client = openai
+            logger.info("OpenAI client initialized successfully with pre-configured API key")
+        elif os.getenv('OPENAI_API_KEY', '').startswith('sk-'):
+            # Legacy environment variable support
+            openai.api_key = os.getenv('OPENAI_API_KEY')
+            self.client = openai
+            logger.info("OpenAI client initialized successfully using legacy OPENAI_API_KEY")
+        else:
+            logger.warning("Valid OpenAI API key not found – using fallback responses")
         
         self.conversation_history = {}
     
@@ -296,7 +292,7 @@ class IntelligentConversationEngine:
             # Get conversation history
             history = self.conversation_history.get(user_id, [])
             
-            if self.client and os.getenv('OPENAI_API_KEY'):
+            if self.client:
                 # Use OpenAI for full ChatGPT-like experience
                 response = self._openai_chat_completion(message, user_id, system_prompt, history)
             else:
@@ -1506,6 +1502,11 @@ def process_chat_message():
         
         # Calculate conversation length (needed for both OpenAI and fallback paths)
         conversation_length = len(conversation_history)
+        
+        # Ensure the SentimentalApp OpenAI key is active for this request (MentalOS may have changed it)
+        _sent_key = os.getenv('OPENAI_API_KEY')
+        if _sent_key and _sent_key.startswith('sk-') and openai.api_key != _sent_key:
+            openai.api_key = _sent_key
         
         # Generate AI response
         if openai.api_key:
