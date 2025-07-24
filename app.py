@@ -29,15 +29,13 @@ except ImportError:
 # Load environment variables from nearest .env (only once)
 load_dotenv(find_dotenv())
 
-# Configure OpenAI API key with validation
+# Configure OpenAI for SentimentalApp only. Mental-OS switches key per request.
 _sent_key = os.getenv('OPENAI_API_KEY', '')
-_mental_key = os.getenv('MENTALOS_OPENAI_API_KEY', '')
 
-# Prefer a valid SentimentalApp key; otherwise use a valid MentalOS key
-openai.api_key = _sent_key if _sent_key.startswith('sk-') else (_mental_key if _mental_key.startswith('sk-') else None)
-# Warn if no valid key found
+openai.api_key = _sent_key if _sent_key.startswith('sk-') else None
+
 if openai.api_key is None:
-    print('WARNING: No valid OpenAI API key found in environment variables; AI features will be disabled until a proper key is set')
+    print('WARNING: OPENAI_API_KEY missing or invalid – SentimentalApp AI endpoints will be disabled until a valid key is provided')
 
 # (Removed automatic key mirroring – keeps Sentimental and MentalOS keys isolated.)
 
