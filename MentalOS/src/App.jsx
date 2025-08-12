@@ -137,6 +137,13 @@ const mentalModel = [
     ],
   },
   {
+    name: "claims",
+    icon: <FaFolderOpen className="inline mr-2 text-gray-400" />,
+    files: [
+      { name: "claims.md", label: "Claims", icon: <FaFileAlt className="inline mr-1 text-gray-300" /> }
+    ],
+  },
+  {
     name: "session-summaries",
     icon: <FaFolderOpen className="inline mr-2 text-gray-400" />,
     files: [
@@ -200,6 +207,7 @@ const fileDescriptions = {
   "readiness-assessment.md": "How ready are you for change?",
   "SessionSummaries.md": "Chronological bullet summaries of each chat session.",
   "private.md": "Private notes for therapist/AI only.",
+  "claims.md": "Clear statements about you, with sources. You review and accept or reject each claim."
 };
 
 // Example bot prompts for each file (can be expanded/AI-generated later)
