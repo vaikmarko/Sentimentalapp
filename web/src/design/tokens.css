@@ -1,0 +1,121 @@
+@import "tailwindcss";
+
+/*
+ * Night Studio design tokens — see docs/plan/02-ux-and-design-system.md
+ *
+ * Core rule: light = meaning. Chrome stays dark and quiet; glow is reserved
+ * for creation (lamplight), AI craft (dusk), and finished artifacts.
+ */
+@theme {
+  /* Night — base surfaces (deep warm charcoal, never pure black) */
+  --color-night-900: #0e0c12;
+  --color-night-800: #14111b;
+  --color-night-700: #1a1622;
+  --color-night-600: #241e30;
+  --color-night-500: #322a42;
+
+  /* Lamplight — the human color: speaking, gifting, primary CTAs */
+  --color-lamplight-300: #f4c97e;
+  --color-lamplight-400: #eeb763;
+  --color-lamplight-500: #e8a849;
+  --color-lamplight-600: #c98a32;
+
+  /* Dusk — the studio's (AI) color: distilling, recommendations, reveal shimmer */
+  --color-dusk-300: #b07ef2;
+  --color-dusk-400: #9b5ced;
+  --color-dusk-500: #8639e8;
+  --color-dusk-600: #6f2bc4;
+
+  /* Text on Night */
+  --color-ink-100: #f2ede4;
+  --color-ink-300: #cfc8bc;
+  --color-ink-500: #978f84;
+
+  /* Signature Spectrum — emotional signatures (muted, AA-checked on night-900) */
+  --color-sig-joy: #e3c477;
+  --color-sig-bittersweet: #d49097;
+  --color-sig-grief: #8da3c0;
+  --color-sig-pride: #dd9466;
+  --color-sig-calm: #9db8a0;
+  --color-sig-longing: #b39bc8;
+  --color-sig-fear: #a8a4b8;
+  --color-sig-wonder: #8fc0c4;
+
+  /* Typography — artifacts speak serif, the studio speaks grotesque */
+  --font-prose: "Fraunces Variable", Georgia, serif;
+  --font-ui: "Inter Variable", system-ui, sans-serif;
+
+  /* Motion — "breathe and develop" */
+  --ease-spring: cubic-bezier(0.32, 1.25, 0.32, 1);
+  --duration-fast: 150ms;
+  --duration-base: 240ms;
+  --duration-slow: 300ms;
+  --duration-breathe: 4s;
+}
+
+@layer base {
+  html {
+    background-color: var(--color-night-900);
+    color: var(--color-ink-100);
+    font-family: var(--font-ui);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100dvh;
+  }
+}
+
+@layer utilities {
+  /* Lit elements breathe at rest — disabled under reduced motion */
+  .breathe {
+    animation: breathe var(--duration-breathe) ease-in-out infinite;
+  }
+
+  @keyframes breathe {
+    0%,
+    100% {
+      opacity: 0.85;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  /* The "develop" transition: blur resolving into sharpness */
+  .develop-in {
+    animation: develop var(--duration-slow) var(--ease-spring) both;
+  }
+
+  @keyframes develop {
+    from {
+      opacity: 0;
+      filter: blur(6px);
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      filter: blur(0);
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .breathe {
+      animation: none;
+    }
+    .develop-in {
+      animation-name: fade;
+      animation-duration: var(--duration-base);
+    }
+    @keyframes fade {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+  }
+}

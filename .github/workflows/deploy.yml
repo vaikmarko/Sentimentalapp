@@ -1,0 +1,82 @@
+# Production deploy: API to Cloud Run, web to Firebase Hosting.
+#
+# Required repository secrets (Settings -> Secrets and variables -> Actions):
+#   GCP_SA_KEY            service-account JSON with Cloud Run + Artifact Registry roles
+#   FIREBASE_SA_KEY       service-account JSON with Firebase Hosting admin
+#
+# Runs on main only when these secrets exist; otherwise skips quietly so CI
+# stays green for forks/before infra is provisioned.
+
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check deploy credentials
+        id: creds
+        run: |
+          if [ -n "${{ secrets.GCP_SA_KEY }}" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::GCP_SA_KEY not configured - skipping API deploy"
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: google-github-actions/auth@v2
+        if: steps.creds.outputs.available == 'true'
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - uses: google-github-actions/setup-gcloud@v2
+        if: steps.creds.outputs.available == 'true'
+      - name: Deploy to Cloud Run
+        if: steps.creds.outputs.available == 'true'
+        run: |
+          gcloud run deploy sentimental-api-v2 \
+            --source api \
+            --region europe-west1 \
+            --project sentimental-f95e6 \
+            --allow-unauthenticated \
+            --set-env-vars "ENVIRONMENT=production,APP_VERSION=${GITHUB_SHA::8}" \
+            --quiet
+
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check deploy credentials
+        id: creds
+        run: |
+          if [ -n "${{ secrets.FIREBASE_SA_KEY }}" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::FIREBASE_SA_KEY not configured - skipping web deploy"
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/setup-node@v4
+        if: steps.creds.outputs.available == 'true'
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Build
+        if: steps.creds.outputs.available == 'true'
+        working-directory: web
+        run: npm ci && npm run build
+      - name: Deploy to Firebase Hosting
+        if: steps.creds.outputs.available == 'true'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SA_KEY }}
+          channelId: live
+          projectId: sentimental-f95e6
