@@ -27,9 +27,11 @@ Task: scaffold /web per docs/plan/03 repo layout.
 - Vite + React 18 + TypeScript strict + Tailwind. PWA manifest + service worker
   (vite-plugin-pwa). Firebase Auth (Google + email link), auth-gated app shell.
 - Implement the design tokens from docs/plan/02 as Tailwind theme: Night Studio
-  palette (deep warm charcoal base #0E0C12 family, dusk gradient violet #8639E8 →
-  ember), serif family for prose (e.g. Newsreader or Source Serif) + grotesque for
-  UI (e.g. Inter), spacing/radius/motion tokens (150–300ms springs).
+  system — Night base (#0E0C12 → #1A1622 elevations), Lamplight amber (#E8A849
+  family), Dusk violet (#8639E8), the 8-tone Signature Spectrum with AA-checked
+  text pairings, Fraunces (variable, optical size) for artifact prose + Inter for
+  UI, spacing/radius/motion tokens (150–300ms springs, 4s breathe cycle, the
+  "develop" transition primitive: blur+grain → sharp).
 - App shell: 5 tabs (Tonight, Chronicle, Create, Resonance, You) as routes with
   empty states that already look intentional (not "coming soon" text).
 - /src/capabilities: define TypeScript interfaces for Mic, Push, ShareSheet,
