@@ -111,10 +111,14 @@ real entries finds zero invented details.
 ### P2.1 — Song pipeline
 
 ```
-Task: story → playable song per docs/plan/03.
+Task: story → playable song per docs/plan/03 and the cost ladder in docs/plan/07.
 - Steps: lyrics+style prompt (LLM; style derived from emotional signature, prompt
-  asset song@vN) → Suno v5 via aggregator API (env: SUNO_AGGREGATOR_KEY; webhook
-  preferred, poll fallback with backoff) → download MP3 + cover → Storage.
+  asset song@vN) → provider step with two implementations behind a flag:
+  (a) "studio queue" — pipeline pauses at a human step; admin screen lists
+  ready-to-paste lyrics + style string, founder generates in their own Suno
+  account and uploads the MP3, pipeline resumes (reuse/port the legacy MP3
+  upload path); (b) MiniMax Music via fal.ai (env: FAL_KEY; queue + webhook,
+  poll fallback with backoff) → download MP3 + cover → Storage.
 - Async UX contract: API returns pipeline-run id immediately; client shows
   "in the studio" state; push (or in-app event) on completion.
 - Cost: log per-generation cost to generation_events; enforce per-user daily

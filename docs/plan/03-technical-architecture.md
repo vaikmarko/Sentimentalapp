@@ -16,10 +16,10 @@
 | Auth | Firebase Auth (keep) | custom auth |
 | Speech-to-text | OpenAI `gpt-4o-transcribe` / Whisper API (fallback: Gemini) | self-hosted Whisper |
 | Story/LLM | provider-agnostic layer; frontier model via API (Claude/GPT class) | fine-tuning at launch |
-| Music | Suno v5 via aggregator API (RunAPI or equivalent — Suno has no official public API) | training our own music model |
-| Video | Higgsfield API (Python SDK; aggregates Seedance 2.0, Kling 3.0, Veo 3.1, Sora 2) | direct multi-vendor integrations |
-| Voice/TTS | ElevenLabs v3 | — |
-| Images | via Higgsfield (Seedream/Flux/Nano Banana) — one vendor for all visuals | separate image vendor |
+| Music | ladder per doc 07: founder's Suno account (concierge) → MiniMax Music via fal.ai (~$0.04/song, official) → Suno wrapper as premium tier | training our own music model; cookie-based Suno automation (ToS risk) |
+| Video | ladder per doc 07: concierge via founder's Higgsfield subscription → ffmpeg Ken Burns over generated stills → fal.ai/Higgsfield video API as premium | direct multi-vendor integrations |
+| Voice/TTS | user's own recorded voice first (free, more intimate); ElevenLabs when TTS needed | — |
+| Images | fal.ai image models (~$0.01–0.04/image) | separate image vendor subscriptions |
 | Observability | Cloud Logging + Sentry + a `generation_events` Firestore collection for product metrics | full OTel stack |
 | CI/CD | GitHub Actions → Cloud Run deploy + Firebase Hosting deploy | — |
 
@@ -92,9 +92,10 @@ Design rules:
 
 ## Secrets & environments
 
-Required secrets (Cloud Run env / Cursor Cloud Agents secrets for dev agents):
-`OPENAI_API_KEY`, `ANTHROPIC_API_KEY` (or chosen LLM), `SUNO_AGGREGATOR_KEY`,
-`HIGGSFIELD_API_KEY`, `ELEVENLABS_API_KEY`, `SENTRY_DSN`.
+Required secrets now (Cloud Run env / Cursor Cloud Agents secrets for dev agents):
+`OPENAI_API_KEY` (or chosen LLM key), `FAL_KEY`, `SENTRY_DSN`.
+Deferred until their rung activates (see doc 07): `ELEVENLABS_API_KEY`,
+`HIGGSFIELD_API_KEY`, Suno-wrapper key.
 Environments: `test` and `production` only (legacy had three; `demo` is retired —
 the production share pages ARE the demo).
 

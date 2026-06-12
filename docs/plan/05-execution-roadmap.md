@@ -47,8 +47,11 @@ hard gate; we do not proceed to media formats on top of a mediocre story engine.
 Goal: the first share-grade artifact and the public surface for it.
 
 Workstreams:
-- **P2.1 Song pipeline**: lyrics+style prompt → Suno (via aggregator) → webhook/poll
-  → stored MP3; "in the studio" async UX + push on completion.
+- **P2.1 Song pipeline** (cost ladder per doc 07): lyrics+style generation +
+  "Studio queue" admin screen for concierge generation through the founder's Suno
+  account (Rung 1, ~€0) + provider interface with a MiniMax-via-fal.ai
+  implementation behind a flag (Rung 2, ~$0.04/song); "in the studio" async UX +
+  push on completion. Suno-wrapper premium tier deferred to Phase 5.
 - **P2.2 Artifact player**: unified player, lyric sync, replay.
 - **P2.3 Share pages**: server-rendered `/s/**` templates (story + song), OG tags,
   watermark, end-hook + try-widget v1 (record in page, story preview, signup to keep).
@@ -118,6 +121,8 @@ empty).
 ## Immediate next actions (Phase 0 start)
 
 1. Approve/adjust this plan (founder review pass).
-2. Provision secrets: LLM key(s), Suno aggregator, Higgsfield, ElevenLabs, Sentry
-   (Cursor Dashboard → Cloud Agents → Secrets for agent-driven development).
+2. Provision secrets — only three needed now per doc 07: LLM key, `FAL_KEY`,
+   `SENTRY_DSN` (Cursor Dashboard → Cloud Agents → Secrets for agent-driven
+   development). Keep the founder's Suno subscription active (Rung 1 of the
+   music ladder).
 3. Kick off F0.1–F0.4 as parallel agent runs using the prompts in 06.

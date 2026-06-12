@@ -12,5 +12,6 @@ media artifacts (story, song, memory film) and built-in growth mechanics.
 | [04 — Growth & Virality](04-growth-and-virality.md) | gifting loop, share pages as landing pages, Wrapped, monetization sketch, metrics |
 | [05 — Execution Roadmap](05-execution-roadmap.md) | phases 0–5 with workstreams and acceptance gates, sequencing rationale, immediate next actions |
 | [06 — Agent Prompts](06-agent-prompts.md) | ready-to-run prompts for development agents per workstream + the product's own prompt-asset process |
+| [07 — Immediate Tooling & Budget](07-immediate-tooling-and-budget.md) | deploy-now cost ladder: Suno concierge mode → MiniMax (~$0.04/song) → premium tiers; budget guardrails keeping validation under ~€100/month |
 
 Status: awaiting founder review (see 05 "Immediate next actions").
