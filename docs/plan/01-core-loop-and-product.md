@@ -50,6 +50,30 @@ X/LinkedIn/Facebook posts, newsletter, presentation, article, blog post, letter,
 reflection/insights/growth-summary (these merge into the Wrapped, see below), book
 chapter, fairytale (returns later as a Gift variant — it tested well emotionally).
 
+### Parked format concept: "Polished Note" (founder idea, experiment-tier)
+
+Voice messages are already the native medium of the target cohort — they send
+them all day. The concept: the user records a voice message **to send to a
+person**, in their own words and feelings; we don't create content, we *polish
+theirs* — remove filler words, false starts and dead air, tighten the flow,
+optionally add a subtle music bed — and hand back a sendable voice message that
+is still unmistakably *them*, just smoother (or deliberately cooler).
+
+- **Technical tier 1 (authentic, cheap, no cloning):** word-level timestamps from
+  transcription → an edit list (cut fillers/silences, light reordering) → ffmpeg
+  renders the polished audio from the *original recording*. The real voice,
+  actually edited — the Descript mechanic, productized for one tap.
+- **Technical tier 2 (later, consent-gated):** voice-clone re-synthesis for
+  heavier rewrites where tier 1 cuts can't get there.
+- **Why it fits:** same capture surface as the core loop (the Speak screen), same
+  distill pipeline front half, and inherently person-to-person distribution —
+  every output lands in someone's DMs.
+- **Risk to respect:** the product value is authenticity; over-polishing natural
+  speech goes uncanny fast. Polish must stay light and the user always hears
+  before/after and chooses.
+- **Status:** parked in the Phase 5 experiment backlog with a metric hypothesis;
+  not part of the launch loop.
+
 ## The weekly payoff: "Your Episode"
 
 Every week, for users with ≥2 entries, the app auto-generates a **weekly episode**:

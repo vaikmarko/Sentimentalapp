@@ -96,8 +96,11 @@ traffic; first monthly Wrapped delivered to active users.
 
 Backlog seeded by data, not opinions: duet stories, fairytale gift variant,
 voice-cloned narration (consent flow), yearly Wrapped film, paid tier activation,
-embeddings-based context retrieval, occasion reminders. Each item enters a phase
-only with a metric hypothesis attached.
+embeddings-based context retrieval, occasion reminders, **Polished Note**
+(voice-message polishing in the user's real voice via timestamp-cut editing —
+concept in 01; hypothesis: a DM-native artifact with person-to-person
+distribution lifts new-user acquisition without touching the core loop).
+Each item enters a phase only with a metric hypothesis attached.
 
 ## Cross-cutting tracks (run through all phases)
 
