@@ -4,7 +4,7 @@ import sentry_sdk
 from fastapi import FastAPI
 
 from app.core.config import get_settings
-from app.routes import demo, health, internal_tasks
+from app.routes import demo, entries, health, internal_tasks, stories
 
 logging.basicConfig(
     level=logging.INFO,
@@ -23,4 +23,6 @@ app = FastAPI(
 
 app.include_router(health.router)
 app.include_router(demo.router, prefix="/api")
+app.include_router(entries.router, prefix="/api")
+app.include_router(stories.router, prefix="/api")
 app.include_router(internal_tasks.router)

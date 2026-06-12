@@ -1,0 +1,74 @@
+{
+  "universal": [
+    {
+      "id": "uq-01",
+      "en": "Tell me about a moment from this year you keep coming back to.",
+      "et": "Räägi mulle ühest selle aasta hetkest, mille juurde sa aina tagasi tuled."
+    },
+    {
+      "id": "uq-02",
+      "en": "Who surprised you recently — and what did they do?",
+      "et": "Kes sind hiljuti üllatas — ja millega?"
+    },
+    {
+      "id": "uq-03",
+      "en": "What's something small that made today different from yesterday?",
+      "et": "Mis väike asi tegi tänase päeva eilsest erinevaks?"
+    },
+    {
+      "id": "uq-04",
+      "en": "Tell me about a place you can picture down to the smallest detail.",
+      "et": "Räägi mulle kohast, mida sa mäletad pisima detailini."
+    },
+    {
+      "id": "uq-05",
+      "en": "What did you almost say to someone today, but didn't?",
+      "et": "Mida sa täna oleksid peaaegu kellelegi öelnud, aga jätsid ütlemata?"
+    },
+    {
+      "id": "uq-06",
+      "en": "What's a smell or sound that takes you straight back somewhere?",
+      "et": "Mis lõhn või heli viib su otsejoones kuhugi tagasi?"
+    },
+    {
+      "id": "uq-07",
+      "en": "Tell me about something you did recently that younger you wouldn't believe.",
+      "et": "Räägi millestki hiljutisest, mida noorem sina ei usuks."
+    },
+    {
+      "id": "uq-08",
+      "en": "What conversation from this week is still running in your head?",
+      "et": "Milline selle nädala vestlus käib sul ikka veel peas?"
+    },
+    {
+      "id": "uq-09",
+      "en": "What are you quietly proud of right now?",
+      "et": "Mille üle sa praegu vaikselt uhke oled?"
+    },
+    {
+      "id": "uq-10",
+      "en": "Tell me about an object you own that has a story behind it.",
+      "et": "Räägi mulle ühest oma asjast, millel on lugu taga."
+    },
+    {
+      "id": "uq-11",
+      "en": "What's something you're in the middle of figuring out?",
+      "et": "Mis on see asi, mille üle sa parasjagu pead murrad?"
+    },
+    {
+      "id": "uq-12",
+      "en": "Who do you miss, and what would you tell them right now?",
+      "et": "Kellest sa puudust tunned ja mida sa talle praegu ütleksid?"
+    },
+    {
+      "id": "uq-13",
+      "en": "Tell me about the last time you laughed properly.",
+      "et": "Räägi mulle viimasest korrast, kui sa päriselt naersid."
+    },
+    {
+      "id": "uq-14",
+      "en": "What's a tiny ritual of yours that nobody else knows about?",
+      "et": "Mis on sinu väike rituaal, millest keegi teine ei tea?"
+    }
+  ]
+}

@@ -1,6 +1,9 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useAuth } from "../features/auth/AuthProvider";
 import { SignIn } from "../features/auth/SignIn";
+import { SpeakScreen } from "../features/speak/SpeakScreen";
+import { RevealScreen } from "../features/reveal/RevealScreen";
+import { StoryScreen } from "../features/stories/StoryScreen";
 import { Shell } from "./Shell";
 import { Tonight } from "./tabs/Tonight";
 import { Chronicle } from "./tabs/Chronicle";
@@ -23,6 +26,11 @@ export function App() {
 
   return (
     <Routes>
+      {/* Full-screen surfaces (no tab bar): the Booth, the Darkroom, the page */}
+      <Route path="/speak" element={<SpeakScreen />} />
+      <Route path="/entry/:entryId" element={<RevealScreen />} />
+      <Route path="/story/:storyId" element={<StoryScreen />} />
+
       <Route element={<Shell />}>
         <Route path="/" element={<Tonight />} />
         <Route path="/chronicle" element={<Chronicle />} />
