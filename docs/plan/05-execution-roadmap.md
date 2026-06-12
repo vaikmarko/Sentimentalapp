@@ -107,7 +107,9 @@ Each item enters a phase only with a metric hypothesis attached.
 - **Prompt quality**: every generation prompt versioned + golden-tested; founder
   reviews tone drift on each change (process in 06).
 - **Metrics**: the 04 dashboard grows with each phase; no feature ships without
-  its funnel events.
+  its funnel events. From Phase 1, log entry time-of-day to validate (or kill)
+  the evening-usage hypothesis behind the "Tonight" framing and push timing
+  (see 02).
 - **Safety**: crisis-language detection from Phase 1; privacy copy reviewed
   per surface; GDPR data export/delete by end of Phase 2 (EU launch market).
 - **Cost**: per-artifact cost tracking from the first Suno call; budget alarms.

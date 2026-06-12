@@ -28,6 +28,21 @@ old; neon/cyber — spectacular but emotionally wrong for confession) because it
 natively explains the product's two registers: warm intimacy inside, and the
 glow seen from outside that makes a passerby want to come in.
 
+**Important clarification — the metaphor is about intimacy, not clock time.**
+The "after dark" framing signals privacy and calm (a dark room says "you can
+speak quietly here" in a way a bright interface cannot); it does NOT assume
+users literally open the app at night. That assumption is untested, and there
+are strong daytime use cases: voice notes are an all-day medium, gifting is not
+time-bound, commutes are prime voice-capture moments. Consequences:
+
+- The dark, lamplit design works at any hour (users live in dark apps all day —
+  Spotify, IG); nothing in the system depends on evening usage.
+- The home tab's working name "Tonight" is provisional — if entry-timestamp data
+  (logged from Phase 1) shows all-day usage, it becomes time-aware ("Today" /
+  "Tonight" by clock) or neutral.
+- Daily-question push timing is an experiment variable (morning recap vs.
+  evening wind-down), not a fixed evening assumption.
+
 ### Light logic (the system's core rule)
 
 In this world, **light = meaning**. The UI chrome stays dark and quiet; light is
