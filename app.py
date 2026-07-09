@@ -415,6 +415,11 @@ logger.info("All intelligent engines initialized successfully")
 def index():
     return render_template('index.html', environment=ENVIRONMENT)
 
+@app.route('/assets/<path:filename>')
+def vite_assets(filename):
+    """Serve hashed Vite build assets (also served directly by Firebase Hosting)."""
+    return send_from_directory('public/assets', filename)
+
 @app.route('/app')
 def app_view():
     """Render the main React-powered application shell.

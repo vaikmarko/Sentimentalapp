@@ -1,4 +1,4 @@
-const { useState, useEffect, useRef } = React;
+import React, { useState, useEffect, useRef } from 'react';
 
 // Lucide icons as inline SVG components since we can't import them directly
 const Search = () => (
@@ -3505,18 +3505,4 @@ const SentimentalApp = () => {
   );
 };
 
-// Make it available globally
-window.SentimentalApp = SentimentalApp;
-
-// Initialize the app
-console.log('Starting React app initialization...');
-console.log('React:', typeof React);
-console.log('ReactDOM:', typeof ReactDOM);
-console.log('SentimentalApp:', typeof SentimentalApp);
-
-try {
-  ReactDOM.render(React.createElement(SentimentalApp), document.getElementById('sentimental-app'));
-  console.log('React app rendered successfully');
-} catch (error) {
-  console.error('React rendering error:', error);
-}
+export default SentimentalApp;

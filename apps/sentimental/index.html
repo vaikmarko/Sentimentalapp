@@ -4,20 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sentimental - Your Life, Your Story</title>
-    <link rel="stylesheet" href="/shared/styles/tailwind.css">
-    <script src="https://unpkg.com/react@19/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@19/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <style>
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .loading-spinner {
-            animation: spin 1s linear infinite;
-            opacity: 1;
-        }
-    </style>
 </head>
 <body class="bg-gray-50">
     <!-- Loading Screen -->
@@ -34,7 +20,6 @@
     <!-- React App Root -->
     <div id="sentimental-app"></div>
 
-    <!-- Load React Component -->
-    <script type="text/babel" src="./sentimental-app.jsx"></script>
+    <script type="module" src="/src/main.jsx"></script>
 </body>
 </html>

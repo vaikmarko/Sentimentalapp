@@ -3,11 +3,13 @@ set -e
 
 echo "🏗️  Building Sentimental Apps..."
 
-# Build Sentimental (direct JSX loading, no bundler yet)
-echo "Building Sentimental app..."
-mkdir -p public/js
-cp apps/sentimental/sentimental-app.jsx public/js/sentimental-app.jsx
-cp public/js/sentimental-app.jsx static/js/sentimental-app.jsx
+# Build Sentimental frontend with Vite (outputs to public/)
+echo "Building Sentimental app (Vite)..."
+rm -rf public/assets
+(cd apps/sentimental && npm run build)
+
+# Flask serves the same built shell at / and /app
+cp public/index.html templates/index.html
 
 # Copy shared assets
 echo "Copying shared assets..."

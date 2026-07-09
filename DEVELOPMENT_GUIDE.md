@@ -40,8 +40,11 @@ npm run dev
 ### Sentimental Development
 ```bash
 cd apps/sentimental
-# Currently uses direct JSX loading
-# Modern Vite build system available for future enhancement
+npm install   # first time only
+npm run dev   # Vite dev server on :5173, proxies /api to Flask on :8080
+
+# Production build (outputs to public/ and templates/index.html):
+./deploy/scripts/build.sh
 ```
 
 ## 📁 File Organization
