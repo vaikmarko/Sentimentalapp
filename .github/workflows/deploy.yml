@@ -87,7 +87,7 @@ jobs:
         if: steps.creds.outputs.available == 'true'
         working-directory: web
         run: npm ci && npm run build && rm -rf ../deploy/dist && cp -r dist ../deploy/dist
-      - name: Deploy to Firebase Hosting (site sentimentalapp-test)
+      - name: Deploy to Firebase Hosting (staging site sentimentalapp-test)
         if: steps.creds.outputs.available == 'true'
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
@@ -97,3 +97,13 @@ jobs:
           projectId: sentimental-f95e6
           entryPoint: deploy
           target: sentimentalapp-test
+      - name: Deploy to Firebase Hosting (production site, sentimentalapp.com)
+        if: steps.creds.outputs.available == 'true'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SA_KEY }}
+          channelId: live
+          projectId: sentimental-f95e6
+          entryPoint: deploy
+          target: production

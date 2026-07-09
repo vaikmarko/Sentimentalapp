@@ -87,11 +87,11 @@ if [[ "$TARGET" == "all" || "$TARGET" == "web" ]]; then
   rm -rf "$REPO_ROOT/deploy/dist"
   cp -r "$REPO_ROOT/web/dist" "$REPO_ROOT/deploy/dist"
 
-  log "Deploying web to Firebase Hosting (site ${HOSTING_TARGET})"
+  log "Deploying web to Firebase Hosting (staging + production sites)"
   (cd "$REPO_ROOT/deploy" && firebase deploy \
-    --only "hosting:${HOSTING_TARGET}" \
+    --only hosting \
     --project "$PROJECT" \
     --non-interactive)
 fi
 
-log "Done. Web: https://${HOSTING_TARGET}.web.app"
+log "Done. Web: https://${HOSTING_TARGET}.web.app + https://sentimentalapp.com"

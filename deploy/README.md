@@ -1,14 +1,14 @@
 # Deployment config (Sentimental v2)
 
-v2 deploys to its own surfaces so the legacy app stays untouched until the
-traffic flip (see `LEGACY.md` and `docs/plan/03`):
+The traffic flip happened 2026-07-09 (see `LEGACY.md`); v2 is production:
 
 | Surface | Where | Config |
 |---|---|---|
 | API | Cloud Run service `sentimental-api-v2` (europe-west1) | `.github/workflows/deploy.yml` |
-| Web | Firebase Hosting site `sentimentalapp-test` | this folder |
+| Web (production) | Firebase Hosting site `sentimental-f95e6` → **sentimentalapp.com** (target `production`) | this folder |
+| Web (staging) | Firebase Hosting site `sentimentalapp-test` | this folder |
 
-Root `firebase.json` / `.firebaserc` remain the **legacy** hosting config.
+Both hosting targets receive the same build on every deploy.
 
 ## One-time credential setup
 

@@ -34,7 +34,8 @@ cd api && pytest && ruff check . && mypy .
 ## Deploy
 
 Pushes to `main` deploy automatically via `.github/workflows/deploy.yml`
-(API → Cloud Run `sentimental-api-v2`, web → Firebase Hosting site
-`sentimentalapp-test`). Manual deploy: `bash deploy/deploy_v2.sh`.
+(API → Cloud Run `sentimental-api-v2`, web → Firebase Hosting production site
+`sentimentalapp.com` + staging site `sentimentalapp-test`). Manual deploy:
+`bash deploy/deploy_v2.sh`.
 
-Live: https://sentimentalapp-test.web.app
+Live: https://sentimentalapp.com (staging: https://sentimentalapp-test.web.app)

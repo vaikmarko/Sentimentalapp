@@ -5,7 +5,8 @@
   "targets": {
     "sentimental-f95e6": {
       "hosting": {
-        "sentimentalapp-test": ["sentimentalapp-test"]
+        "sentimentalapp-test": ["sentimentalapp-test"],
+        "production": ["sentimental-f95e6"]
       }
     }
   }
