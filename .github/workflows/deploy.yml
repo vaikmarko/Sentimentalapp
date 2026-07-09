@@ -40,13 +40,17 @@ jobs:
         if: steps.creds.outputs.available == 'true'
       - name: Deploy to Cloud Run
         if: steps.creds.outputs.available == 'true'
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
+          FAKE="true"
+          if [ -n "$OPENAI_API_KEY" ]; then FAKE="false"; fi
           gcloud run deploy sentimental-api-v2 \
             --source api \
             --region europe-west1 \
             --project sentimental-f95e6 \
             --allow-unauthenticated \
-            --set-env-vars "ENVIRONMENT=production,APP_VERSION=${GITHUB_SHA::8}" \
+            --set-env-vars "ENVIRONMENT=production,APP_VERSION=${GITHUB_SHA::8},STORAGE_MODE=gcs,FAKE_PROVIDERS=${FAKE},OPENAI_API_KEY=${OPENAI_API_KEY}" \
             --quiet
 
   web:
@@ -71,8 +75,8 @@ jobs:
       - name: Build
         if: steps.creds.outputs.available == 'true'
         working-directory: web
-        run: npm ci && npm run build
-      - name: Deploy to Firebase Hosting
+        run: npm ci && npm run build && rm -rf ../deploy/dist && cp -r dist ../deploy/dist
+      - name: Deploy to Firebase Hosting (site sentimentalapp-test)
         if: steps.creds.outputs.available == 'true'
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
@@ -80,3 +84,5 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SA_KEY }}
           channelId: live
           projectId: sentimental-f95e6
+          entryPoint: deploy
+          target: sentimentalapp-test

@@ -54,3 +54,6 @@ public/static/css/.env
 
 # TypeScript build info
 *.tsbuildinfo
+
+# Deploy build staging
+deploy/dist/

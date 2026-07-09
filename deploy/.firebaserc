@@ -1,0 +1,12 @@
+{
+  "projects": {
+    "default": "sentimental-f95e6"
+  },
+  "targets": {
+    "sentimental-f95e6": {
+      "hosting": {
+        "sentimentalapp-test": ["sentimentalapp-test"]
+      }
+    }
+  }
+}
