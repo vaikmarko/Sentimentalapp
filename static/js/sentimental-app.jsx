@@ -21,8 +21,8 @@ const MessageCircle = () => (
 );
 
 const Sparkles = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .962 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.582a.5.5 0 0 1 0 .962L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.962 0L9.937 15.5z"/>
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 0L14.59 8.41L23 11L14.59 13.59L12 22L9.41 13.59L1 11L9.41 8.41L12 0Z"/>
   </svg>
 );
 
@@ -118,7 +118,8 @@ const getFormatIcon = (formatType) => {
     x_thread: '🧵',
     youtube_short: '▶️',
     instagram_story: '📸',
-    fairytale: '📚',
+    fairytale: 'Fairytale',
+    short_story: 'Fairytale',
     
     // Content Formats
     article: '📝',
@@ -141,7 +142,7 @@ const getFormatIcon = (formatType) => {
     podcast_segment: '🎧',
     email: '✉️',
     letter: '💌',
-    short_story: '📚', // legacy alias
+    // fairytale: 'Fairytale', // legacy alias
   };
   return icons[formatType] || '📄';
 };
@@ -216,7 +217,7 @@ function renderActions({ slug, storyId=null, formatType='', mime='text/markdown'
 
 // Main App Component
 const SentimentalApp = () => {
-  const [currentView, setCurrentView] = useState('share');
+  const [currentView, setCurrentView] = useState('landing');
   const [selectedStory, setSelectedStory] = useState(null);
   const [shareModal, setShareModal] = useState(null);
   const [previousView, setPreviousView] = useState('share');
@@ -248,7 +249,7 @@ const SentimentalApp = () => {
   const [message, setMessage] = useState('');
   const [isSignupMode, setIsSignupMode] = useState(false);
   const [loginForm, setLoginForm] = useState({ name: '', email: '', password: '' });
-  const [appInitialized, setAppInitialized] = useState(false);
+  const [appInitialized, setAppInitialized] = useState(true);
 
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [uploadingAudio, setUploadingAudio] = useState(false);
@@ -495,7 +496,7 @@ const SentimentalApp = () => {
         // Fallback to formats that are actually supported by prompts engine
         setSupportedFormats([
           'x', 'linkedin', 'instagram', 'facebook',
-          'song', 'poem', 'reel', 'fairytale', 
+          'song', 'poem', 'reel', 'short_story', 
           'article', 'blog_post', 'presentation', 'newsletter', 'podcast',
           'insights', 'growth_summary', 'journal_entry',
           'reflection', 'letter'
@@ -508,7 +509,7 @@ const SentimentalApp = () => {
         'x', 'linkedin', 'instagram', 'song', 'poem', 'article',
         'reflection',
         'insights',
-        'fairytale', 'letter'
+        'short_story', 'letter'
       ]);
     } finally {
       setLoadingFormats(false);
@@ -902,7 +903,7 @@ const SentimentalApp = () => {
     return response.json();
   };
 
-  // Upload Instagram Image
+  // Upload Instagram Image helper
   const uploadImage = async (file, storyId) => {
     try {
       const formData = new FormData();
@@ -912,7 +913,7 @@ const SentimentalApp = () => {
 
       const headers = {};
       if (user) {
-        headers['X-User-ID']    = user.id;
+        headers['X-User-ID'] = user.id;
         headers['X-User-Email'] = user.email || '';
       }
 
@@ -931,16 +932,7 @@ const SentimentalApp = () => {
   // Format viewing functions
   const viewFormat = async (story, formatType) => {
     setLoadingFormat(true);
-    // Initialize currentFormat (include cover_url if Instagram format already has one)
-    const initialCoverUrl = (formatType === 'instagram' && story.formats && typeof story.formats[formatType] === 'object')
-      ? story.formats[formatType].cover_url
-      : null;
-    setCurrentFormat({
-      story,
-      formatType,
-      title: null,
-      ...(initialCoverUrl ? { cover_url: initialCoverUrl } : {})
-    });
+    setCurrentFormat({ story, formatType, title: null });
     setCurrentView('format-detail');
     
     try {
@@ -1019,11 +1011,6 @@ const SentimentalApp = () => {
           const title = data.title || (formatType === 'song' ? extractSongTitle(contentText) : (story.title || 'Podcast'));
           const audioUrl = data.audio_url || (typeof data.content === 'object' ? data.content.audio_url : null);
           setCurrentFormat(prev => ({...prev, title, audio_url: audioUrl}));
-        }
-
-        // NEW: propagate cover_url from API response
-        if (formatType === 'instagram' && data.cover_url) {
-          setCurrentFormat(prev => ({ ...prev, cover_url: data.cover_url }));
         }
       } else {
         // Format doesn't exist, check authentication before trying to generate it
@@ -1519,6 +1506,159 @@ const SentimentalApp = () => {
     );
   };
 
+  // Landing Page
+  const renderLanding = () => (
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
+      {/* Navigation */}
+      <nav className="bg-white/80 backdrop-blur-sm border-b border-gray-200">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            Sentimental
+          </div>
+          <div className="flex gap-4">
+            <button
+              onClick={() => setCurrentView('discover')}
+              className="text-gray-600 hover:text-gray-900 font-medium"
+            >
+              Explore
+            </button>
+            <button
+              onClick={() => setShowLogin(true)}
+              className="bg-purple-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-purple-700 transition-colors"
+            >
+              Sign In
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <div className="max-w-6xl mx-auto px-4 py-12 md:py-20">
+        <div className="text-center mb-16">
+          <h1 className="text-4xl md:text-6xl font-bold mb-6">
+            <span style={{background: 'linear-gradient(90deg, #7c3aed 0%, #db2777 50%, #2563eb 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'}}>
+              Transform Your Thoughts
+            </span>
+            <br />
+            <span className="text-gray-900">Into Beautiful Stories</span>
+          </h1>
+          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            Have meaningful conversations with AI and watch your experiences transform into songs, poems, social media posts, and more.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button
+              onClick={() => setCurrentView('discover')}
+              className="bg-purple-600 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-purple-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+            >
+              Explore Stories
+            </button>
+            <button
+              onClick={() => setShowLogin(true)}
+              className="bg-white text-purple-600 px-8 py-4 rounded-xl text-lg font-semibold hover:bg-gray-50 transition-all shadow-lg border-2 border-purple-600"
+            >
+              Start Creating
+            </button>
+          </div>
+        </div>
+
+        {/* Features */}
+        <div className="grid md:grid-cols-3 gap-8 mb-20">
+          <div className="bg-white rounded-3xl p-8 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.08)] border border-gray-100 hover:shadow-[0_20px_60px_-15px_rgba(124,58,237,0.15)] transition-all duration-300 hover:-translate-y-2 group relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div className="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-purple-100 transition-colors">
+              <div className="text-purple-600"><MessageCircle /></div>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">Deep Conversations</h3>
+            <p className="text-gray-600 leading-relaxed text-lg">
+              Chat with an AI companion that truly listens. Explore your thoughts and feelings in a safe, judgment-free space.
+            </p>
+          </div>
+
+          <div className="bg-white rounded-3xl p-8 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.08)] border border-gray-100 hover:shadow-[0_20px_60px_-15px_rgba(236,72,153,0.15)] transition-all duration-300 hover:-translate-y-2 group relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-pink-500 to-rose-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div className="w-16 h-16 bg-pink-50 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-pink-100 transition-colors">
+              <div className="text-pink-600"><Sparkles /></div>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">Magical Transformation</h3>
+            <p className="text-gray-600 leading-relaxed text-lg">
+              Watch as your words automatically transform into beautiful songs, poems, and social media posts ready to share.
+            </p>
+          </div>
+
+          <div className="bg-white rounded-3xl p-8 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.08)] border border-gray-100 hover:shadow-[0_20px_60px_-15px_rgba(59,130,246,0.15)] transition-all duration-300 hover:-translate-y-2 group relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-blue-100 transition-colors">
+              <div className="text-blue-600"><BookOpen /></div>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">Your Life Story</h3>
+            <p className="text-gray-600 leading-relaxed text-lg">
+              Build a meaningful collection of your life's moments. Every conversation becomes a page in your personal story.
+            </p>
+          </div>
+        </div>
+
+        {/* How It Works */}
+        <div className="bg-white rounded-[2.5rem] p-8 md:p-16 mb-24 shadow-xl border border-gray-100 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500"></div>
+          <h2 className="text-4xl md:text-5xl font-bold text-center mb-20 text-gray-900">How It Works</h2>
+          
+          <div className="grid md:grid-cols-3 gap-16 relative">
+            {/* Connecting Line (Desktop) */}
+            <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-gradient-to-r from-purple-200 via-pink-200 to-blue-200 -z-10"></div>
+
+            <div className="text-center">
+              <div className="mb-6">
+                <span className="text-5xl font-bold" style={{color: '#7c3aed'}}>1</span>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Share Experience</h3>
+              <p className="text-gray-600 leading-relaxed text-lg px-4">
+                Have a natural conversation about a moment, feeling, or memory. Just talk like you would to a friend.
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="mb-6">
+                <span className="text-5xl font-bold" style={{color: '#ec4899'}}>2</span>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">AI Creates Story</h3>
+              <p className="text-gray-600 leading-relaxed text-lg px-4">
+                We instantly craft a beautifully written story that captures the essence and emotion of your words.
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="mb-6">
+                <span className="text-5xl font-bold" style={{color: '#3b82f6'}}>3</span>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Transform & Share</h3>
+              <p className="text-gray-600 leading-relaxed text-lg px-4">
+                Turn that story into songs, poems, or posts with one click. Keep them private or share with the world.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* CTA */}
+        <div className="relative rounded-[3rem] overflow-hidden shadow-2xl mb-24" style={{background: 'linear-gradient(135deg, #312e81 0%, #581c87 50%, #831843 100%)'}}>
+          <div className="absolute inset-0 opacity-20" style={{backgroundImage: "url('https://www.transparenttextures.com/patterns/cubes.png')"}}></div>
+          <div className="relative px-8 py-20 md:py-24 text-center">
+            <h2 className="text-4xl md:text-6xl font-bold text-white mb-8 tracking-tight">Ready to Begin Your Journey?</h2>
+            <p className="text-xl md:text-2xl mb-12 max-w-3xl mx-auto font-light" style={{color: '#e9d5ff'}}>
+              Join thousands of people who are discovering themselves and creating their personal story collection.
+            </p>
+            <button
+              onClick={() => setShowLogin(true)}
+              className="px-12 py-6 rounded-2xl text-xl font-bold transition-all shadow-xl hover:shadow-2xl hover:scale-105 transform duration-200 inline-block min-w-[200px]"
+              style={{backgroundColor: 'white', color: '#581c87'}}
+            >
+              Get Started Free →
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   // Discover Page with beautiful story cards
   const renderDiscover = () => (
     <div className="h-full flex flex-col">
@@ -1590,12 +1730,13 @@ const SentimentalApp = () => {
               .filter(story => story.public === true)
               .sort((a, b) => toMillis(b.created_at || b.timestamp) - toMillis(a.created_at || a.timestamp))
               .map(story => (
-              <div key={story.id} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-200">
+              <div key={story.id} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 hover:border-purple-200">
                 {/* Story Header */}
-                <div className="p-6 pb-4">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                      <span className="text-white font-semibold text-sm">
+                <div className="p-6 pb-4 relative">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500"></div>
+                  <div className="flex items-center gap-3 mb-4 mt-2">
+                    <div className="w-12 h-12 bg-gradient-to-br from-purple-600 via-pink-600 to-purple-700 rounded-xl flex items-center justify-center shadow-lg">
+                      <span className="text-white font-bold text-lg">
                         {story.author?.[0]?.toUpperCase() || 'U'}
                       </span>
                     </div>
@@ -1618,9 +1759,9 @@ const SentimentalApp = () => {
 
                   {/* Format Tags */}
                   {story.createdFormats && story.createdFormats.length > 0 && (
-                    <div className="mb-4 p-3 bg-purple-50 rounded-lg">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Sparkles />
+                    <div className="mb-4 p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border border-purple-100">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="text-purple-600"><Sparkles /></div>
                         <span className="text-sm font-medium text-purple-700">
                           {user && story.user_id === user.id ? 'Your Transformations:' : 'Available Transformations:'}
                         </span>
@@ -1656,15 +1797,15 @@ const SentimentalApp = () => {
                   )}
 
                   <div className="flex flex-wrap items-start sm:items-center justify-between gap-3 pt-4 border-t border-gray-100">
-                    <button 
+                    <button
                       onClick={() => {
                         setSelectedStory(story);
                         setPreviousView('discover');
                         setCurrentView('story-detail');
                       }}
-                      className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                      className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 text-sm font-semibold shadow-lg hover:shadow-xl"
                     >
-                      Read Story
+                      Read Story →
                     </button>
                   </div>
                 </div>
@@ -2113,13 +2254,13 @@ const SentimentalApp = () => {
                       {story.createdFormats && story.createdFormats.length > 0 && (
                         <>
                           <span className="text-xs text-purple-600 font-medium">•</span>
-                          {sortFormats(story.createdFormats.map(normalizeFormat)).slice(0, 4).map(format => (
+                          {sortFormats(story.createdFormats.map(normalizeFormat)).slice(0, 2).map(format => (
                             <span key={format} className="bg-purple-100 text-purple-700 px-2 py-1 rounded-full text-xs">
                               {getFormatDisplayName(format)}
                             </span>
                           ))}
-                          {story.createdFormats.length > 4 && (
-                            <span className="text-xs text-gray-500">+{story.createdFormats.length - 4} more</span>
+                          {story.createdFormats.length > 2 && (
+                            <span className="text-xs text-gray-500">+{story.createdFormats.length - 2} more</span>
                           )}
                         </>
                       )}
@@ -2351,6 +2492,7 @@ const SentimentalApp = () => {
       song: 'Song',
       reel: 'Reel',
       fairytale: 'Fairytale',
+      short_story: 'Fairytale',
       article: 'Article',
       blog_post: 'Blog Post',
       presentation: 'Presentation',
@@ -2494,7 +2636,7 @@ const SentimentalApp = () => {
         );
       }
       
-      // Instagram format with optional cover image upload
+      // Instagram format with image support
       if (currentFormat.formatType === 'instagram') {
         const isOwner = user && (currentFormat.story.user_id === user.id || isSuperUser);
 
@@ -2502,12 +2644,12 @@ const SentimentalApp = () => {
           const file = e.target.files[0];
           if (!file) return;
           if (!file.type.startsWith('image/')) {
-            alert('Please select an image (JPG, PNG, WEBP)');
+            alert('Please select an image');
             return;
           }
           const res = await uploadImage(file, currentFormat.story.id);
           if (res.success) {
-            setCurrentFormat((prev) => ({ ...prev, cover_url: res.image_url }));
+            setCurrentFormat(prev => ({ ...prev, cover_url: res.image_url }));
           } else {
             alert(res.error || 'Upload failed');
           }
@@ -2515,21 +2657,12 @@ const SentimentalApp = () => {
 
         return (
           <div className="space-y-4">
-            {currentFormat.cover_url && (
-              <img
-                src={currentFormat.cover_url}
-                alt="Instagram cover"
-                className="w-full mx-auto rounded-xl"
-                style={{ maxWidth: '420px' }}
-              />
-            )}
-
+            {currentFormat.cover_url && <img src={currentFormat.cover_url} alt="Instagram cover" className="w-full max-w-[420px] mx-auto rounded-xl" />}
             <div className="prose max-w-none">
               <pre className="whitespace-pre-wrap font-sans text-gray-700 leading-relaxed text-base">
-                {typeof formatContent === 'object' ? formatContent.content || JSON.stringify(formatContent, null, 2) : formatContent}
+                {typeof formatContent === 'object' ? formatContent.content || JSON.stringify(formatContent,null,2) : formatContent}
               </pre>
             </div>
-
             {isOwner && (
               <div>
                 <input type="file" accept="image/*" id="ig-image-upload" className="hidden" onChange={handleImageChange} />
@@ -2980,20 +3113,21 @@ const SentimentalApp = () => {
   // Main Render Logic
   const renderMainContent = () => {
     switch(currentView) {
+      case 'landing': return renderLanding();
       case 'discover': return renderDiscover();
       case 'share': return renderShare();
       case 'stories': return renderStories();
       case 'story-detail': return renderStoryDetail();
       case 'format-detail': return renderFormatDetail();
       case 'inner-space': return renderInnerSpace();
-      default: return renderDiscover();
+      default: return renderLanding();
     }
   };
 
   // Mobile Footer Navigation
   const renderMobileFooter = () => (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
-      <div className="flex items-center justify-evenly py-2">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-gray-200/50 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] z-50">
+      <div className="flex items-center justify-evenly py-3 px-2">
         {[
           { 
             id: 'discover', 
@@ -3050,16 +3184,14 @@ const SentimentalApp = () => {
                 }
               }
             }}
-            className={`flex flex-col items-center gap-1 px-1 py-2 transition-colors ${
+            className={`flex flex-col items-center gap-1.5 px-4 py-2.5 rounded-xl transition-all transform duration-200 ${
               currentView === tab.id 
-                ? 'text-purple-600' 
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'text-white bg-gradient-to-br from-purple-600 to-pink-600 shadow-lg scale-105' 
+                : 'text-gray-500 hover:text-purple-600 hover:bg-purple-50/80 hover:scale-105'
             }`}
           >
-            <div className={`${currentView === tab.id ? 'text-purple-600' : 'text-gray-500'}`}>
-              <tab.icon />
-            </div>
-            <span className="text-xs font-medium">{tab.label}</span>
+            <tab.icon />
+            <span className="text-xs font-semibold tracking-wide">{tab.label}</span>
           </button>
         ))}
       </div>
@@ -3345,14 +3477,17 @@ const SentimentalApp = () => {
   const messagesContainerRef = React.useRef(null);
   const messageInputRef = React.useRef(null);
 
-  // Don't render anything until app is initialized to prevent flashing
-  if (!appInitialized) {
-    return null;
-  }
+  // Hide loading screen when component mounts
+  React.useEffect(() => {
+    const loadingElement = document.getElementById('loading');
+    if (loadingElement) {
+      loadingElement.style.display = 'none';
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {renderNavbar()}
+      {currentView !== 'landing' && renderNavbar()}
       {renderLoginModal()}
       {renderUploadModal()}
       {renderSpaceModal()}
@@ -3360,15 +3495,28 @@ const SentimentalApp = () => {
       {editingFormat && renderEditFormatModal()}
       
       {/* Main Content with bottom padding on mobile for footer */}
-      <div className="pb-20 md:pb-0">
+      <div className={currentView !== 'landing' ? "pb-20 md:pb-0" : ""}>
         {renderMainContent()}
       </div>
 
       {/* Mobile Footer Navigation */}
-      {renderMobileFooter()}
+      {currentView !== 'landing' && renderMobileFooter()}
     </div>
   );
 };
 
 // Make it available globally
 window.SentimentalApp = SentimentalApp;
+
+// Initialize the app
+console.log('Starting React app initialization...');
+console.log('React:', typeof React);
+console.log('ReactDOM:', typeof ReactDOM);
+console.log('SentimentalApp:', typeof SentimentalApp);
+
+try {
+  ReactDOM.render(React.createElement(SentimentalApp), document.getElementById('sentimental-app'));
+  console.log('React app rendered successfully');
+} catch (error) {
+  console.error('React rendering error:', error);
+}

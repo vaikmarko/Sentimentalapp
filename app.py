@@ -46,12 +46,12 @@ from werkzeug.utils import secure_filename
 import uuid
 
 # Import our intelligent engines (these may touch openai during init, so do it *after* key sanitisation)
-from smart_story_engine import SmartStoryEngine
-from personal_context_mapper import PersonalContextMapper
-from knowledge_engine import KnowledgeEngine
-from formats_generation_engine import FormatsGenerationEngine
-from format_types import FormatType
-from prompts_engine import PromptsEngine, PromptType, AIProviderManager
+from api.engines.smart_story_engine import SmartStoryEngine
+from api.engines.personal_context_mapper import PersonalContextMapper
+from api.engines.knowledge_engine import KnowledgeEngine
+from api.engines.formats_generation_engine import FormatsGenerationEngine
+from api.utils.format_types import FormatType
+from api.engines.prompts_engine import PromptsEngine, PromptType, AIProviderManager
 
 # The logger isn't configured until now, replicate the earlier messages
 if not openai.api_key:
@@ -141,9 +141,9 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 # Extend allowed extensions for image uploads
 ALLOWED_EXTENSIONS = {'mp3', 'wav', 'ogg', 'm4a', 'jpg', 'jpeg', 'png', 'webp'}
 
-# MentalOS file system base directory
-BASE_MENTALOS_DIR = os.path.join(os.getcwd(), 'MentalOS', 'user_data')
-os.makedirs(BASE_MENTALOS_DIR, exist_ok=True)
+# MentalOS removed - moved to SentimentalApp V2
+# Dummy BASE_MENTALOS_DIR to prevent errors in legacy code
+BASE_MENTALOS_DIR = "/tmp/dummy-mental-os"
 
 # allowed_file function moved to utils.py
 
@@ -157,6 +157,14 @@ def is_anonymous_user(user_id):
 def allowed_file(filename):
     """Check if file extension is allowed"""
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def get_mock_stories():
+    """Demo-mode fallback when Firestore is unavailable."""
+    return []
+
+def get_mock_connections():
+    """Demo-mode fallback when Firestore is unavailable."""
+    return []
 
 def is_valid_access_code(code):
     """Check if access code is valid"""
@@ -411,14 +419,10 @@ def index():
 def app_view():
     """Render the main React-powered application shell.
 
-    Historically we showed a marketing landing page in production and only
-    served the full app in testing. Now the app itself is the product, so we
-    always return the compiled `app.html` template regardless of environment.
-    A cache-busting query string is appended to force browsers to pull the
-    latest static assets after each deploy.
+    The app.html template was removed during the cleanup; index.html now boots
+    the same React shell, so both / and /app serve it.
     """
-    import time
-    return render_template('app.html', environment=ENVIRONMENT, cache_bust=int(time.time()))
+    return render_template('index.html', environment=ENVIRONMENT)
 
 @app.route('/landing')
 def landing():
@@ -3080,9 +3084,114 @@ def _get_user_dir(user_id: str) -> str:
 
 
 def open_file_fs(user_id: str, path: str) -> str:
-    """Open and return the contents of a MentalOS file. Returns empty string if not found."""
+    """Open and return the contents of a MentalOS file. Creates template if AboutMe.md doesn't exist."""
     rel = _sanitize_subpath(path)
     abs_path = os.path.join(_get_user_dir(user_id), rel)
+    
+    # If AboutMe.md doesn't exist, create it with the comprehensive template
+    if not os.path.exists(abs_path) and path == "AboutMe.md":
+        template_content = '''# About Me (Summary)
+
+*This file is for mapping the landscape of your mind - a comprehensive profile that grows and evolves as you discover more about yourself.*
+
+## 🧠 Personal Profile
+
+> *"The unexamined life is not worth living." - Socrates*
+
+Welcome to your mental model! This foundational document serves as the cornerstone of your self-discovery journey. It's designed to be filled collaboratively through our conversations.
+
+## 👤 Core Identity
+| Aspect | Details |
+|--------|---------|
+| **Name** | *[Your full name and any preferred nicknames]* |
+| **Age & Life Stage** | *[e.g., 28, Early career professional navigating career transitions]* |
+| **Location** | *[City, Country - and how this shapes your perspective]* |
+| **Current Role** | *[Primary occupation, side projects, or main life focus]* |
+| **Educational Background** | *[Degrees, certifications, or key learning experiences]* |
+| **Relationship Status** | *[Single, partnered, married, complicated - with context]* |
+| **Living Situation** | *[Alone, with family, roommates, etc.]* |
+
+## 🌟 Core Values & Beliefs
+- **🎯 What I stand for:** *[Your fundamental principles and non-negotiables]*
+- **🚀 My life mission/purpose:** *[What drives you at the deepest level?]*
+- **⚖️ How I define success:** *[Your personal definition, not society's]*
+- **🌱 What I believe about personal growth:** *[Your philosophy on change and development]*
+- **🤝 How I view relationships:** *[Your approach to connecting with others]*
+
+## 💫 Current Life Snapshot
+- **⭐ What energizes me most:** *[Activities, people, or situations that light you up]*
+- **⚡ What drains my energy:** *[What consistently exhausts or frustrates you?]*
+- **🏔️ My biggest challenge right now:** *[Main obstacle you're facing - be specific]*
+- **🧐 What I'm most curious about:** *[Aspects of yourself you want to understand better]*
+- **🎯 How I spend my free time:** *[Hobbies, interests, guilty pleasures]*
+- **📚 What I'm currently learning:** *[Skills, subjects, or areas of growth]*
+- **🎭 My current life themes:** *[What patterns or topics keep showing up?]*
+
+## 🧠 Mental & Emotional Landscape
+- **🎭 My default emotional state:** *[Generally optimistic, anxious, calm, energetic, etc.]*
+- **⚡ How I handle stress:** *[Your typical stress responses and coping mechanisms]*
+- **💡 My decision-making style:** *[Analytical, intuitive, collaborative, impulsive, etc.]*
+- **🧩 How I process information:** *[Visual, auditory, kinesthetic, logical, emotional]*
+- **⏰ My natural rhythms:** *[When you're most productive, creative, social]*
+- **🎪 My coping mechanisms:** *[Healthy and unhealthy patterns you've noticed]*
+
+## 🗺️ Life Context & Background
+- **👪 Family dynamics that shaped me:** *[Key family influences on your personality]*
+- **🌍 Cultural/social influences:** *[How your background affects your worldview]*
+- **⚡ Pivotal life experiences:** *[Moments that fundamentally changed you]*
+- **🏆 Key achievements I'm proud of:** *[Both big and small wins]*
+- **💔 Significant challenges I've overcome:** *[How these shaped your resilience]*
+
+## 🎯 Growth Areas & Aspirations
+- **🌱 What I'm working on improving:** *[Current self-development focuses]*
+- **🚧 Patterns I want to change:** *[Behaviors or thoughts you'd like to shift]*
+- **🦋 Who I'm becoming:** *[The version of yourself you're growing toward]*
+- **📈 Skills I want to develop:** *[Both professional and personal]*
+- **🌟 Dreams I'm pursuing:** *[Long-term aspirations and goals]*
+
+## 🤝 Relationship Patterns
+- **💕 How I form connections:** *[Your approach to building relationships]*
+- **🗣️ My communication style:** *[Direct, diplomatic, emotional, logical, etc.]*
+- **⚖️ How I handle conflict:** *[Your typical patterns in disagreements]*
+- **🎁 How I show care:** *[Your love language and caring expressions]*
+- **🛡️ My boundaries:** *[What you're learning about healthy limits]*
+
+## 🧘 Self-Care & Wellness
+- **😴 My sleep patterns:** *[What works and what doesn't]*
+- **🏃 Physical activity I enjoy:** *[Movement that feels good to you]*
+- **🧠 Mental health practices:** *[Meditation, therapy, journaling, etc.]*
+- **🍎 Nutrition approach:** *[Your relationship with food and eating]*
+- **⚡ Energy management:** *[What helps you recharge vs. what depletes you]*
+
+## 🎨 Creative & Intellectual Life
+- **🎭 Creative outlets:** *[How you express creativity]*
+- **📚 Intellectual interests:** *[Topics that fascinate you]*
+- **🤔 Philosophical questions I ponder:** *[Big ideas you think about]*
+- **🎵 Art/media that moves me:** *[Music, books, movies that resonate]*
+
+## 💼 Professional Identity
+- **🚀 Career trajectory:** *[Where you've been and where you're heading]*
+- **🎯 Professional strengths:** *[What you excel at in work contexts]*
+- **📈 Growth areas at work:** *[Skills or experiences you're developing]*
+- **🏢 Ideal work environment:** *[Conditions where you thrive professionally]*
+
+---
+
+## 🔄 Living Document Notes
+*This profile is designed to evolve. As we chat and you discover new things about yourself, we'll update this together. Think of it as a collaborative autobiography of your inner world.*
+
+**Last Updated:** *[Date will be automatically tracked]*
+
+**Profile Completeness:** ▓▓▓░░░░░░░ (Starter Profile - grows through conversation)
+
+**Privacy Note:** This information is stored locally and remains completely private to you.'''
+        
+        # Create the file with the template
+        os.makedirs(os.path.dirname(abs_path), exist_ok=True)
+        with open(abs_path, 'w', encoding='utf-8') as f:
+            f.write(template_content)
+        return template_content
+    
     if not os.path.exists(abs_path):
         return ""
     with open(abs_path, 'r', encoding='utf-8') as f:
@@ -3193,21 +3302,20 @@ def process_mental_chat_message():
     """Endpoint for MentalOS Therapist Bot that can read/write user markdown files."""
     try:
         data = request.get_json(force=True)
+        user_id = data.get('user_id') or request.headers.get('X-User-ID') or 'anonymous'
+        
         # Front-end now sends the currently active file and list of open files for richer context
         active_file = data.get('active_file')
         open_files_ctx = data.get('open_files') or []
         missing_fields = data.get('missing_fields') or []
         # Compute missing fields here if front-end did not supply them
         if (not missing_fields) and active_file:
-            current_content = file_contents.get(active_file, '')
-            if not current_content:
-                try:
-                    current_content = open_file_fs(user_id, active_file)
-                except Exception:
-                    pass
+            current_content = ''
+            try:
+                current_content = open_file_fs(user_id, active_file)
+            except Exception:
+                pass
             missing_fields = compute_missing_fields(active_file, current_content)
-
-        user_id = data.get('user_id') or request.headers.get('X-User-ID') or 'anonymous'
         if 'messages' in data:
             messages = data['messages']
         else:
@@ -3229,21 +3337,7 @@ def process_mental_chat_message():
                 'setup_required': True
             }), 200
 
-        user_dir = _get_user_dir(user_id)
-        logger.info(f"MentalOS: User directory for {user_id}: {user_dir}")
-        existing_files = []
-        file_contents = {}
-        for root, _, files in os.walk(user_dir):
-            for f in files:
-                rel_path = os.path.relpath(os.path.join(root, f), user_dir)
-                existing_files.append(rel_path)
-                try:
-                    with open(os.path.join(root, f), 'r', encoding='utf-8') as file:
-                        content = file.read()
-                        file_contents[rel_path] = content
-                except:
-                    file_contents[rel_path] = ''
-        logger.info(f"MentalOS: Found files for user {user_id}: {existing_files}")
+        # File contents already loaded above
 
         user_message = ''
         for m in reversed(messages):
@@ -3261,7 +3355,10 @@ def process_mental_chat_message():
                 placeholder = entry.get('fields', {}).get(candidate_field)
                 if not placeholder:
                     continue
-                if active_file not in file_contents:
+                # Skip if file not available
+                try:
+                    file_content = open_file_fs(user_id, active_file)
+                except:
                     continue
 
                 from patch_engine import replace_placeholder
@@ -3313,11 +3410,10 @@ def process_mental_chat_message():
 
                 # Only patch if we extracted a plausible value and actual replacement occurred.
                 if value:
-                    original_content = file_contents[active_file]
+                    original_content = file_content
                     new_content_active = replace_placeholder(original_content, placeholder, value)
                     if new_content_active != original_content:
                         overwrite_file_fs(user_id, active_file, new_content_active)
-                        file_contents[active_file] = new_content_active  # keep in-memory copy fresh
                         diffs_applied.append({
                             "operation": "overwrite_file",
                             "path": active_file,
@@ -3330,28 +3426,58 @@ def process_mental_chat_message():
                         break
 
         # Decide which files to patch – prioritise active_file if provided (LLM diff)
-        if active_file and active_file in file_contents and not direct_patch_done:
-            files_iter = [(active_file, file_contents[active_file])]
+        if active_file and not direct_patch_done:
+            try:
+                active_file_content = open_file_fs(user_id, active_file)
+                files_iter = [(active_file, active_file_content)]
+            except:
+                files_iter = []
         else:
-            files_iter = file_contents.items()
+            files_iter = []
 
         for file_path, file_content in files_iter:
             diff = propose_unified_diff_with_llm(user_message, file_content)
             if diff and diff.startswith('---'):
-                patch_set = patch_ng.fromstring(diff)
-                patched = patch_ng.patch(file_content, patch_set)
-                if patched is not None and patched != file_content:
-                    overwrite_file_fs(user_id, file_path, patched)
-                    diffs_applied.append({
-                        "operation": "overwrite_file",
-                        "path": file_path,
-                        "snippet": patched,
-                        "diff": diff
-                    })
+                try:
+                    # Ensure proper encoding for patch_ng
+                    diff_bytes = diff.encode('utf-8') if isinstance(diff, str) else diff
+                    file_bytes = file_content.encode('utf-8') if isinstance(file_content, str) else file_content
+                    patch_set = patch_ng.fromstring(diff_bytes)
+                    patched_bytes = patch_ng.patch(file_bytes, patch_set)
+                    if patched_bytes is not None:
+                        patched = patched_bytes.decode('utf-8') if isinstance(patched_bytes, bytes) else patched_bytes
+                        if patched != file_content:
+                            overwrite_file_fs(user_id, file_path, patched)
+                            diffs_applied.append({
+                                "operation": "overwrite_file",
+                                "path": file_path,
+                                "snippet": patched,
+                                "diff": diff
+                            })
+                except Exception as e:
+                    logger.warning(f"Patch failed for {file_path}: {e}")
+                    continue
         # Always generate a conversational reply
         ai_reply = None
         try:
             user_name = None
+            # Load user files first
+            user_dir = _get_user_dir(user_id)
+            logger.info(f"MentalOS: User directory for {user_id}: {user_dir}")
+            existing_files = []
+            file_contents = {}
+            for root, _, files in os.walk(user_dir):
+                for f in files:
+                    rel_path = os.path.relpath(os.path.join(root, f), user_dir)
+                    existing_files.append(rel_path)
+                    try:
+                        with open(os.path.join(root, f), 'r', encoding='utf-8') as file:
+                            content = file.read()
+                            file_contents[rel_path] = content
+                    except:
+                        file_contents[rel_path] = ''
+            logger.info(f"MentalOS: Found files for user {user_id}: {existing_files}")
+            
             if active_file and '**Name**' in file_contents.get(active_file, ''):
                 import re as _re
                 m_name = _re.search(r"\*\*Name\*\*\s*\|\s*([^|\n]+)", file_contents[active_file])
@@ -3404,7 +3530,7 @@ def process_mental_chat_message():
                     logger.warning(f"Could not parse function-call arguments: {_e}")
         except Exception as e:
             logger.error(f"OpenAI ChatCompletion failed: {e}")
-            ai_reply = "Hi! How can I help you today? (AI system unavailable)"
+            ai_reply = "Hi! I'm ready to help you explore your inner world and fill out your profile. What would you like to work on first? I can help you with your core identity, values, current life situation, or any other section of your About Me profile!"
         if diffs_applied:
             diff_chunks = [d['diff'] for d in diffs_applied if 'diff' in d]
             return {
@@ -3452,9 +3578,32 @@ def process_mental_chat_message():
                 if var in about_content:
                     about_content = about_content.replace(var, name_match, 1)
                     break
-            # If Name row exists but placeholder not found, update row value
+            # If Name row exists but placeholder not found, check if it's empty or contains placeholder before updating
             if _re.search(r"\*\*Name\*\*\s*\|", about_content):
-                new_about = _re.sub(r"\*\*Name\*\*\s*\|[^\n]*", f"**Name** | {name_match}", about_content)
+                # Check if current value is empty, contains placeholder, or brackets indicating unfilled
+                current_name_match = _re.search(r"\*\*Name\*\*\s*\|\s*([^|\n]+)", about_content)
+                if current_name_match:
+                    current_value = current_name_match.group(1).strip()
+                    # Update if: 1) current value is placeholder-like/empty, 2) user is providing correction, 3) current value is similar
+                    should_update = (
+                        not current_value or 
+                        '[' in current_value or 
+                        'your name' in current_value.lower() or 
+                        '*[' in current_value or
+                        current_value == name_match or  # Same name
+                        # Allow updates if user is clearly correcting/providing their name
+                        any(phrase in user_message.lower() for phrase in [
+                            "my name is", "i'm ", "i am ", "call me", "name's", 
+                            "actually my name", "my real name", "correct", "update"
+                        ])
+                    )
+                    if should_update:
+                        new_about = _re.sub(r"\*\*Name\*\*\s*\|[^\n]*", f"**Name** | {name_match}", about_content)
+                    else:
+                        # Keep existing value if no clear intent to update
+                        new_about = about_content
+                else:
+                    new_about = _re.sub(r"\*\*Name\*\*\s*\|[^\n]*", f"**Name** | {name_match}", about_content)
             else:
                 # Append a Name row to the end of first table
                 lines = about_content.split('\n')
@@ -3464,17 +3613,192 @@ def process_mental_chat_message():
                         insert_idx = i
                 lines.insert(insert_idx+1, f"| **Name** | {name_match} |")
                 new_about = '\n'.join(lines)
-            overwrite_file_fs(user_id, about_path, new_about)
-            return {
-                "message": ai_reply,
-                "sources": [{"operation": "overwrite_file", "path": about_path, "snippet": new_about}],
-                "diff_preview": f"Set Name to {name_match} in {about_path}"
-            }
+            
+            # Only update and return file changes if content actually changed
+            if new_about != about_content:
+                overwrite_file_fs(user_id, about_path, new_about)
+                return {
+                    "message": ai_reply,
+                    "sources": [{"operation": "overwrite_file", "path": about_path, "snippet": new_about}],
+                    "diff_preview": f"Set Name to {name_match} in {about_path}",
+                    "citations": [{"file": about_path, "snippet": new_about[:100] + "...", "type": "edit"}],
+                    "reasoning": f"Updated {about_path} with the name you provided: {name_match}"
+                }
 
-        return {"message": ai_reply, "sources": []}
+        return {
+            "message": ai_reply, 
+            "sources": [],
+            "citations": [],
+            "reasoning": "Based on our conversation and the context you've provided."
+        }
 
     except Exception as e:
         logger.error(f"Error processing MentalOS chat message: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/mental-os/dev/clear-all', methods=['POST'])
+def clear_all_user_data():
+    """Developer tool: Clear all user data for testing."""
+    try:
+        data = request.get_json()
+        user_id = data.get('user_id', 'anonymous')
+        
+        user_dir = _get_user_dir(user_id)
+        
+        if os.path.exists(user_dir):
+            # Remove all files in user directory
+            import shutil
+            shutil.rmtree(user_dir)
+            logger.info(f"Cleared all data for user {user_id}")
+        
+        # Recreate empty user directory
+        os.makedirs(user_dir, exist_ok=True)
+        
+        return jsonify({"message": "All user data cleared successfully"}), 200
+        
+    except Exception as e:
+        logger.error(f"Error clearing user data: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/mental-os/dev/reset-to-templates', methods=['POST'])
+def reset_user_to_templates():
+    """Developer tool: Reset user files to original templates (preserve structure)."""
+    try:
+        data = request.get_json()
+        user_id = data.get('user_id', 'anonymous')
+        
+        user_dir = _get_user_dir(user_id)
+        
+        # Clear existing user directory
+        if os.path.exists(user_dir):
+            import shutil
+            shutil.rmtree(user_dir)
+        
+        # Recreate user directory
+        os.makedirs(user_dir, exist_ok=True)
+        
+        # Create basic template files
+        templates = {
+            'AboutMe.md': '''# About Me (Summary)
+
+*This file is for mapping the landscape of your mind - a comprehensive profile that grows and evolves as you discover more about yourself.*
+
+## 🧠 Personal Profile
+
+> *"The unexamined life is not worth living." - Socrates*
+
+Welcome to your mental model! This foundational document serves as the cornerstone of your self-discovery journey. It's designed to be filled collaboratively through our conversations.
+
+## 👤 Core Identity
+| Aspect | Details |
+|--------|---------|
+| **Name** | *[Your full name and any preferred nicknames]* |
+| **Age & Life Stage** | *[e.g., 28, Early career professional navigating career transitions]* |
+| **Location** | *[City, Country - and how this shapes your perspective]* |
+| **Current Role** | *[Primary occupation, side projects, or main life focus]* |
+| **Educational Background** | *[Degrees, certifications, or key learning experiences]* |
+| **Relationship Status** | *[Single, partnered, married, complicated - with context]* |
+| **Living Situation** | *[Alone, with family, roommates, etc.]* |
+
+## 🌟 Core Values & Beliefs
+- **🎯 What I stand for:** *[Your fundamental principles and non-negotiables]*
+- **🚀 My life mission/purpose:** *[What drives you at the deepest level?]*
+- **⚖️ How I define success:** *[Your personal definition, not society's]*
+- **🌱 What I believe about personal growth:** *[Your philosophy on change and development]*
+- **🤝 How I view relationships:** *[Your approach to connecting with others]*
+
+## 💫 Current Life Snapshot
+- **⭐ What energizes me most:** *[Activities, people, or situations that light you up]*
+- **⚡ What drains my energy:** *[What consistently exhausts or frustrates you?]*
+- **🏔️ My biggest challenge right now:** *[Main obstacle you're facing - be specific]*
+- **🧐 What I'm most curious about:** *[Aspects of yourself you want to understand better]*
+- **🎯 How I spend my free time:** *[Hobbies, interests, guilty pleasures]*
+- **📚 What I'm currently learning:** *[Skills, subjects, or areas of growth]*
+- **🎭 My current life themes:** *[What patterns or topics keep showing up?]*
+
+## 🧠 Mental & Emotional Landscape
+- **🎭 My default emotional state:** *[Generally optimistic, anxious, calm, energetic, etc.]*
+- **⚡ How I handle stress:** *[Your typical stress responses and coping mechanisms]*
+- **💡 My decision-making style:** *[Analytical, intuitive, collaborative, impulsive, etc.]*
+- **🧩 How I process information:** *[Visual, auditory, kinesthetic, logical, emotional]*
+- **⏰ My natural rhythms:** *[When you're most productive, creative, social]*
+- **🎪 My coping mechanisms:** *[Healthy and unhealthy patterns you've noticed]*
+
+## 🗺️ Life Context & Background
+- **👪 Family dynamics that shaped me:** *[Key family influences on your personality]*
+- **🌍 Cultural/social influences:** *[How your background affects your worldview]*
+- **⚡ Pivotal life experiences:** *[Moments that fundamentally changed you]*
+- **🏆 Key achievements I'm proud of:** *[Both big and small wins]*
+- **💔 Significant challenges I've overcome:** *[How these shaped your resilience]*
+
+## 🎯 Growth Areas & Aspirations
+- **🌱 What I'm working on improving:** *[Current self-development focuses]*
+- **🚧 Patterns I want to change:** *[Behaviors or thoughts you'd like to shift]*
+- **🦋 Who I'm becoming:** *[The version of yourself you're growing toward]*
+- **📈 Skills I want to develop:** *[Both professional and personal]*
+- **🌟 Dreams I'm pursuing:** *[Long-term aspirations and goals]*
+
+## 🤝 Relationship Patterns
+- **💕 How I form connections:** *[Your approach to building relationships]*
+- **🗣️ My communication style:** *[Direct, diplomatic, emotional, logical, etc.]*
+- **⚖️ How I handle conflict:** *[Your typical patterns in disagreements]*
+- **🎁 How I show care:** *[Your love language and caring expressions]*
+- **🛡️ My boundaries:** *[What you're learning about healthy limits]*
+
+## 🧘 Self-Care & Wellness
+- **😴 My sleep patterns:** *[What works and what doesn't]*
+- **🏃 Physical activity I enjoy:** *[Movement that feels good to you]*
+- **🧠 Mental health practices:** *[Meditation, therapy, journaling, etc.]*
+- **🍎 Nutrition approach:** *[Your relationship with food and eating]*
+- **⚡ Energy management:** *[What helps you recharge vs. what depletes you]*
+
+## 🎨 Creative & Intellectual Life
+- **🎭 Creative outlets:** *[How you express creativity]*
+- **📚 Intellectual interests:** *[Topics that fascinate you]*
+- **🤔 Philosophical questions I ponder:** *[Big ideas you think about]*
+- **🎵 Art/media that moves me:** *[Music, books, movies that resonate]*
+
+## 💼 Professional Identity
+- **🚀 Career trajectory:** *[Where you've been and where you're heading]*
+- **🎯 Professional strengths:** *[What you excel at in work contexts]*
+- **📈 Growth areas at work:** *[Skills or experiences you're developing]*
+- **🏢 Ideal work environment:** *[Conditions where you thrive professionally]*
+
+---
+
+## 🔄 Living Document Notes
+*This profile is designed to evolve. As we chat and you discover new things about yourself, we'll update this together. Think of it as a collaborative autobiography of your inner world.*
+
+**Last Updated:** *[Date will be automatically tracked]*
+
+**Profile Completeness:** ▓▓▓░░░░░░░ (Starter Profile - grows through conversation)
+
+**Privacy Note:** This information is stored locally and remains completely private to you.''',
+            
+            'SessionSummaries.md': '''# Session Summaries
+
+This file tracks your conversations and insights over time.
+
+## Recent Sessions
+
+*Session summaries will appear here as you interact with the system.*
+
+---
+
+*Each session builds upon previous conversations, helping to create a richer understanding of your thoughts and patterns.*'''
+        }
+        
+        # Write template files
+        for filename, content in templates.items():
+            file_path = os.path.join(user_dir, filename)
+            with open(file_path, 'w', encoding='utf-8') as f:
+                f.write(content)
+        
+        logger.info(f"Reset user {user_id} to templates")
+        return jsonify({"message": "User data reset to templates successfully"}), 200
+        
+    except Exception as e:
+        logger.error(f"Error resetting user to templates: {e}")
         return jsonify({'error': str(e)}), 500
 
 def patch_aboutme_field(user_id: str, field: str, value: str) -> str:
@@ -3499,15 +3823,8 @@ def patch_aboutme_field(user_id: str, field: str, value: str) -> str:
     else:
         return 'ERROR: Field not found in file'
 
-# Load Knowledge Map (single source of truth for MentalOS file schemas)
-KNOWLEDGE_MAP_PATH = os.path.join(os.getcwd(), 'MentalOS', 'knowledge_map.json')
-try:
-    with open(KNOWLEDGE_MAP_PATH, 'r', encoding='utf-8') as _km:
-        KNOWLEDGE_MAP = _json.load(_km)
-        logger.info(f"Loaded knowledge map with {len(KNOWLEDGE_MAP)} entries from {KNOWLEDGE_MAP_PATH}")
-except Exception as _e:
-    logger.warning(f"Could not load knowledge map at {KNOWLEDGE_MAP_PATH}: {_e}")
-    KNOWLEDGE_MAP = {}
+# MentalOS Knowledge Map disabled - moved to SentimentalApp V2
+KNOWLEDGE_MAP = {}
 
 
 def compute_missing_fields(file_name: str, content: str):
@@ -3545,28 +3862,9 @@ def save_mental_os_file(filename):
         logger.error(f"Error saving MentalOS file {filename}: {e}")
         return jsonify({'error': str(e)}), 500
 
-# ------------------------------------------------------------------
-# Unified schema – future-proof replacement of KNOWLEDGE_MAP
-# ------------------------------------------------------------------
-MENTAL_SCHEMA_PATH = os.path.join(os.getcwd(), 'MentalOS', 'mental_model_schema.json')
-try:
-    with open(MENTAL_SCHEMA_PATH, 'r', encoding='utf-8') as _ms:
-        import json as _json2
-        MENTAL_SCHEMA = _json2.load(_ms)
-        logger.info(f"Loaded MentalOS unified schema from {MENTAL_SCHEMA_PATH}")
-except Exception as _e:
-    logger.warning(f"Could not load mental model schema at {MENTAL_SCHEMA_PATH}: {_e}")
-    MENTAL_SCHEMA = {}
-
-# Compile schema validator once for fast reuse
-if _jsonschema and MENTAL_SCHEMA:
-    try:
-        MENTAL_VALIDATOR = _jsonschema.Draft7Validator(MENTAL_SCHEMA)
-    except Exception as _e:
-        logger.warning(f"Could not compile JSON schema validator: {_e}")
-        MENTAL_VALIDATOR = None
-else:
-    MENTAL_VALIDATOR = None
+# MentalOS Schema disabled - moved to SentimentalApp V2
+MENTAL_SCHEMA = {}
+MENTAL_VALIDATOR = None
 
 # -----------------------
 # Function-calling extraction helpers
@@ -3770,6 +4068,167 @@ def list_mental_folders():
     folders = _scan_user_folders(user_id)
     return jsonify({"folders": folders})
 
+# ---------------- Dynamic Model Endpoint ----------------
+
+@app.route('/api/mental-os/model', methods=['GET'])
+def get_dynamic_mental_model():
+    """Return dynamic file model based on user files and agent suggestions."""
+    user_id = request.args.get('user_id', 'anonymous')
+    
+    try:
+        # Load knowledge map and base model
+        base_model = [
+            {
+                "name": "AboutMe",
+                "icon": "user",
+                "files": [{"name": "AboutMe.md", "label": "About Me (Summary)", "icon": "file"}]
+            },
+            {
+                "name": "core-identity", 
+                "icon": "folder",
+                "files": [
+                    {"name": "values.md", "label": "Values & Beliefs", "icon": "file"},
+                    {"name": "personality-traits.md", "label": "Personality Traits", "icon": "file"},
+                    {"name": "life-philosophy.md", "label": "Life Philosophy", "icon": "file"},
+                    {"name": "identity-markers.md", "label": "Identity Markers", "icon": "file"},
+                ]
+            },
+            {
+                "name": "emotional-system",
+                "icon": "folder", 
+                "files": [
+                    {"name": "emotional-triggers.md", "label": "Emotional Triggers", "icon": "file"},
+                    {"name": "stress-responses.md", "label": "Stress Responses", "icon": "file"},
+                    {"name": "emotional-regulation.md", "label": "Emotional Regulation", "icon": "file"},
+                ]
+            },
+            {
+                "name": "relationships",
+                "icon": "folder",
+                "files": [
+                    {"name": "family-dynamics.md", "label": "Family Dynamics", "icon": "file"},
+                    {"name": "friendship-patterns.md", "label": "Friendship Patterns", "icon": "file"},
+                    {"name": "romantic-relationships.md", "label": "Romantic Relationships", "icon": "file"},
+                ]
+            },
+            {
+                "name": "session-summaries",
+                "icon": "folder",
+                "files": [{"name": "SessionSummaries.md", "label": "Session Summaries", "icon": "file"}]
+            },
+            {
+                "name": "voices",
+                "icon": "folder", 
+                "files": []
+            }
+        ]
+        
+        # Add actual user files to voices folder
+        user_dir = _get_user_dir(user_id)
+        voices_dir = os.path.join(user_dir, 'voices')
+        if os.path.exists(voices_dir):
+            for filename in os.listdir(voices_dir):
+                if filename.endswith('.md') and filename != 'ABOUT_THIS_FOLDER.md':
+                    # Extract label from filename (e.g., "john_friend.md" -> "John Friend")
+                    label = filename.replace('.md', '').replace('_', ' ').title()
+                    base_model[-1]["files"].append({
+                        "name": f"voices/{filename}",
+                        "label": label,
+                        "icon": "file"
+                    })
+        
+        # Apply checkpoint gating - unlock folders based on completion
+        gated_model = apply_checkpoint_gating(user_id, base_model)
+        
+        return jsonify({"model": gated_model}), 200
+        
+    except Exception as e:
+        logger.error(f"Error generating dynamic model: {e}")
+        return jsonify({"error": str(e)}), 500
+
+def apply_checkpoint_gating(user_id: str, base_model: list) -> list:
+    """Apply progressive folder unlocking based on content completion."""
+    try:
+        # Check completion status of key files
+        completion_status = check_user_completion(user_id)
+        
+        # Define gating rules
+        gating_rules = {
+            "AboutMe": {"always_unlocked": True},  # Always available
+            "core-identity": {"requires": ["aboutme_basic"]},  # Unlock after basic info
+            "emotional-system": {"requires": ["aboutme_basic", "core_identity_started"]},
+            "relationships": {"requires": ["core_identity_started"]},
+            "session-summaries": {"always_unlocked": True},  # Always available
+            "voices": {"requires": ["aboutme_basic"]},  # Can invite others after basic info
+        }
+        
+        # Apply gating to model
+        gated_model = []
+        for folder in base_model:
+            folder_name = folder["name"]
+            rules = gating_rules.get(folder_name, {})
+            
+            if rules.get("always_unlocked"):
+                # Always include
+                gated_model.append(folder)
+            elif "requires" in rules:
+                # Check if requirements are met
+                requirements_met = all(completion_status.get(req, False) for req in rules["requires"])
+                if requirements_met:
+                    gated_model.append(folder)
+                else:
+                    # Add as locked folder with progress hint
+                    locked_folder = {
+                        **folder,
+                        "locked": True,
+                        "unlock_hint": f"Complete {', '.join(rules['requires'])} to unlock"
+                    }
+                    gated_model.append(locked_folder)
+            else:
+                # No rules, include by default
+                gated_model.append(folder)
+        
+        return gated_model
+        
+    except Exception as e:
+        logger.warning(f"Error applying checkpoint gating: {e}")
+        return base_model  # Fallback to unrestricted model
+
+def check_user_completion(user_id: str) -> dict:
+    """Check what completion milestones the user has achieved."""
+    completion = {}
+    
+    try:
+        # Check AboutMe.md basic completion
+        aboutme_content = open_file_fs(user_id, "AboutMe.md")
+        if aboutme_content:
+            # Basic info means name, age, and location are filled
+            has_name = "**Name**" in aboutme_content and "[" not in aboutme_content.split("**Name**")[1].split("|")[1][:50]
+            has_age = "**Age" in aboutme_content and "[" not in aboutme_content.split("**Age")[1].split("|")[1][:50]
+            has_location = "**Location**" in aboutme_content and "[" not in aboutme_content.split("**Location**")[1].split("|")[1][:50]
+            
+            if has_name and (has_age or has_location):
+                completion["aboutme_basic"] = True
+        
+        # Check core identity files started
+        core_files = ["values.md", "personality-traits.md", "life-philosophy.md"]
+        core_started = False
+        for file in core_files:
+            try:
+                content = open_file_fs(user_id, file)
+                if content and len(content.strip()) > 100:  # Some meaningful content
+                    core_started = True
+                    break
+            except:
+                pass
+        completion["core_identity_started"] = core_started
+        
+        return completion
+        
+    except Exception as e:
+        logger.warning(f"Error checking user completion: {e}")
+        return {}
+
 # ---------------- Share token flow ----------------
 
 @app.route('/api/mental-os/share', methods=['POST'])
@@ -3840,6 +4299,99 @@ def create_share_link():
     }
 
     return jsonify({"token": token, "url": relative_url, "full_url": full_url, "file": filename})
+
+@app.route('/api/mental-os/history/<path:filename>', methods=['GET'])
+def get_file_history(filename):
+    """Get version history for a file."""
+    user_id = request.args.get('user_id', 'anonymous')
+    
+    try:
+        # Simple history implementation using filesystem timestamps
+        user_dir = _get_user_dir(user_id)
+        file_path = os.path.join(user_dir, filename)
+        
+        if not os.path.exists(file_path):
+            return jsonify({"error": "File not found"}), 404
+        
+        # Get file stats
+        stat = os.stat(file_path)
+        
+        # For now, return basic version info
+        # In a full implementation, this would track actual version snapshots
+        history = [
+            {
+                "version": 1,
+                "timestamp": stat.st_mtime,
+                "size": stat.st_size,
+                "summary": f"Last modified {datetime.fromtimestamp(stat.st_mtime).strftime('%Y-%m-%d %H:%M')}"
+            }
+        ]
+        
+        return jsonify({
+            "file": filename,
+            "history": history,
+            "current_version": 1
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error getting file history: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/mental-os/voices/apply', methods=['POST'])
+def apply_voice_insights():
+    """Extract knowledge objects from voice contributions and apply to user files."""
+    data = request.get_json() or {}
+    user_id = data.get('user_id')
+    voice_file = data.get('voice_file')  # e.g., "voices/alex_friend.md"
+    
+    if not user_id or not voice_file:
+        return jsonify({"error": "user_id and voice_file required"}), 400
+    
+    try:
+        # Read the voice file content
+        voice_content = open_file_fs(user_id, voice_file)
+        if not voice_content:
+            return jsonify({"error": "Voice file not found or empty"}), 404
+            
+        # Use OpenAI to extract structured insights
+        system_prompt = """You are analyzing a voice contribution (friend/partner/family perspective). 
+Extract concrete insights about the person and format them as knowledge objects.
+
+For each insight, return JSON in this format:
+{"placeholder_update": {"file": "filename.md", "field": "field_name", "value": "extracted_value"}}
+or
+{"therapist_note": {"file": "filename.md", "insight": "observation", "evidence": "supporting_quote"}}
+
+Focus on actionable insights that belong in specific files like personality-traits.md, values.md, emotional-triggers.md, etc."""
+
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": f"Voice contribution:\n\n{voice_content}"}
+            ],
+            max_tokens=800,
+            temperature=0.3
+        )
+        
+        ai_analysis = response.choices[0].message.content
+        
+        # Apply insights (simplified for now - could expand to actually update files)
+        insights_applied = []
+        lines = ai_analysis.split('\n')
+        for line in lines:
+            if 'placeholder_update' in line or 'therapist_note' in line:
+                insights_applied.append(line.strip())
+        
+        return jsonify({
+            "analysis": ai_analysis,
+            "insights_applied": insights_applied,
+            "voice_file": voice_file
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error applying voice insights: {e}")
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/mental-os/share/<string:token>', methods=['GET', 'PUT'])
 def handle_share_token(token):
