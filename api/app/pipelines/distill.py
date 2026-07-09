@@ -60,7 +60,7 @@ def _parse_json(text: str) -> dict:
 
 def _distill(run: PipelineRun) -> dict:
     transcript = (run.step("transcribe").output or {})["text"]
-    prompt = load_prompt("distill@v1")
+    prompt = load_prompt("distill@v2")
     job = get_provider("llm").submit(
         {
             "prompt": prompt.render(transcript=transcript),

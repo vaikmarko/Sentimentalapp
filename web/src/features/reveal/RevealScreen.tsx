@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api, type EntryStatus } from "../../lib/api";
 import { capabilities } from "../../capabilities";
+import { recommendationText } from "../../lib/i18n";
 import { StoryCard } from "../stories/StoryCard";
 
 const POLL_MS = 1500;
@@ -76,9 +77,8 @@ export function RevealScreen() {
       <div className="develop-in mt-6 space-y-4" style={{ animationDelay: "400ms" }}>
         <div className="rounded-xl border border-dusk-600/40 bg-dusk-600/10 p-4">
           <p className="text-sm leading-relaxed text-dusk-300">
-            <span className="font-medium">This wants to be a {story.recommendation.format}</span>
-            {" — "}
-            {story.recommendation.reason}. <span className="text-ink-500">(coming in the next phase)</span>
+            <span className="font-medium">{recommendationText(story)}</span>{" "}
+            <span className="text-ink-500">(coming in the next phase)</span>
           </p>
         </div>
 

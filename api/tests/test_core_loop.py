@@ -27,7 +27,7 @@ def test_text_entry_distills_into_story(client):
     assert story["signature"]["tone"] == "bittersweet"
     assert story["recommendation"]["format"] == "song"
     assert story["support_flag"] is False
-    assert story["prompt_ref"] == "distill@v1"
+    assert story["prompt_ref"] == "distill@v2"
 
 
 def test_audio_entry_distills_into_story(client, tmp_path, monkeypatch):
@@ -84,9 +84,22 @@ def test_daily_question_is_stable_within_a_day(client):
 def test_distill_prompt_renders_transcript_verbatim():
     from app.prompts.loader import load_prompt
 
-    prompt = load_prompt("distill@v1")
+    prompt = load_prompt("distill@v2")
     rendered = prompt.render(transcript="she always burned the rice")
     assert "she always burned the rice" in rendered
     assert "{transcript}" not in rendered
-    assert "Never invent biographical facts" in rendered
+    # The clauses the product depends on must survive prompt edits.
+    assert "Never invent" in rendered
+    assert "No closing moral" in rendered
+    assert "IN THE STORY'S LANGUAGE" in rendered
     assert prompt.meta["name"] == "distill"
+    assert prompt.meta["version"] == "2"
+
+
+def test_recommendation_reasons_are_bilingual(client):
+    client.post(
+        "/api/entries/text",
+        json={"text": "A long enough text about a small quiet morning at home."},
+    )
+    story = client.get("/api/stories").json()["stories"][0]
+    assert {"en", "et"} <= story["recommendation"]["reason"].keys()
