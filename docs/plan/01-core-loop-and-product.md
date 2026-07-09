@@ -21,7 +21,8 @@ Hard requirements per step:
    history (people they mention, themes, unfinished threads). Never generic
    ("how was your day?") after day 3; always specific ("you mentioned your brother
    on Tuesday — what's the story there?"). Question quality is a ranked, versioned
-   prompt asset (see 06).
+   prompt asset (see 06). Delivery timing follows the **studio-hours logic in 02**
+   (onboarding-chosen window, adaptive to observed entry times, quiet-skip rule).
 2. **Speak** — recording UI is full-screen, calm, with live waveform. Max friction
    allowed: one tap to start. Auto-stop on long silence with confirmation. Typing is
    available but visually secondary.

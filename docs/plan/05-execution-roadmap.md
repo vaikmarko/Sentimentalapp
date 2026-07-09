@@ -36,7 +36,10 @@ Workstreams:
 - **P1.3 Reveal + Chronicle**: story card UI, reveal animation, Keep action,
   Chronicle timeline, cover image generation.
 - **P1.4 Daily prompt engine v1**: hand-curated universal prompts + context-aware
-  selection once user has ≥3 entries; "Tonight" home screen.
+  selection once user has ≥3 entries; "Tonight" home screen; studio-hours
+  preference (onboarding "quiet moment" question + manual override in settings —
+  logic in 02; delivery via push arrives with P2.1's push infrastructure, until
+  then the question lives on the Tonight screen only).
 
 Acceptance: time-to-magic < 90s for a new user; story keep-rate measurable;
 founder uses it daily and the outputs feel true (no invented details) — this is a
@@ -51,7 +54,10 @@ Workstreams:
   "Studio queue" admin screen for concierge generation through the founder's Suno
   account (Rung 1, ~€0) + provider interface with a MiniMax-via-fal.ai
   implementation behind a flag (Rung 2, ~$0.04/song); "in the studio" async UX +
-  push on completion. Suno-wrapper premium tier deferred to Phase 5.
+  push on completion. Push infrastructure built here also delivers the daily
+  question in the studio-hours window (02) — web push on Android / installed-PWA
+  iOS; adaptive window activates once entry-timestamp data accumulates.
+  Suno-wrapper premium tier deferred to Phase 5.
 - **P2.2 Artifact player**: unified player, lyric sync, replay.
 - **P2.3 Share pages**: server-rendered `/s/**` templates (story + song), OG tags,
   watermark, end-hook + try-widget v1 (record in page, story preview, signup to keep).

@@ -41,7 +41,54 @@ time-bound, commutes are prime voice-capture moments. Consequences:
   (logged from Phase 1) shows all-day usage, it becomes time-aware ("Today" /
   "Tonight" by clock) or neutral.
 - Daily-question push timing is an experiment variable (morning recap vs.
-  evening wind-down), not a fixed evening assumption.
+  evening wind-down), not a fixed evening assumption. The full timing and
+  notification logic is specified below ("Studio hours").
+
+### Studio hours — how the user knows it's time (added 2026-07-09)
+
+Doctrine: **a notification is never a reminder; it is itself the product.**
+Every push must carry value the user would miss without it (per the ethical
+guardrails in 01). The pull comes from the content, not the ping.
+
+The notification stack — exactly three kinds, in priority order:
+
+1. **The daily question.** The push text IS tonight's personalized question
+   ("you mentioned your brother on Tuesday — what's the story there?"). Opening
+   it lands directly in the Booth with that question pre-loaded. Never generic
+   after day 3 (01, step 1); if the context engine has nothing better than
+   generic, it stays silent that day rather than sending filler.
+2. **Artifact developed.** The Darkroom mechanic: songs/films finish
+   asynchronously, and "your song has developed" is the one waiting-push nobody
+   resents — the user is the one waiting (P2.1 async UX).
+3. **Your Episode is ready.** The weekly zero-effort payoff (01), plus monthly
+   Wrapped when it ships.
+
+Everything else (occasion/gift reminders, resonance activity) is opt-in and
+off by default.
+
+**Studio hours** — when the daily question arrives:
+
+- Onboarding asks one question: *"when is your quiet moment?"* (morning coffee /
+  commute / evening wind-down / "let me discover it"). The answer sets the
+  default push window. This replaces any fixed-evening assumption.
+- **Adaptive window:** entry timestamps (logged from Phase 1 by mandate of 05)
+  gradually shift each user's window toward when they actually speak — the
+  studio learns when your lamp is on. Manual override lives in You → settings.
+- **The quiet-skip rule:** a missed day triggers *nothing* — no re-ping, no
+  "we miss you", no broken-streak framing (guilt-streaks are a banned
+  anti-pattern). Tomorrow simply brings the next question; the Chronicle shows
+  chapters filled, never gaps.
+- **Hard cap:** at most one daily-question push per day; artifact-developed and
+  episode pushes are event-driven and unaffected by the cap.
+
+**Delivery channels by phase** (matches the PWA→Capacitor ladder in 00):
+
+- PWA now: web push works on Android immediately; on iOS only once the PWA is
+  installed (the install prompt comes after the first kept artifact, per the
+  mobile-first rules above). Until push permission exists, the daily question
+  still renders on the Tonight screen — the app must feel complete without
+  notifications.
+- Capacitor (P4.2): native push on both stores, haptics on reveal.
 
 ### Light logic (the system's core rule)
 
