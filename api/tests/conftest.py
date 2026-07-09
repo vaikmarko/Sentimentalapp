@@ -11,6 +11,9 @@ TEST_USER = AuthedUser(uid="test-uid", email="test@example.com", name="Test User
 @pytest.fixture
 def client(tmp_path, monkeypatch):
     monkeypatch.setenv("UPLOAD_DIR", str(tmp_path / "uploads"))
+    # Tests must never hit real providers or spend money, regardless of local .env.
+    monkeypatch.setenv("FAKE_PROVIDERS", "true")
+    monkeypatch.setenv("ENVIRONMENT", "test")
     from app.core.config import get_settings
 
     get_settings.cache_clear()
