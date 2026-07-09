@@ -78,6 +78,21 @@
       "additionalProperties": false
     },
     {
+      "title": "Claim",
+      "description": "A user-facing claim about self with evidence, status, and confidence.",
+      "type": "object",
+      "properties": {
+        "kind": { "const": "claim" },
+        "id": { "type": "string", "description": "Optional stable identifier for the claim." },
+        "text": { "type": "string", "description": "The claim text (one clear statement)." },
+        "evidence": { "type": "array", "items": { "type": "string" }, "description": "Citations or references supporting the claim." },
+        "status": { "type": "string", "enum": ["proposed", "accepted", "rejected"], "default": "proposed" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.5 }
+      },
+      "required": ["kind", "text"],
+      "additionalProperties": false
+    },
+    {
       "title": "CrossLink",
       "description": "Link content between two files when a relationship is detected (e.g. a value informing a goal).",
       "type": "object",
@@ -117,6 +132,13 @@
       "text": "Client is driven by a desire for autonomy and impact.",
       "evidence": ["I want to build something that matters", "I prefer setting my own schedule"],
       "confidence": 0.8
+    },
+    {
+      "kind": "claim",
+      "text": "I recover faster when I take a 20-minute evening walk.",
+      "evidence": ["daily-life.md: Walked 4/7 days, felt calmer after"],
+      "status": "proposed",
+      "confidence": 0.6
     },
     {
       "kind": "cross_link",

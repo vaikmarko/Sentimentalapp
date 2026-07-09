@@ -3721,6 +3721,29 @@ def _apply_knowledge_objects(user_id: str, objects: list[dict]):
                 overwrite_file_fs(user_id, from_file, new_content)
                 diffs.append({"operation": "append", "path": from_file, "snippet": link_line})
 
+        elif kind == "claim":
+            # Append or update a user-facing claim in claims.md
+            claim_text = obj.get("text")
+            evidence = obj.get("evidence", [])
+            status = obj.get("status", "proposed")
+            confidence = obj.get("confidence", 0.5)
+            if not claim_text:
+                continue
+            path = 'claims.md'
+            try:
+                existing = open_file_fs(user_id, path)
+            except Exception:
+                existing = ""
+            # Create a simple sectioned format for claims
+            import datetime as _dt
+            ts = _dt.datetime.utcnow().strftime('%Y-%m-%d')
+            block = f"\n## Claim\n\n- Text: {claim_text}\n- Status: {status}\n- Confidence: {confidence:.2f}\n- Date: {ts}\n"
+            if evidence:
+                block += "- Evidence:\n" + '\n'.join(f"  - {ev}" for ev in evidence) + "\n"
+            new_content = (existing.rstrip() + "\n\n" if existing.strip() else "# Claims\n\n") + block
+            overwrite_file_fs(user_id, path, new_content)
+            diffs.append({"operation": "append", "path": path, "snippet": block.strip()})
+
 # --------------------------------------------------------------------
 # === MentalOS Share-link & Folder Index helpers ===
 
