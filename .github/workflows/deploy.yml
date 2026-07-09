@@ -58,6 +58,9 @@ jobs:
             --quiet
 
   web:
+    # Hosting rewrite references the Cloud Run service, so the API must exist
+    # before the web deploy validates the config.
+    needs: api
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
