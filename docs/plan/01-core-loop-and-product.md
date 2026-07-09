@@ -74,6 +74,29 @@ is still unmistakably *them*, just smoother (or deliberately cooler).
 - **Status:** parked in the Phase 5 experiment backlog with a metric hypothesis;
   not part of the launch loop.
 
+### Parked capture mode: "The Listener" (waiting on GPT-Live API)
+
+OpenAI's GPT-Live (announced 2026-07-08) is a full-duplex voice model: it
+listens and speaks simultaneously, backchannels naturally ("mhmm"), stays
+quiet while the speaker thinks, and delegates deeper reasoning to a frontier
+model in the background. ChatGPT-only at launch; **API "coming soon"** — we
+signed up for the waitlist and build nothing on it until it ships.
+
+When the API opens, the Booth gains an optional guided mode: a gentle
+interviewer that asks the right follow-up at the right moment, by voice.
+The conversation transcript feeds the existing distill pipeline unchanged —
+this is a new capture surface, not a new architecture.
+
+Boundaries (non-negotiable, aligned with our ethical guardrails):
+- The Listener is an *interviewer*, never a companion. It asks, listens, and
+  hands back a story; it does not build a relationship. This is both an
+  emotional-reliance safeguard (OpenAI flags this risk themselves) and our
+  positioning: the AI is the studio, not a friend.
+- Estonian fluency must be verified before launch in ET (OpenAI acknowledges
+  non-native accents / fluency gaps in smaller languages at launch).
+- Session cost will exceed the one-shot voice note; guided mode enters the
+  credit system, the plain voice note stays free.
+
 ## The weekly payoff: "Your Episode"
 
 Every week, for users with ≥2 entries, the app auto-generates a **weekly episode**:

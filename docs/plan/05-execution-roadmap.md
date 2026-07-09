@@ -99,7 +99,10 @@ voice-cloned narration (consent flow), yearly Wrapped film, paid tier activation
 embeddings-based context retrieval, occasion reminders, **Polished Note**
 (voice-message polishing in the user's real voice via timestamp-cut editing —
 concept in 01; hypothesis: a DM-native artifact with person-to-person
-distribution lifts new-user acquisition without touching the core loop).
+distribution lifts new-user acquisition without touching the core loop),
+**The Listener** (guided voice capture on GPT-Live once its API ships —
+concept and boundaries in 01; hypothesis: guided entries run longer and
+yield higher keep-rate stories than one-shot voice notes).
 Each item enters a phase only with a metric hypothesis attached.
 
 ## Cross-cutting tracks (run through all phases)
