@@ -1,46 +1,41 @@
-# Legacy freeze (Phase 0, F0.4)
+# Legacy app — ARCHIVED (2026-07-09)
 
-The Flask app at the repo root (`app.py` + engines + `static/`/`public/`
-bundles + `templates/`) is **frozen**: it keeps serving existing users and
-deploys unchanged, but receives no new features. All new work happens in
-`/web` (React PWA) and `/api` (FastAPI) per `docs/plan/03`.
+The legacy Flask app (v1) no longer lives on `main`. It was archived by founder
+decision on 2026-07-09; all product work happens in `/web` (React PWA) and
+`/api` (FastAPI) per `docs/plan/`.
 
-The physical move to a `/legacy` directory is deliberately deferred to the
-traffic-flip moment (end of the strangler migration): moving now would break
-the root-based deploy flows (`gcloud run deploy --source .`, root `Dockerfile`,
-`firebase.json` pointing at `public/`) for no user-facing benefit.
+## Where the code lives
 
-## Deployment (unchanged)
+| Ref | Contents |
+|---|---|
+| branch `legacy-vite-refresh` | **final deployed state** — includes the 2026-07-09 cleanup (api/apps/shared layout, Vite-built frontend, fixed deploy scripts) that is currently running in production |
+| tag `legacy-archive-2026-07-09` | last `main` commit that still carried the legacy tree at the repo root (pre-cleanup layout) |
 
-See `README.md` and `SIMPLE_DEPLOYMENT.md`. Cloud Run service deploys from the
-repo root; Firebase Hosting serves `public/` with `/s/**` rewritten to Cloud Run.
+## What is still running (until explicit decommission)
 
-## Route inventory (frozen surface)
+- Cloud Run service `sentimentalapp` (europe-west1, project `sentimental-f95e6`)
+  serves the legacy API + app shell at `sentimentalapp.com`.
+- Firebase Hosting (root config on the archive branch) serves the static bundle
+  and rewrites `/`, `/app`, `/api/**`, `/s/**` to that service.
 
-Pages: `/`, `/app`, `/landing`, `/manifest.json`, `/cosmos`, `/chat`, `/deck`,
-`/story`, `/inner-space`, `/debug`, `/static/uploads/<file>`,
-`/s/<story_id>[/<format_type>]` (public share pages — concept carries into v2).
+Deleting the code from `main` does not affect these deployments; they run from
+already-built images/releases. To redeploy the legacy app for any reason:
 
-Stories API: CRUD on `/api/stories[...]`, likes/reactions/comments,
-`/api/stories/<id>/formats/<type>` (GET/PUT), `/api/stories/<id>/generate-format`,
-`/api/stories/generate`, `/api/stories/<id>/privacy`,
-`/api/users/<id>/generate-book-chapter`, `/api/connections/<id>`,
-`/api/insights/<id>`.
+```bash
+git checkout legacy-vite-refresh
+./deploy/scripts/deploy-production.sh
+```
 
-Chat: `/api/chat/message`.
+## Decommission checklist (when the traffic flip happens)
 
-Auth: `/api/auth/register|login|firebase-signup|firebase-signin|firebase-sync|
-check-access-code|verify-user-access|fix-marko-user`.
+1. Point `sentimentalapp.com` hosting at v2 (today v2 lives on the
+   `sentimentalapp-test` hosting site; see `deploy/README.md`).
+2. Decide the fate of legacy Firestore collections (`stories`, users, uploads) —
+   v2 only writes `v2_*` collections; a migration mapping is docs/plan/03 scope.
+3. Scale Cloud Run service `sentimentalapp` to zero / delete it.
+4. Delete the legacy Firebase Hosting release if the site config moved.
 
-Uploads: `/api/upload/audio` (the MP3 path the v2 Studio queue will reuse,
-see docs/plan/07), `/api/upload/image`.
-
-Misc/admin/debug: `/api/ai/providers`, `/api/formats/supported`,
-`/api/admin/*`, `/api/debug/*`.
-
-MentalOS (parked product, see docs/plan/00): `/api/mental-os/*`.
-
-## Data
+## Data (unchanged)
 
 v2 shares the same Firebase project; new collections are namespaced `v2_*`
 (first: `v2_pipeline_runs`). Legacy collections are never written by v2 code

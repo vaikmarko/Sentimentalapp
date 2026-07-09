@@ -1,7 +1,0 @@
-- Age: *[age]*
-- Location: *[location]*
-- Current Role: Working on transforming mental health globally
-- Passion: Improving access to mental health resources and support
-- Interests: *[interests]*
-- Goals: *[goals]*
-- Feelings: *[feelings]*

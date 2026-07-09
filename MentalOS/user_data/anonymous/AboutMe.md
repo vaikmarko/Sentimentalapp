@@ -1,3 +1,0 @@
-- Name: Marko
-- Occupation: Mental Health Platform Developer
-- Goal: To transform how mental health issues are solved and improved globally
