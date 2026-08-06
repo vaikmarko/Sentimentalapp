@@ -1,0 +1,17 @@
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    avoid_print: true
+    always_use_package_imports: true
+    prefer_single_quotes: true
+    cancel_subscriptions: true
+    close_sinks: true
+    prefer_final_locals: true
+    unnecessary_late: true
+
+analyzer:
+  exclude:
+    - build/**
+    - lib/**.g.dart
+    - lib/**.freezed.dart
