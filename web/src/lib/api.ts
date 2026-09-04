@@ -67,6 +67,8 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text }),
     }),
+  /** Erases every entry, recording, story and the sign-in record. Irreversible. */
+  deleteAccount: () => apiFetch<{ deleted: Record<string, number> }>("/me", { method: "DELETE" }),
   createAudioEntry: (blob: Blob, durationMs: number) => {
     const form = new FormData();
     form.append("file", blob, "entry");

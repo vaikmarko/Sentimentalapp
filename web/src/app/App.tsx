@@ -1,18 +1,23 @@
+import { useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useAuth } from "../features/auth/AuthProvider";
 import { SignIn } from "../features/auth/SignIn";
+import { Privacy } from "../features/legal/Privacy";
 import { SpeakScreen } from "../features/speak/SpeakScreen";
 import { RevealScreen } from "../features/reveal/RevealScreen";
 import { StoryScreen } from "../features/stories/StoryScreen";
+import { track } from "../lib/analytics";
 import { Shell } from "./Shell";
 import { Tonight } from "./tabs/Tonight";
 import { Chronicle } from "./tabs/Chronicle";
-import { Create } from "./tabs/Create";
-import { Resonance } from "./tabs/Resonance";
 import { You } from "./tabs/You";
 
 export function App() {
   const { user, loading } = useAuth();
+
+  useEffect(() => {
+    track("pageview");
+  }, []);
 
   if (loading) {
     return (
@@ -22,7 +27,14 @@ export function App() {
     );
   }
 
-  if (!user) return <SignIn />;
+  if (!user) {
+    return (
+      <Routes>
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="*" element={<SignIn />} />
+      </Routes>
+    );
+  }
 
   return (
     <Routes>
@@ -30,12 +42,11 @@ export function App() {
       <Route path="/speak" element={<SpeakScreen />} />
       <Route path="/entry/:entryId" element={<RevealScreen />} />
       <Route path="/story/:storyId" element={<StoryScreen />} />
+      <Route path="/privacy" element={<Privacy />} />
 
       <Route element={<Shell />}>
         <Route path="/" element={<Tonight />} />
         <Route path="/chronicle" element={<Chronicle />} />
-        <Route path="/create" element={<Create />} />
-        <Route path="/resonance" element={<Resonance />} />
         <Route path="/you" element={<You />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

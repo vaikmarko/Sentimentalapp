@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { api, type EntryStatus } from "../../lib/api";
 import { capabilities } from "../../capabilities";
-import { recommendationText } from "../../lib/i18n";
+import { track } from "../../lib/analytics";
 import { StoryCard } from "../stories/StoryCard";
 
 const POLL_MS = 1500;
@@ -27,6 +27,12 @@ export function RevealScreen() {
           timer = window.setTimeout(() => void poll(), POLL_MS);
         } else if (next.status === "done") {
           capabilities.haptics.tap();
+          if (next.story) {
+            track("story_revealed", {
+              language: next.story.language || "unknown",
+              tone: next.story.signature.tone,
+            });
+          }
         } else {
           setFailed(true);
         }
@@ -74,28 +80,19 @@ export function RevealScreen() {
     <main className="mx-auto min-h-dvh max-w-md px-5 pb-12 pt-10">
       <StoryCard story={story} animate />
 
-      <div className="develop-in mt-6 space-y-4" style={{ animationDelay: "400ms" }}>
-        <div className="rounded-xl border border-dusk-600/40 bg-dusk-600/10 p-4">
-          <p className="text-sm leading-relaxed text-dusk-300">
-            <span className="font-medium">{recommendationText(story)}</span>{" "}
-            <span className="text-ink-500">(coming in the next phase)</span>
-          </p>
-        </div>
-
-        <div className="flex gap-3">
-          <Link
-            to="/chronicle"
-            className="flex-1 rounded-full bg-lamplight-500 py-3 text-center font-ui text-sm font-medium text-night-900"
-          >
-            Keep
-          </Link>
-          <button disabled className="flex-1 rounded-full border border-night-500 py-3 text-sm text-ink-500" title="Coming soon">
-            Share
-          </button>
-          <button disabled className="flex-1 rounded-full border border-night-500 py-3 text-sm text-ink-500" title="Coming soon">
-            Gift
-          </button>
-        </div>
+      <div className="develop-in mt-8" style={{ animationDelay: "400ms" }}>
+        <button
+          onClick={() => {
+            track("story_kept", { tone: story.signature.tone });
+            navigate("/chronicle", { replace: true });
+          }}
+          className="w-full rounded-full bg-lamplight-500 py-3 text-center font-ui text-sm font-medium text-night-900 transition-transform duration-150 active:scale-95"
+        >
+          Keep
+        </button>
+        <p className="mt-4 text-center text-xs text-ink-500">
+          Kept on your shelf. Only you can read it.
+        </p>
       </div>
     </main>
   );

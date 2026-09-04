@@ -35,6 +35,7 @@ ROLES=(
   roles/artifactregistry.admin
   roles/firebasehosting.admin
   roles/serviceusage.serviceUsageConsumer
+  roles/secretmanager.admin  # syncs OPENAI_API_KEY into Secret Manager + grants Cloud Run access
 )
 for ROLE in "${ROLES[@]}"; do
   echo ">>> Granting ${ROLE}"

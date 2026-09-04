@@ -1,8 +1,10 @@
 # Production deploy: API to Cloud Run, web to Firebase Hosting.
 #
 # Required repository secrets (Settings -> Secrets and variables -> Actions):
-#   GCP_SA_KEY            service-account JSON with Cloud Run + Artifact Registry roles
+#   GCP_SA_KEY            service-account JSON with Cloud Run + Artifact Registry +
+#                         Secret Manager admin roles (deploy/setup_deploy_credentials.sh)
 #   FIREBASE_SA_KEY       service-account JSON with Firebase Hosting admin
+#   OPENAI_API_KEY        required; synced into Secret Manager and mounted on Cloud Run
 #
 # Runs on main only when these secrets exist; otherwise skips quietly so CI
 # stays green for forks/before infra is provisioned.
@@ -42,19 +44,44 @@ jobs:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
       - uses: google-github-actions/setup-gcloud@v2
         if: steps.creds.outputs.available == 'true'
-      - name: Deploy to Cloud Run
+      - name: Sync OpenAI key into Secret Manager
         if: steps.creds.outputs.available == 'true'
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          PROJECT: sentimental-f95e6
+          SECRET: openai-api-key
         run: |
-          FAKE="true"
-          if [ -n "$OPENAI_API_KEY" ]; then FAKE="false"; fi
+          # Production never runs with fake providers: fail loudly instead of
+          # serving canned stories to real people.
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "::error::OPENAI_API_KEY secret is not configured - refusing to deploy production API"
+            exit 1
+          fi
+          if ! gcloud secrets describe "$SECRET" --project "$PROJECT" >/dev/null 2>&1; then
+            gcloud secrets create "$SECRET" --project "$PROJECT" --replication-policy automatic --quiet
+          fi
+          # Only add a version when the value changed, so the secret history stays readable.
+          CURRENT="$(gcloud secrets versions access latest --secret "$SECRET" --project "$PROJECT" 2>/dev/null || true)"
+          if [ "$CURRENT" != "$OPENAI_API_KEY" ]; then
+            printf '%s' "$OPENAI_API_KEY" | gcloud secrets versions add "$SECRET" --project "$PROJECT" --data-file=- --quiet
+          fi
+          # Cloud Run's runtime service account must be allowed to read it.
+          PROJECT_NUMBER="$(gcloud projects describe "$PROJECT" --format 'value(projectNumber)')"
+          gcloud secrets add-iam-policy-binding "$SECRET" --project "$PROJECT" \
+            --member "serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com" \
+            --role roles/secretmanager.secretAccessor --quiet >/dev/null
+      - name: Deploy to Cloud Run
+        if: steps.creds.outputs.available == 'true'
+        run: |
+          # The key is mounted from Secret Manager, never written into env-var
+          # config where it would be visible on every revision.
           gcloud run deploy sentimental-api-v2 \
             --source api \
             --region europe-west1 \
             --project sentimental-f95e6 \
             --allow-unauthenticated \
-            --set-env-vars "ENVIRONMENT=production,APP_VERSION=${GITHUB_SHA::8},STORAGE_MODE=gcs,FAKE_PROVIDERS=${FAKE},OPENAI_API_KEY=${OPENAI_API_KEY}" \
+            --set-env-vars "ENVIRONMENT=production,APP_VERSION=${GITHUB_SHA::8},STORAGE_MODE=gcs,FAKE_PROVIDERS=false" \
+            --update-secrets "OPENAI_API_KEY=openai-api-key:latest" \
             --quiet
 
   web:
@@ -86,6 +113,10 @@ jobs:
       - name: Build
         if: steps.creds.outputs.available == 'true'
         working-directory: web
+        env:
+          # Repository variable (Settings -> Variables), e.g. "sentimentalapp.com".
+          # Unset = analytics stays off.
+          VITE_PLAUSIBLE_DOMAIN: ${{ vars.PLAUSIBLE_DOMAIN }}
         run: npm ci && npm run build && rm -rf ../deploy/dist && cp -r dist ../deploy/dist
       - name: Deploy to Firebase Hosting (staging site sentimentalapp-test)
         if: steps.creds.outputs.available == 'true'

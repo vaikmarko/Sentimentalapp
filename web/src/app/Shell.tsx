@@ -1,10 +1,10 @@
 import { NavLink, Outlet } from "react-router-dom";
 
+// Only surfaces that actually work are shown. Create and Resonance return as
+// tabs when their features ship (docs/plan/05) — never as "coming soon" stubs.
 const TABS = [
   { to: "/", label: "Tonight", icon: MoonIcon },
   { to: "/chronicle", label: "Chronicle", icon: BookIcon },
-  { to: "/create", label: "Create", icon: PlusIcon },
-  { to: "/resonance", label: "Resonance", icon: RippleIcon },
   { to: "/you", label: "You", icon: PersonIcon },
 ] as const;
 
@@ -54,23 +54,6 @@ function BookIcon() {
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
       <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
       <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-    </svg>
-  );
-}
-
-function PlusIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden>
-      <path d="M12 5v14M5 12h14" />
-    </svg>
-  );
-}
-
-function RippleIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
-      <circle cx="12" cy="12" r="3" />
-      <circle cx="12" cy="12" r="8" opacity="0.5" />
     </svg>
   );
 }

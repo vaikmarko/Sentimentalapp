@@ -14,6 +14,10 @@ class MediaStore(Protocol):
 
     def read(self, ref: str) -> bytes: ...
 
+    def delete(self, ref: str) -> None:
+        """Remove the blob; a ref that is already gone is not an error."""
+        ...
+
 
 class LocalMediaStore:
     def __init__(self, root: str | None = None) -> None:
@@ -27,6 +31,9 @@ class LocalMediaStore:
 
     def read(self, ref: str) -> bytes:
         return (self._root / ref.removeprefix("local://")).read_bytes()
+
+    def delete(self, ref: str) -> None:
+        (self._root / ref.removeprefix("local://")).unlink(missing_ok=True)
 
 
 class GcsMediaStore:
@@ -43,6 +50,15 @@ class GcsMediaStore:
     def read(self, ref: str) -> bytes:
         name = ref.removeprefix(f"gs://{get_settings().gcs_bucket}/")
         return self._bucket.blob(name).download_as_bytes()
+
+    def delete(self, ref: str) -> None:
+        from contextlib import suppress
+
+        from google.api_core.exceptions import NotFound
+
+        name = ref.removeprefix(f"gs://{get_settings().gcs_bucket}/")
+        with suppress(NotFound):
+            self._bucket.blob(name).delete()
 
 
 def get_media_store() -> MediaStore:

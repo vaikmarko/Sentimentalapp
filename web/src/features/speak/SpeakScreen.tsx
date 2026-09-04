@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { capabilities } from "../../capabilities";
 import { api } from "../../lib/api";
+import { track } from "../../lib/analytics";
 import { Waveform } from "./Waveform";
 
 const SILENCE_LEVEL = 0.06;
@@ -62,9 +63,15 @@ export function SpeakScreen() {
       lastVoiceAt.current = Date.now();
       setElapsed(0);
       setMode("recording");
+      track("recording_started", { source: "voice" });
     } catch {
-      setMode("typing"); // mic denied/unavailable -> graceful text fallback
+      startTyping(); // mic denied/unavailable -> graceful text fallback
     }
+  }
+
+  function startTyping() {
+    setMode("typing");
+    track("recording_started", { source: "text" });
   }
 
   async function finish() {
@@ -183,7 +190,7 @@ export function SpeakScreen() {
               </button>
             )}
             {mode === "idle" && (
-              <button onClick={() => setMode("typing")} className="text-sm text-ink-500 underline-offset-4 hover:text-ink-300 hover:underline">
+              <button onClick={startTyping} className="text-sm text-ink-500 underline-offset-4 hover:text-ink-300 hover:underline">
                 write instead
               </button>
             )}

@@ -7,6 +7,7 @@ class DocStore(Protocol):
     def set(self, doc_id: str, data: dict[str, Any]) -> None: ...
     def get(self, doc_id: str) -> dict[str, Any] | None: ...
     def list_by_user(self, user_id: str, limit: int = 100) -> list[dict[str, Any]]: ...
+    def delete(self, doc_id: str) -> None: ...
 
 
 class FirestoreDocStore:
@@ -30,6 +31,9 @@ class FirestoreDocStore:
         )
         return [cast(dict[str, Any], d.to_dict()) for d in query.stream()]
 
+    def delete(self, doc_id: str) -> None:
+        self._col.document(doc_id).delete()
+
 
 class MemoryDocStore:
     def __init__(self) -> None:
@@ -45,3 +49,6 @@ class MemoryDocStore:
         mine = [d for d in self._docs.values() if d.get("user_id") == user_id]
         mine.sort(key=lambda d: d.get("created_at", ""), reverse=True)
         return mine[:limit]
+
+    def delete(self, doc_id: str) -> None:
+        self._docs.pop(doc_id, None)

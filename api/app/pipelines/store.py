@@ -12,6 +12,8 @@ COLLECTION = "v2_pipeline_runs"
 class RunStore(Protocol):
     def save(self, run: PipelineRun) -> None: ...
     def get(self, run_id: str) -> PipelineRun | None: ...
+    def list_ids_by_user(self, user_id: str) -> list[str]: ...
+    def delete(self, run_id: str) -> None: ...
 
 
 class FirestoreRunStore:
@@ -32,6 +34,13 @@ class FirestoreRunStore:
             return None
         return PipelineRun.model_validate(snap.to_dict())
 
+    def list_ids_by_user(self, user_id: str) -> list[str]:
+        query = self._client.collection(COLLECTION).where("user_id", "==", user_id)
+        return [snap.id for snap in query.stream()]
+
+    def delete(self, run_id: str) -> None:
+        self._client.collection(COLLECTION).document(run_id).delete()
+
 
 class MemoryRunStore:
     def __init__(self) -> None:
@@ -43,3 +52,9 @@ class MemoryRunStore:
     def get(self, run_id: str) -> PipelineRun | None:
         data = self._runs.get(run_id)
         return PipelineRun.model_validate(data) if data else None
+
+    def list_ids_by_user(self, user_id: str) -> list[str]:
+        return [rid for rid, data in self._runs.items() if data.get("user_id") == user_id]
+
+    def delete(self, run_id: str) -> None:
+        self._runs.pop(run_id, None)

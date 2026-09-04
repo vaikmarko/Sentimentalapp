@@ -7,8 +7,9 @@
 #   - GOOGLE_APPLICATION_CREDENTIALS pointing to a key file, or
 #   - an already-authenticated gcloud (local dev machine).
 #
-# Optional:
-#   OPENAI_API_KEY   enables real providers on Cloud Run (otherwise fake mode)
+# Required for the API (first deploy; later deploys reuse Secret Manager):
+#   OPENAI_API_KEY   synced into Secret Manager and mounted on Cloud Run.
+#                    Production never runs in fake-provider mode.
 #
 # Usage:
 #   bash deploy/deploy_v2.sh          # deploy API + web
@@ -66,16 +67,37 @@ gcloud config set project "$PROJECT" --quiet
 # --- API -> Cloud Run --------------------------------------------------------
 
 if [[ "$TARGET" == "all" || "$TARGET" == "api" ]]; then
-  FAKE="true"
-  [[ -n "${OPENAI_API_KEY:-}" ]] && FAKE="false"
+  SECRET="openai-api-key"
+  if [[ -n "${OPENAI_API_KEY:-}" ]]; then
+    log "Syncing OPENAI_API_KEY into Secret Manager (${SECRET})"
+    if ! gcloud secrets describe "$SECRET" --project "$PROJECT" >/dev/null 2>&1; then
+      gcloud secrets create "$SECRET" --project "$PROJECT" --replication-policy automatic --quiet
+    fi
+    CURRENT="$(gcloud secrets versions access latest --secret "$SECRET" --project "$PROJECT" 2>/dev/null || true)"
+    if [[ "$CURRENT" != "$OPENAI_API_KEY" ]]; then
+      printf '%s' "$OPENAI_API_KEY" | gcloud secrets versions add "$SECRET" --project "$PROJECT" --data-file=- --quiet
+    fi
+    PROJECT_NUMBER="$(gcloud projects describe "$PROJECT" --format 'value(projectNumber)')"
+    gcloud secrets add-iam-policy-binding "$SECRET" --project "$PROJECT" \
+      --member "serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com" \
+      --role roles/secretmanager.secretAccessor --quiet >/dev/null
+  elif ! gcloud secrets describe "$SECRET" --project "$PROJECT" >/dev/null 2>&1; then
+    echo "ERROR: OPENAI_API_KEY is not set and Secret Manager has no '${SECRET}'." >&2
+    echo "Production never runs with fake providers. Export OPENAI_API_KEY and retry." >&2
+    exit 1
+  else
+    log "OPENAI_API_KEY not set locally - reusing the existing Secret Manager version"
+  fi
+
   VERSION="$(git -C "$REPO_ROOT" rev-parse --short HEAD 2>/dev/null || echo manual)"
-  log "Deploying API to Cloud Run (${API_SERVICE}, FAKE_PROVIDERS=${FAKE})"
+  log "Deploying API to Cloud Run (${API_SERVICE})"
   gcloud run deploy "$API_SERVICE" \
     --source "$REPO_ROOT/api" \
     --region "$REGION" \
     --project "$PROJECT" \
     --allow-unauthenticated \
-    --set-env-vars "ENVIRONMENT=production,APP_VERSION=${VERSION},STORAGE_MODE=gcs,FAKE_PROVIDERS=${FAKE},OPENAI_API_KEY=${OPENAI_API_KEY:-}" \
+    --set-env-vars "ENVIRONMENT=production,APP_VERSION=${VERSION},STORAGE_MODE=gcs,FAKE_PROVIDERS=false" \
+    --update-secrets "OPENAI_API_KEY=${SECRET}:latest" \
     --quiet
 fi
 

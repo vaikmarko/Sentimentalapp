@@ -12,7 +12,7 @@ export default defineConfig({
       manifest: {
         name: "Sentimental",
         short_name: "Sentimental",
-        description: "Talk for two minutes — get back something beautiful enough to keep, share, or gift.",
+        description: "Talk for two minutes — get back a short, true story in your own words, kept private on your shelf.",
         theme_color: "#0E0C12",
         background_color: "#0E0C12",
         display: "standalone",

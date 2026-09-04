@@ -1,6 +1,7 @@
 """Firebase ID-token verification as a FastAPI dependency."""
 
 import logging
+from contextlib import suppress
 
 import firebase_admin
 from fastapi import Depends, HTTPException, Request
@@ -41,3 +42,18 @@ async def get_current_user(request: Request) -> AuthedUser:
 
 
 CurrentUser = Depends(get_current_user)
+
+
+def delete_auth_user(uid: str) -> None:
+    """Remove the Firebase Auth record so the person is signed out everywhere.
+
+    No-op in the test environment (no Firebase project); an already-missing
+    user is treated as deleted.
+    """
+    from app.core.config import get_settings
+
+    if get_settings().environment == "test":
+        return
+    _ensure_app()
+    with suppress(firebase_auth.UserNotFoundError):
+        firebase_auth.delete_user(uid)
